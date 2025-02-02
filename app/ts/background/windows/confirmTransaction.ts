@@ -18,10 +18,8 @@ import { JsonRpcResponseError, handleUnexpectedError, printError } from '../../u
 import { InterceptedRequest, UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch, getUniqueRequestIdentifierString } from '../../utils/requests.js'
 import { Semaphore } from '../../utils/semaphore.js'
 import { modifyObject } from '../../utils/typescript.js'
-import { refreshConfirmTransactionSimulation } from '../background.js'
 import { getHtmlFile, sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
 import { replyToInterceptedRequest } from '../messageSending.js'
-import { simulateGnosisSafeTransactionOnPass } from '../popupMessageHandlers.js'
 import { getSettings } from '../settings.js'
 import { appendPendingTransactionOrMessage, clearPendingTransactions, getPendingTransactionsAndMessages, getSimulationResults, removePendingTransactionOrMessage, updatePendingTransactionOrMessage } from '../storageVariables.js'
 import { craftPersonalSignPopupMessage } from './personalSign.js'
@@ -295,9 +293,6 @@ export async function openConfirmTransactionDialogForMessage(
 			await updateConfirmTransactionView(ethereumClientService)
 
 			await tryFocusingTabOrWindow(openedDialog)
-			if (visualizedPersonalSignRequest.type === 'SafeTx') {
-				await simulateGnosisSafeTransactionOnPass(simulator.ethereum, simulator.tokenPriceService, visualizedPersonalSignRequest)
-			}
 		})
 	} catch(e) {
 		await handleUnexpectedError(e)
@@ -342,18 +337,16 @@ export async function openConfirmTransactionDialogForTransaction(
 		await updateConfirmTransactionView(simulator.ethereum)
 
 		const transactionToSimulate = await transactionToSimulatePromise
-		const simulationResultsPromise = refreshConfirmTransactionSimulation(simulator, activeAddress, simulationMode, request.uniqueRequestIdentifier, transactionToSimulate)
 		if (transactionToSimulate.success) {
 			await updatePendingTransactionOrMessage(pendingTransaction.uniqueRequestIdentifier, async (transaction) => ({ ...transaction, transactionToSimulate: transactionToSimulate, transactionOrMessageCreationStatus: 'Simulating' as const }))
 			await updateConfirmTransactionView(simulator.ethereum)
 		}
-		await updatePendingTransactionOrMessage(pendingTransaction.uniqueRequestIdentifier, async (transaction) => {
-			if (transaction.type !== 'Transaction') return transaction
-			const simulationResults = await simulationResultsPromise
-			if (simulationResults === undefined) return transaction
-			if (transactionToSimulate.success) return { ...transaction, transactionToSimulate, simulationResults, transactionOrMessageCreationStatus: 'Simulated' }
-			return { ...transaction, transactionToSimulate, simulationResults, transactionOrMessageCreationStatus: 'FailedToSimulate' }
-		})
+		// await updatePendingTransactionOrMessage(pendingTransaction.uniqueRequestIdentifier, async (transaction) => {
+		// 	if (transaction.type !== 'Transaction') return transaction
+		// 	if (simulationResults === undefined) return transaction
+		// 	if (transactionToSimulate.success) return { ...transaction, transactionToSimulate, simulationResults, transactionOrMessageCreationStatus: 'Simulated' }
+		// 	return { ...transaction, transactionToSimulate, simulationResults, transactionOrMessageCreationStatus: 'FailedToSimulate' }
+		// })
 		await updateConfirmTransactionView(simulator.ethereum)
 		await tryFocusingTabOrWindow(openedDialog)
 	})

@@ -16,7 +16,6 @@ import { ApproveIcon, ArrowIcon } from '../subcomponents/icons.js'
 import { insertBetweenElements } from '../subcomponents/misc.js'
 import { EnrichedSolidityTypeComponentWithAddressBook, StringElement } from '../subcomponents/solidityType.js'
 import { getAddressBookEntryOrAFiller } from '../ui-utils.js'
-import { GasFee, NonTokenLogAnalysisCard, RawTransactionDetailsCard, TokenLogAnalysisCard, TransactionCreated, TransactionHeader, TransactionsAccountChangesCard } from './SimulationSummary.js'
 import { identifyRoutes } from './SwapTransactions.js'
 
 function isPositiveEvent(visResult: TokenVisualizerResultWithMetadata, ourAddressInReferenceFrame: bigint) {
@@ -96,41 +95,15 @@ export function SenderReceiver({ from, to, renameAddressCallBack }: { from: Addr
 }
 
 export function Transaction(param: TransactionVisualizationParameters) {
-	const removeTransactionOrSignedMessage = param.removeTransactionOrSignedMessage
-	const remove = removeTransactionOrSignedMessage === undefined ? undefined : () => {
-		return removeTransactionOrSignedMessage({ type: 'Transaction', transactionIdentifier: param.simTx.transactionIdentifier })
-	}
 	return (
 		<div class = 'card'>
-			<TransactionHeader
-				simTx = { param.simTx }
-				removeTransactionOrSignedMessage = { remove }
-			/>
 			<div class = 'card-content' style = 'padding-bottom: 5px;'>
 				<div class = 'container'>
 					<TransactionImportanceBlock { ...param } rpcNetwork = { param.simulationAndVisualisationResults.rpcNetwork } addressMetadata = { param.addressMetaData }/>
 				</div>
 				<QuarantineReasons quarantineReasons = { param.simTx.quarantineReasons }/>
-				<TransactionsAccountChangesCard
-					simTx = { param.simTx }
-					simulationAndVisualisationResults = { param.simulationAndVisualisationResults }
-					renameAddressCallBack = { param.renameAddressCallBack }
-					addressMetaData = { param.simulationAndVisualisationResults.addressBookEntries }
-					namedTokenIds = { param.simulationAndVisualisationResults.namedTokenIds }
-				/>
-				<TokenLogAnalysisCard simTx = { param.simTx } renameAddressCallBack = { param.renameAddressCallBack } />
-				<NonTokenLogAnalysisCard simTx = { param.simTx } renameAddressCallBack = { param.renameAddressCallBack } addressMetaData = { param.addressMetaData }/>
-				<RawTransactionDetailsCard transaction = { param.simTx.transaction } transactionIdentifier = { param.simTx.transactionIdentifier } parsedInputData = { param.simTx.parsedInputData } renameAddressCallBack = { param.renameAddressCallBack } gasSpent = { param.simTx.gasSpent } addressMetaData = { param.simulationAndVisualisationResults.addressBookEntries } />
+				
 				<SenderReceiver from = { param.simTx.transaction.from } to = { param.simTx.transaction.to } renameAddressCallBack = { param.renameAddressCallBack }/>
-
-				<span class = 'log-table' style = 'margin-top: 10px; grid-template-columns: auto auto;'>
-					<div class = 'log-cell'>
-						<TransactionCreated created = { param.simTx.created } />
-					</div>
-					<div class = 'log-cell' style = { { display: 'inline-flex', justifyContent: 'right' } }>
-						<GasFee tx = { param.simTx } rpcNetwork = { param.simulationAndVisualisationResults.rpcNetwork } />
-					</div>
-				</span>
 			</div>
 		</div>
 	)

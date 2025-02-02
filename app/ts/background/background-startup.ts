@@ -1,15 +1,14 @@
 import 'webextension-polyfill'
 import { defaultRpcs, getSettings } from './settings.js'
-import { handleInterceptedRequest, popupMessageHandler, resetSimulatorStateFromConfig } from './background.js'
+import { handleInterceptedRequest, popupMessageHandler } from './background.js'
 import { retrieveWebsiteDetails, updateExtensionBadge, updateExtensionIcon } from './iconHandler.js'
-import { clearTabStates, getPrimaryRpcForChain, getSimulationResults, removeTabState, setRpcConnectionStatus, updateTabState, updateUserAddressBookEntries, updateUserAddressBookEntriesV2Old } from './storageVariables.js'
+import { clearTabStates, getPrimaryRpcForChain, removeTabState, setRpcConnectionStatus, updateTabState, updateUserAddressBookEntries, updateUserAddressBookEntriesV2Old } from './storageVariables.js'
 import { Simulator } from '../simulation/simulator.js'
 import { TabConnection, TabState, WebsiteTabConnections } from '../types/user-interface-types.js'
 import { EthereumBlockHeader } from '../types/wire-types.js'
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
 import { getSocketFromPort, sendPopupMessageToOpenWindows, websiteSocketToString } from './backgroundUtils.js'
 import { sendSubscriptionMessagesForNewBlock } from '../simulation/services/EthereumSubscriptionService.js'
-import { refreshSimulation } from './popupMessageHandlers.js'
 import { Semaphore } from '../utils/semaphore.js'
 import { RawInterceptedRequest, checkAndThrowRuntimeLastError } from '../utils/requests.js'
 import { ICON_NOT_ACTIVE } from '../utils/constants.js'
@@ -181,13 +180,6 @@ async function newBlockAttemptCallback(blockheader: EthereumBlockHeader, ethereu
 		await updateExtensionBadge()
 		await sendPopupMessageToOpenWindows({ method: 'popup_new_block_arrived', data: { rpcConnectionStatus } })
 		if (isNewBlock) {
-			const settings = await getSettings()
-			if (settings.simulationMode) {
-				const simulationResults = await getSimulationResults()
-				if (simulationResults.simulationResultState === 'corrupted') await resetSimulatorStateFromConfig(ethereumClientService, simulator.tokenPriceService)
-				const simulationState = await refreshSimulation(simulator, settings, false)
-				return await sendSubscriptionMessagesForNewBlock(blockheader.number, ethereumClientService, simulationState, websiteTabConnections)
-			}
 			return await sendSubscriptionMessagesForNewBlock(blockheader.number, ethereumClientService, undefined, websiteTabConnections)
 		}
 	} catch(error) {

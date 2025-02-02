@@ -8,7 +8,6 @@ import { RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { isHexEncodedNumber, stringToUint8Array } from '../../utils/bigint.js'
 import { MOCK_PRIVATE_KEYS_ADDRESS, getChainName } from '../../utils/constants.js'
 import { assertNever } from '../../utils/typescript.js'
-import { TransactionCreated } from '../simulationExplaining/SimulationSummary.js'
 import { QuarantineReasons } from '../simulationExplaining/Transactions.js'
 import { SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
 import { Ether } from '../subcomponents/coins.js'
@@ -387,7 +386,6 @@ export function SignatureCard(params: SignatureCardParams) {
 			/>
 
 			<span class = 'log-table' style = 'margin-top: 10px; grid-template-columns: auto auto;'>
-				<div class = 'log-cell'> <TransactionCreated created = { params.visualizedPersonalSignRequest.created } /> </div>
 				<div class = 'log-cell' style = 'justify-content: right;'></div>
 			</span>
 		</div>
