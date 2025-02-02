@@ -1,30 +1,30 @@
+import { ethers, keccak256, toUtf8Bytes } from 'ethers'
+import * as funtypes from 'funtypes'
 import { closePopupOrTabById, getPopupOrTabById, openPopupOrTab, tryFocusingTabOrWindow } from '../../components/ui-utils.js'
 import { EthereumClientService } from '../../simulation/services/EthereumClientService.js'
-import { getInputFieldFromDataOrInput, getSimulatedTransactionCount, mockSignTransaction, simulateEstimateGas, simulatePersonalSign } from '../../simulation/services/SimulationModeEthereumClientService.js'
-import { CANNOT_SIMULATE_OFF_LEGACY_BLOCK, ERROR_INTERCEPTOR_NO_ACTIVE_ADDRESS, METAMASK_ERROR_USER_REJECTED_REQUEST } from '../../utils/constants.js'
-import { TransactionConfirmation, UpdateConfirmTransactionDialog, UpdateConfirmTransactionDialogPendingTransactions } from '../../types/interceptor-messages.js'
-import { Semaphore } from '../../utils/semaphore.js'
-import { WebsiteTabConnections } from '../../types/user-interface-types.js'
-import { TransactionStack, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from '../../types/visualizer-types.js'
-import { SendRawTransactionParams, SendTransactionParams } from '../../types/JsonRpc-types.js'
-import { refreshConfirmTransactionSimulation, updateSimulationState } from '../background.js'
-import { getHtmlFile, sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
-import { appendPendingTransactionOrMessage, clearPendingTransactions, getPendingTransactionsAndMessages, getSimulationResults, removePendingTransactionOrMessage, updatePendingTransactionOrMessage, updateTransactionStack } from '../storageVariables.js'
-import { InterceptedRequest, UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch, getUniqueRequestIdentifierString } from '../../utils/requests.js'
-import { replyToInterceptedRequest } from '../messageSending.js'
+import { getInputFieldFromDataOrInput, getSimulatedTransactionCount, simulateEstimateGas } from '../../simulation/services/SimulationModeEthereumClientService.js'
 import { Simulator } from '../../simulation/simulator.js'
-import { ethers, keccak256, toUtf8Bytes } from 'ethers'
-import { dataStringWith0xStart, stringToUint8Array } from '../../utils/bigint.js'
-import { EthereumAddress, EthereumBytes32, EthereumQuantity, serialize } from '../../types/wire-types.js'
-import { PopupOrTabId, Website } from '../../types/websiteAccessTypes.js'
-import { JsonRpcResponseError, handleUnexpectedError, printError } from '../../utils/errors.js'
 import { PendingTransactionOrSignableMessage } from '../../types/accessRequest.js'
+import { TransactionConfirmation, UpdateConfirmTransactionDialog, UpdateConfirmTransactionDialogPendingTransactions } from '../../types/interceptor-messages.js'
 import { SignMessageParams } from '../../types/jsonRpc-signing-types.js'
-import { craftPersonalSignPopupMessage } from './personalSign.js'
-import { getSettings } from '../settings.js'
-import * as funtypes from 'funtypes'
-import { assertNever, modifyObject } from '../../utils/typescript.js'
+import { SendRawTransactionParams, SendTransactionParams } from '../../types/JsonRpc-types.js'
+import { WebsiteTabConnections } from '../../types/user-interface-types.js'
+import { WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from '../../types/visualizer-types.js'
+import { PopupOrTabId, Website } from '../../types/websiteAccessTypes.js'
+import { EthereumAddress, EthereumBytes32, EthereumQuantity, serialize } from '../../types/wire-types.js'
+import { dataStringWith0xStart, stringToUint8Array } from '../../utils/bigint.js'
+import { CANNOT_SIMULATE_OFF_LEGACY_BLOCK, ERROR_INTERCEPTOR_NO_ACTIVE_ADDRESS, METAMASK_ERROR_USER_REJECTED_REQUEST } from '../../utils/constants.js'
+import { JsonRpcResponseError, handleUnexpectedError, printError } from '../../utils/errors.js'
+import { InterceptedRequest, UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch, getUniqueRequestIdentifierString } from '../../utils/requests.js'
+import { Semaphore } from '../../utils/semaphore.js'
+import { modifyObject } from '../../utils/typescript.js'
+import { refreshConfirmTransactionSimulation } from '../background.js'
+import { getHtmlFile, sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
+import { replyToInterceptedRequest } from '../messageSending.js'
 import { simulateGnosisSafeTransactionOnPass } from '../popupMessageHandlers.js'
+import { getSettings } from '../settings.js'
+import { appendPendingTransactionOrMessage, clearPendingTransactions, getPendingTransactionsAndMessages, getSimulationResults, removePendingTransactionOrMessage, updatePendingTransactionOrMessage } from '../storageVariables.js'
+import { craftPersonalSignPopupMessage } from './personalSign.js'
 
 const pendingConfirmationSemaphore = new Semaphore(1)
 
@@ -62,6 +62,8 @@ export const isConfirmTransactionFocused = async () => {
 }
 
 const getPendingTransactionOrMessageByidentifier = async (uniqueRequestIdentifier: UniqueRequestIdentifier) => {
+	console.log('getPendingTransactionOrMessageByidentifier received uniqueRequestIdentifier:', uniqueRequestIdentifier)
+	console.log('getPendingTransactionsAndMessages:', await getPendingTransactionsAndMessages())
 	return (await getPendingTransactionsAndMessages()).find((tx) => doesUniqueRequestIdentifiersMatch(tx.uniqueRequestIdentifier, uniqueRequestIdentifier))
 }
 
@@ -80,8 +82,13 @@ export const setGasLimitForTransaction = async (transactionIdentifier: BigInt, g
 export async function resolvePendingTransactionOrMessage(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, confirmation: TransactionConfirmation) {
 	console.log('resolvePendingTransactionOrMessage received confirmation:', confirmation)
 	const pendingTransactionOrMessage = await getPendingTransactionOrMessageByidentifier(confirmation.data.uniqueRequestIdentifier)
-	if (pendingTransactionOrMessage === undefined) return // no need to resolve as it doesn't exist anymore
-
+	console.log('pendingTransactionOrMessage 1:', pendingTransactionOrMessage)
+	if (pendingTransactionOrMessage === undefined) {
+		console.log('No pending transaction found - returning')
+		alert('No pending transaction found - returning')
+		return // no need to resolve as it doesn't exist anymore
+	}
+	console.log('pendingTransactionOrMessage 2:', pendingTransactionOrMessage)
 	const reply = (message: { type: 'forwardToSigner' } | { type: 'result', error: { code: number, message: string } } | { type: 'result', result: unknown }) => {
 		if (message.type === 'result' && !('error' in message)) {
 			if (pendingTransactionOrMessage.originalRequestParameters.method === 'eth_sendRawTransaction' || pendingTransactionOrMessage.originalRequestParameters.method === 'eth_sendTransaction') {
@@ -91,39 +98,21 @@ export async function resolvePendingTransactionOrMessage(simulator: Simulator, w
 		}
 		return replyToInterceptedRequest(websiteTabConnections, { ...pendingTransactionOrMessage.originalRequestParameters, ...message, uniqueRequestIdentifier: confirmation.data.uniqueRequestIdentifier })
 	}
+	console.log('confirmation.data.action:', confirmation.data.action)
 	if (confirmation.data.action === 'accept' && pendingTransactionOrMessage.simulationMode === false) {
 		await updatePendingTransactionOrMessage(confirmation.data.uniqueRequestIdentifier, async (transaction) => modifyObject(transaction, { approvalStatus: { status: 'WaitingForSigner' } }))
 		await updateConfirmTransactionView(simulator.ethereum)
 		return replyToInterceptedRequest(websiteTabConnections, { ...pendingTransactionOrMessage.originalRequestParameters, type: 'forwardToSigner', uniqueRequestIdentifier: confirmation.data.uniqueRequestIdentifier })
 	}
+	console.log('confirmation.data.action 2:', confirmation.data.action)
 	await removePendingTransactionOrMessage(confirmation.data.uniqueRequestIdentifier)
 	if ((await getPendingTransactionsAndMessages()).length === 0) await tryFocusingTabOrWindow({ type: 'tab', id: pendingTransactionOrMessage.uniqueRequestIdentifier.requestSocket.tabId })
 	if (!(await updateConfirmTransactionView(simulator.ethereum))) await closePopupOrTabById(pendingTransactionOrMessage.popupOrTabId)
-
+	console.log('confirmation.data.action 3:', confirmation.data.action)
 	if (confirmation.data.action === 'noResponse') return reply(formRejectMessage(undefined))
-	if (pendingTransactionOrMessage === undefined || pendingTransactionOrMessage.transactionOrMessageCreationStatus !== 'Simulated') return reply(formRejectMessage(undefined))
-	if (confirmation.data.action === 'reject') return reply(formRejectMessage(confirmation.data.errorString))
-	if (!pendingTransactionOrMessage.simulationMode) {
-		if (confirmation.data.action === 'signerIncluded') return reply({ type: 'result', result: confirmation.data.signerReply })
-		return reply({ type: 'forwardToSigner' })
-	}
-	if (confirmation.data.action === 'signerIncluded') throw new Error('Signer included transaction that was in simulation')
-
-	switch (pendingTransactionOrMessage.type) {
-		case 'SignableMessage': {
-			await updateTransactionStack((prevStack: TransactionStack) => ({...prevStack, signedMessages: [...prevStack.signedMessages, pendingTransactionOrMessage.signedMessageTransaction] }))
-			updateSimulationState(simulator.ethereum, simulator.tokenPriceService, pendingTransactionOrMessage.activeAddress, true)
-			return reply({ type: 'result', result: simulatePersonalSign(pendingTransactionOrMessage.originalRequestParameters, pendingTransactionOrMessage.signedMessageTransaction.fakeSignedFor).signature })
-		}
-		case 'Transaction': {
-			const signedTransaction = mockSignTransaction(pendingTransactionOrMessage.transactionToSimulate.transaction)
-			const transaction = { ...pendingTransactionOrMessage.transactionToSimulate, signedTransaction }
-			await updateTransactionStack((prevStack: TransactionStack) => ({ ...prevStack, transactions: [...prevStack.transactions, transaction] }))
-			updateSimulationState(simulator.ethereum, simulator.tokenPriceService, pendingTransactionOrMessage.activeAddress, true)
-			return reply({ type: 'result', result: EthereumBytes32.serialize(mockSignTransaction(pendingTransactionOrMessage.transactionToSimulate.transaction).hash) })
-		}
-		default: assertNever(pendingTransactionOrMessage)
-	}
+	
+	if (confirmation.data.action === 'signerIncluded') return reply({ type: 'result', result: confirmation.data.signerReply })
+	return reply({ type: 'forwardToSigner' })
 }
 
 export const onCloseWindowOrTab = async (popupOrTabs: PopupOrTabId, simulator: Simulator, websiteTabConnections: WebsiteTabConnections) => { // check if user has closed the window on their own, if so, reject all signatures

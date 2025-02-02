@@ -441,6 +441,7 @@ async function handleRPCRequest(
 	settings: Settings,
 	activeAddress: bigint | undefined,
 ): Promise<RPCReply> {
+	console.log('handleRPCRequest received request:', request)
 	const maybeParsedRequest = EthereumJsonRpcRequest.safeParse(request)
 	const forwardToSigner = !settings.simulationMode && !request.usingInterceptorWithoutSigner
 	const getForwardingMessage = (request: SendRawTransactionParams | SendTransactionParams | WalletAddEthereumChain | EthGetStorageAtParams) => {
@@ -641,6 +642,11 @@ export const handleInterceptedRequest = async (port: browser.runtime.Port | unde
 		}
 	}
 
+	console.log('handleInterceptedRequest received request:', {
+		method: request.method,
+		uniqueRequestIdentifier: request.uniqueRequestIdentifier
+	})
+
 	switch (access) {
 		case 'askAccess': return await gateKeepRequestBehindAccessDialog(simulator, websiteTabConnections, socket, request, await websitePromise, activeAddress?.address, await getSettings())
 		case 'noAccess': return refuseAccess(websiteTabConnections, request)
@@ -653,6 +659,10 @@ export const handleInterceptedRequest = async (port: browser.runtime.Port | unde
 }
 
 async function handleContentScriptMessage(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, request: InterceptedRequest, website: Website, activeAddress: bigint | undefined) {
+	console.log('handleContentScriptMessage received request:', {
+		method: request.method,
+		uniqueRequestIdentifier: request.uniqueRequestIdentifier
+	})
 	try {
 		const settings = await getSettings()
 		const simulationState = settings.simulationMode ? (await getSimulationResults()).simulationState : undefined

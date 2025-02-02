@@ -71,7 +71,7 @@ export function App() {
 	const [useSignersAddressAsActiveAddress, setUseSignersAddressAsActiveAddress] = useState(false)
 	const [simVisResults, setSimVisResults] = useState<SimulationAndVisualisationResults | undefined >(undefined)
 	const rpcNetwork = useSignal<RpcNetwork | undefined>(undefined)
-	const [simulationMode, setSimulationMode] = useState<boolean>(false)
+	const simulationMode = false
 	const [tabIconDetails, setTabConnection] = useState<TabIconDetails>(DEFAULT_TAB_CONNECTION)
 	const [isSettingsLoaded, setIsSettingsLoaded] = useState<boolean>(false)
 	const [currentBlockNumber, setCurrentBlockNumber] = useState<bigint | undefined>(undefined)
@@ -177,7 +177,6 @@ export function App() {
 					appPage.value = settings.openedPage
 				}
 			}
-			setSimulationMode(settings.simulationMode)
 			rpcNetwork.value = settings.activeRpcNetwork
 			setActiveSimulationAddress(settings.activeSimulationAddress)
 			setUseSignersAddressAsActiveAddress(settings.useSignersAddressAsActiveAddress)
