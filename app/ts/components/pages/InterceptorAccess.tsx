@@ -1,22 +1,21 @@
-import { useState, useEffect } from 'preact/hooks'
-import { ActiveAddressComponent, BigAddress, WebsiteOriginText } from '../subcomponents/address.js'
-import { AddNewAddress } from './AddNewAddress.js'
-import { RenameAddressCallBack } from '../../types/user-interface-types.js'
-import { MessageToPopup } from '../../types/interceptor-messages.js'
-import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
-import Hint from '../subcomponents/Hint.js'
-import { convertNumberToCharacterRepresentationIfSmallEnough, tryFocusingTabOrWindow } from '../ui-utils.js'
-import { ChangeActiveAddress } from './ChangeActiveAddress.js'
-import { DinoSays } from '../subcomponents/DinoSays.js'
-import { getPrettySignerName } from '../subcomponents/signers.js'
-import { addressString, checksummedAddress } from '../../utils/bigint.js'
-import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
-import { Website } from '../../types/websiteAccessTypes.js'
-import { PendingAccessRequest, PendingAccessRequests } from '../../types/accessRequest.js'
 import { Signal, useSignal } from '@preact/signals'
+import { useEffect, useState } from 'preact/hooks'
+import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
+import { PendingAccessRequest, PendingAccessRequests } from '../../types/accessRequest.js'
+import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
+import { MessageToPopup } from '../../types/interceptor-messages.js'
 import { RpcEntries } from '../../types/rpc.js'
+import { RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { ModifyAddressWindowState } from '../../types/visualizer-types.js'
+import { Website } from '../../types/websiteAccessTypes.js'
+import { addressString, checksummedAddress } from '../../utils/bigint.js'
+import { ActiveAddressComponent, BigAddress, WebsiteOriginText } from '../subcomponents/address.js'
+import { DinoSays } from '../subcomponents/DinoSays.js'
+import Hint from '../subcomponents/Hint.js'
 import { ChevronIcon } from '../subcomponents/icons.js'
+import { convertNumberToCharacterRepresentationIfSmallEnough, tryFocusingTabOrWindow } from '../ui-utils.js'
+import { AddNewAddress } from './AddNewAddress.js'
+import { ChangeActiveAddress } from './ChangeActiveAddress.js'
 
 function Title({ icon, title} : {icon: string | undefined, title: string}) {
 	return <span style = 'font-weight: 900; line-height: 48px'>
@@ -109,9 +108,6 @@ function AccessRequest({ renameAddressCallBack, accessRequest, changeActiveAddre
 									disableButton = { false }
 									buttonText = { 'Refresh' }
 								/>
-								<p style = 'color: var(--subtitle-text-color); white-space: normal;' class = 'subtitle is-7'>
-									{ `You can change active address by changing it directly from ${ getPrettySignerName(accessRequest.signerName) } and clicking refresh here afterwards` }
-								</p>
 							</>
 						}
 					</div>

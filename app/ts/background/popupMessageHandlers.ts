@@ -33,6 +33,7 @@ import { TokenPriceService } from '../simulation/services/priceEstimator.js'
 import { searchWebsiteAccess } from './websiteAccessSearch.js'
 
 export async function confirmDialog(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, confirmation: TransactionConfirmation) {
+	console.log('confirmDialog received confirmation:', confirmation)
 	await resolvePendingTransactionOrMessage(simulator, websiteTabConnections, confirmation)
 }
 

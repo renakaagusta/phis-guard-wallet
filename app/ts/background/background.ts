@@ -697,6 +697,7 @@ export async function popupMessageHandler(
 	settings: Settings
 ) {
 	const maybeParsedRequest = PopupMessage.safeParse(request)
+	console.log('Parsed popup message request:', maybeParsedRequest)
 	if (maybeParsedRequest.success === false) {
 		// biome-ignore lint/suspicious/noConsoleLog: <Used for support debugging>
 		console.log({ request })
@@ -709,6 +710,10 @@ export async function popupMessageHandler(
 		}
 	}
 	const parsedRequest = maybeParsedRequest.value
+	console.log('popupMessageHandler received request:', {
+		method: parsedRequest.method,
+		data: parsedRequest
+	})
 	try {
 		switch (parsedRequest.method) {
 			case 'popup_confirmDialog': return await confirmDialog(simulator, websiteTabConnections, parsedRequest)

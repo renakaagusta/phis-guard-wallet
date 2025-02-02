@@ -1,8 +1,7 @@
 import { useSignal } from '@preact/signals'
 import { getTokenAmountsWorth } from '../../simulation/services/priceEstimator.js'
-import { abs, bigintToDecimalString, checksummedAddress } from '../../utils/bigint.js'
+import { abs, checksummedAddress } from '../../utils/bigint.js'
 import { TokenPriceEstimate } from '../../types/visualizer-types.js'
-import { CopyToClipboard } from './CopyToClipboard.js'
 import { JSX } from 'preact/jsx-runtime'
 import { useEffect } from 'preact/hooks'
 import { Erc1155Entry, Erc20TokenEntry, Erc721Entry } from '../../types/addressBookTypes.js'
@@ -53,11 +52,11 @@ export function EtherAmount(param: EtherAmountParams) {
 	}
 
 	return <>
-		<CopyToClipboard content = { bigintToDecimalString(abs(param.amount), 18n) } copyMessage = 'Ether amount copied!' >
+		<>
 			<p class = 'noselect nopointer' style = { style }>
 				{ sign }<AbbreviatedValue amount = { abs(param.amount) } />
 			</p>
-		</CopyToClipboard>
+		</>
 	</>
 }
 
@@ -125,17 +124,17 @@ function TokenIdOrNameOrNothing(param: TokenSymbolParams) {
 
 	if (!('tokenId' in param) || param.tokenId === undefined) return <></>
 	if ('tokenIdName' in param && param.tokenIdName !== undefined) return <>
-		<CopyToClipboard content = { param.tokenId.toString() } copyMessage = 'Token name copied!' >
+		< >
 			<p class = 'noselect nopointer' style = { style }>
 				{ param.tokenIdName }&nbsp;
 			</p>
-		</CopyToClipboard>
+		</>
 	</>
-	return <CopyToClipboard content = { param.tokenId.toString() } copyMessage = 'Token identifier copied!' >
+	return <>
 		<p class = 'noselect nopointer' style = { style }>
 			{ `#${ truncate(param.tokenId.toString(), 9) }` }&nbsp;
 		</p>
-	</CopyToClipboard>
+	</>
 }
 
 export function TokenSymbol(param: TokenSymbolParams) {
@@ -180,17 +179,17 @@ export function TokenAmount(param: TokenAmountParams) {
 
 	if (!('decimals' in param.tokenEntry) || param.tokenEntry.decimals === undefined) {
 		return <>
-			<CopyToClipboard content = { `${ abs(param.amount) } (decimals unknown)` } copyMessage = 'Token amount copied!' >
+			<>
 				<p class = 'noselect nopointer' style = { style }>{ `${ sign }${ abs(param.amount).toString() }` }&nbsp; </p>
-			</CopyToClipboard>
+			</>
 		</>
 	}
 	return <>
-		<CopyToClipboard content = { bigintToDecimalString(abs(param.amount), param.tokenEntry.decimals) } copyMessage = 'Token amount copied!' >
+		<>
 			<p class = 'noselect nopointer' style = { style }>
 				{ sign }<AbbreviatedValue amount = { abs(param.amount) } decimals = { param.tokenEntry.decimals } />
 			</p>
-		</CopyToClipboard>
+		</>
 	</>
 }
 

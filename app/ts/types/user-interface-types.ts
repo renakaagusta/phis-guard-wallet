@@ -32,7 +32,6 @@ export type AddAddressParam = {
 
 export type HomeParams = {
 	changeActiveAddress: () => void,
-	makeMeRich: boolean,
 	activeAddresses: AddressBookEntries,
 	tabState: TabState | undefined,
 	activeSimulationAddress: bigint | undefined,
@@ -49,8 +48,7 @@ export type HomeParams = {
 	rpcConnectionStatus: Signal<RpcConnectionStatus>,
 	rpcEntries: Signal<RpcEntries>
 	simulationUpdatingState: SimulationUpdatingState | undefined,
-	simulationResultState: SimulationResultState | undefined,
-	interceptorDisabled: boolean,
+	simulationResultState: SimulationResultState | undefined
 }
 
 export type ChangeActiveAddressParam = {
@@ -72,7 +70,6 @@ export type FirstCardParams = {
 	rpcNetwork: Signal<RpcNetwork | undefined>,
 	simulationMode: boolean,
 	changeActiveAddress: () => void,
-	makeMeRich: boolean,
 	tabIconDetails: TabIconDetails,
 	tabState: TabState | undefined,
 	renameAddressCallBack: RenameAddressCallBack,

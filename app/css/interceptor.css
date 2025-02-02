@@ -19,11 +19,11 @@ html { font-size: 100%; }
 body { font-family: "Inter" !important; }
 
 :root {
-	--bg-color: #303030;
-	--card-bg-color: #424242;
-	--card-content-bg-color: #484848;
-	--card-header-bg-color: #404040;
-	--window-header-bg-color: #606060;
+	--bg-color: #FFFFFF;
+	--card-bg-color: #FFFFFF;
+	--card-content-bg-color: #FFFFFF;
+	--card-header-bg-color: #FFFFFF;
+	--window-header-bg-color: #FFFFFF;
 
 	--disabled-card-color: rgba(10, 10, 10, 0.6);
 	--primary-color: #58a5b3;
@@ -43,11 +43,11 @@ body { font-family: "Inter" !important; }
 	--warning-color: #FFC107;
 	--negative-dim-color: rgba(246, 104, 94, 0.5);
 
-	--text-color: #ffffff;
-	--subtitle-text-color: rgba(255, 255, 255, 0.7);
-	--disabled-text-color: rgba(255, 255, 255, 0.5);
+	--text-color: #000000;
+	--subtitle-text-color: rgba(0, 0, 0, 0.7);
+	--disabled-text-color: rgba(0, 0, 0, 0.5);
 	--disabled-negative-text-color: rgba(246, 104, 94, 0.5);
-	--unimportant-text-color: rgba(255, 255, 255, 0.2);
+	--unimportant-text-color: rgba(0, 0, 0, 0.2);
 	--importance-box-color: rgba(109, 109, 109);
 	--dim-text-color: rgba(255, 255, 255, 0.8);
 	--alpha-005: rgba(255, 255, 255, 0.05);

@@ -78,6 +78,7 @@ export const setGasLimitForTransaction = async (transactionIdentifier: BigInt, g
 }
 
 export async function resolvePendingTransactionOrMessage(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, confirmation: TransactionConfirmation) {
+	console.log('resolvePendingTransactionOrMessage received confirmation:', confirmation)
 	const pendingTransactionOrMessage = await getPendingTransactionOrMessageByidentifier(confirmation.data.uniqueRequestIdentifier)
 	if (pendingTransactionOrMessage === undefined) return // no need to resolve as it doesn't exist anymore
 

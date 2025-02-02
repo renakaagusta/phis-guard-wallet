@@ -4,7 +4,6 @@ import { Erc721TokenApprovalChange, SimulatedAndVisualizedTransaction, Simulatio
 import { BigAddress, SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
 import { Ether, EtherAmount, EtherSymbol, TokenWithAmount, TokenAmount, TokenPrice, TokenSymbol, TokenOrEth } from '../subcomponents/coins.js'
 import { NonTokenLogAnalysis, TokenLogAnalysis } from './Transactions.js'
-import { CopyToClipboard } from '../subcomponents/CopyToClipboard.js'
 import { SomeTimeAgo, humanReadableDateDeltaLessDetailed } from '../subcomponents/SomeTimeAgo.js'
 import { addressString, bytes32String, nanoString } from '../../utils/bigint.js'
 import { identifyTransaction } from './identifyTransaction.js'
@@ -628,10 +627,7 @@ export function TransactionCreated({ created } : { created: EthereumTimestamp })
 }
 
 export function SimulatedInBlockNumber({ simulationBlockNumber, currentBlockNumber, simulationConductedTimestamp, rpcConnectionStatus } : { simulationBlockNumber: bigint, currentBlockNumber: bigint | undefined, simulationConductedTimestamp: Date, rpcConnectionStatus: Signal<RpcConnectionStatus> }) {
-	return <CopyToClipboard
-		content = { simulationBlockNumber.toString() }
-		contentDisplayOverride = { `Simulated in block number ${ simulationBlockNumber }` }
-		copyMessage = 'Block number copied!'
+	return <
 	>
 		<p style = 'color: var(--subtitle-text-color); text-align: right; display: inline; text-overflow: ellipsis; overflow: hidden;'>
 			{ 'Simulated ' }
@@ -643,7 +639,7 @@ export function SimulatedInBlockNumber({ simulationBlockNumber, currentBlockNumb
 			</span>
 			{ ' ago' }
 		</p>
-	</CopyToClipboard>
+	</>
 }
 
 type SimulationSummaryParams = {

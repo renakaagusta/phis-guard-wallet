@@ -1,32 +1,29 @@
-import { useState, useEffect } from 'preact/hooks'
-import { defaultActiveAddresses } from '../background/settings.js'
-import { SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationState, TokenPriceEstimate, SimulationUpdatingState, SimulationResultState, NamedTokenId, ModifyAddressWindowState, EditEnsNamedHashWindowState } from '../types/visualizer-types.js'
-import { ChangeActiveAddress } from './pages/ChangeActiveAddress.js'
-import { Home } from './pages/Home.js'
-import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-interface-types.js'
-import Hint from './subcomponents/Hint.js'
-import { AddNewAddress } from './pages/AddNewAddress.js'
-import { InterceptorAccessList } from './pages/InterceptorAccessList.js'
+import { Signal, useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
-import { PasteCatcher } from './subcomponents/PasteCatcher.js'
-import { truncateAddr } from '../utils/ethereum.js'
-import { DEFAULT_TAB_CONNECTION, METAMASK_ERROR_ALREADY_PENDING, METAMASK_ERROR_USER_REJECTED_REQUEST, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
-import { UpdateHomePage, Settings, MessageToPopup, UnexpectedErrorOccured } from '../types/interceptor-messages.js'
-import { version, gitCommitSha } from '../version.js'
+import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../background/backgroundUtils.js'
-import { EthereumAddress, EthereumBytes32 } from '../types/wire-types.js'
-import { checksummedAddress } from '../utils/bigint.js'
-import { AddressBookEntry, AddressBookEntries } from '../types/addressBookTypes.js'
-import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
+import { noNewBlockForOverTwoMins } from '../background/iconHandler.js'
+import { defaultActiveAddresses } from '../background/settings.js'
+import { AddressBookEntries, AddressBookEntry } from '../types/addressBookTypes.js'
+import { MessageToPopup, Settings, UnexpectedErrorOccured, UpdateHomePage } from '../types/interceptor-messages.js'
 import { VisualizedPersonalSignRequest } from '../types/personal-message-definitions.js'
 import { RpcEntries, RpcEntry, RpcNetwork } from '../types/rpc.js'
+import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-interface-types.js'
+import { EditEnsNamedHashWindowState, ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState, TokenPriceEstimate } from '../types/visualizer-types.js'
+import { EthereumAddress, EthereumBytes32 } from '../types/wire-types.js'
+import { checksummedAddress } from '../utils/bigint.js'
+import { DEFAULT_TAB_CONNECTION, METAMASK_ERROR_ALREADY_PENDING, METAMASK_ERROR_USER_REJECTED_REQUEST, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
+import { truncateAddr } from '../utils/ethereum.js'
+import { AddNewAddress } from './pages/AddNewAddress.js'
+import { ChangeActiveAddress } from './pages/ChangeActiveAddress.js'
+import { EditEnsLabelHash } from './pages/EditEnsLabelHash.js'
+import { Home } from './pages/Home.js'
 import { ErrorComponent, UnexpectedError } from './subcomponents/Error.js'
+import Hint from './subcomponents/Hint.js'
+import { PasteCatcher } from './subcomponents/PasteCatcher.js'
 import { SignersLogoName } from './subcomponents/signers.js'
 import { SomeTimeAgo } from './subcomponents/SomeTimeAgo.js'
-import { noNewBlockForOverTwoMins } from '../background/iconHandler.js'
 import { humanReadableDate } from './ui-utils.js'
-import { EditEnsLabelHash } from './pages/EditEnsLabelHash.js'
-import { Signal, useSignal } from '@preact/signals'
 
 type ProviderErrorsParam = {
 	tabState: TabState | undefined
@@ -68,16 +65,13 @@ type Page = { page: 'Home' | 'ChangeActiveAddress' | 'AccessList' | 'Settings' |
 
 export function App() {
 	const appPage = useSignal<Page>({ page: 'Unknown' })
-	const [makeMeRich, setMakeMeRich] = useState(false)
 	const [activeAddresses, setActiveAddresses] = useState<AddressBookEntries>(defaultActiveAddresses)
 	const [activeSimulationAddress, setActiveSimulationAddress] = useState<bigint | undefined>(undefined)
 	const [activeSigningAddress, setActiveSigningAddress] = useState<bigint | undefined>(undefined)
 	const [useSignersAddressAsActiveAddress, setUseSignersAddressAsActiveAddress] = useState(false)
 	const [simVisResults, setSimVisResults] = useState<SimulationAndVisualisationResults | undefined >(undefined)
-	const [websiteAccess, setWebsiteAccess] = useState<WebsiteAccessArray | undefined>(undefined)
-	const [websiteAccessAddressMetadata, setWebsiteAccessAddressMetadata] = useState<AddressBookEntries>([])
 	const rpcNetwork = useSignal<RpcNetwork | undefined>(undefined)
-	const [simulationMode, setSimulationMode] = useState<boolean>(true)
+	const [simulationMode, setSimulationMode] = useState<boolean>(false)
 	const [tabIconDetails, setTabConnection] = useState<TabIconDetails>(DEFAULT_TAB_CONNECTION)
 	const [isSettingsLoaded, setIsSettingsLoaded] = useState<boolean>(false)
 	const [currentBlockNumber, setCurrentBlockNumber] = useState<bigint | undefined>(undefined)
@@ -87,7 +81,6 @@ export function App() {
 	const rpcEntries = useSignal<RpcEntries>([])
 	const [simulationUpdatingState, setSimulationUpdatingState] = useState<SimulationUpdatingState | undefined>(undefined)
 	const [simulationResultState, setSimulationResultState] = useState<SimulationResultState | undefined>(undefined)
-	const [interceptorDisabled, setInterceptorDisabled] = useState<boolean>(false)
 	const [unexpectedError, setUnexpectedError] = useState<UnexpectedErrorOccured | undefined>(undefined)
 
 	async function setActiveAddressAndInformAboutIt(address: bigint | 'signer') {
@@ -154,7 +147,6 @@ export function App() {
 				setActiveAddresses(data.activeAddresses)
 				setCurrentTabId(data.tabId)
 				setActiveSigningAddress(data.activeSigningAddressInThisTab)
-				setInterceptorDisabled(data.interceptorDisabled)
 				updateHomePageSettings(data.settings, !isSettingsLoaded)
 				setUnexpectedError(data.latestUnexpectedError)
 				if (isSettingsLoaded === false) setTabConnection(data.tabState.tabIconDetails)
@@ -171,10 +163,8 @@ export function App() {
 					setSimulationUpdatingState(data.visualizedSimulatorState.simulationUpdatingState)
 					setSimulationResultState(data.visualizedSimulatorState.simulationResultState)
 				}
-				setMakeMeRich(data.makeMeRich)
 				setTabState(data.tabState)
 				setCurrentBlockNumber(data.currentBlockNumber)
-				setWebsiteAccessAddressMetadata(data.websiteAccessAddressMetadata)
 				rpcConnectionStatus.value = data.rpcConnectionStatus
 				return true
 			})
@@ -191,7 +181,6 @@ export function App() {
 			rpcNetwork.value = settings.activeRpcNetwork
 			setActiveSimulationAddress(settings.activeSimulationAddress)
 			setUseSignersAddressAsActiveAddress(settings.useSignersAddressAsActiveAddress)
-			setWebsiteAccess(settings.websiteAccess)
 		}
 
 		const popupMessageListener = (msg: unknown) => {
@@ -328,22 +317,16 @@ export function App() {
 		sendPopupMessageToBackgroundPage({ method: 'popup_changePage', data: newPage })
 	}
 
-	async function openWebsiteAccess() {
-		await sendPopupMessageToBackgroundPage({ method: 'popup_openWebsiteAccess' })
-		return globalThis.close() // close extension popup, chrome closes it by default, but firefox does not
-	}
 	async function openAddressBook() {
 		await sendPopupMessageToBackgroundPage({ method: 'popup_openAddressBook' })
 		return globalThis.close() // close extension popup, chrome closes it by default, but firefox does not
 	}
-	async function openSettings() {
-		await sendPopupMessageToBackgroundPage({ method: 'popup_openSettings' })
-		return globalThis.close() // close extension popup, chrome closes it by default, but firefox does not
-	}
+
 	async function clearUnexpectedError() {
 		setUnexpectedError(undefined)
 		await sendPopupMessageToBackgroundPage({ method: 'popup_clearUnexpectedError' })
 	}
+
 	return (
 		<main>
 			<Hint>
@@ -354,14 +337,10 @@ export function App() {
 							<div class = 'navbar-brand'>
 								<a class = 'navbar-item' style = 'cursor: unset'>
 									<img src = '../img/LOGOA.svg' alt = 'Logo' width = '32'/>
-									<p style = 'color: #FFFFFF; padding-left: 5px;'>THE INTERCEPTOR
-										<span style = 'color: var(--unimportant-text-color); font-size: 0.8em; padding-left: 5px;' > { `${ version } - ${ gitCommitSha.slice(0, 8) }`  } </span>
-									</p>
+									<p style = 'color: #000000; padding-left: 5px;'>PhisGuard</p>
 								</a>
 								<a class = 'navbar-item' style = 'margin-left: auto; margin-right: 0;'>
-									<img src = '../img/internet.svg' width = '32' onClick = { openWebsiteAccess }/>
 									<img src = '../img/address-book.svg' width = '32' onClick = { openAddressBook }/>
-									<img src = '../img/settings.svg' width = '32' onClick = { openSettings }/>
 								</a>
 							</div>
 						</nav>
@@ -377,7 +356,6 @@ export function App() {
 							activeSigningAddress = { activeSigningAddress }
 							activeSimulationAddress = { activeSimulationAddress }
 							changeActiveAddress = { changeActiveAddress }
-							makeMeRich = { makeMeRich }
 							activeAddresses = { activeAddresses }
 							simulationMode = { simulationMode }
 							tabIconDetails = { tabIconDetails }
@@ -389,7 +367,6 @@ export function App() {
 							rpcEntries = { rpcEntries }
 							simulationUpdatingState = { simulationUpdatingState }
 							simulationResultState = { simulationResultState }
-							interceptorDisabled = { interceptorDisabled }
 						/>
 
 						<div class = { `modal ${ appPage.value.page !== 'Home' && appPage.value.page !== 'Unknown' ? 'is-active' : ''}` }>
@@ -397,15 +374,6 @@ export function App() {
 								<EditEnsLabelHash
 									close = { goHome }
 									editEnsNamedHashWindowState = { appPage.value.state }
-								/>
-							: <></> }
-							{ appPage.value.page === 'AccessList' ?
-								<InterceptorAccessList
-									goHome = { goHome }
-									setWebsiteAccess = { setWebsiteAccess }
-									websiteAccess = { websiteAccess }
-									websiteAccessAddressMetadata = { websiteAccessAddressMetadata }
-									renameAddressCallBack = { renameAddressCallBack }
 								/>
 							: <></> }
 							{ appPage.value.page === 'ChangeActiveAddress' ?
