@@ -273,7 +273,7 @@ export function Home(param: HomeParams) {
 
 	return <>
 		{ param.rpcNetwork.value.httpsRpc === undefined ?
-			<ErrorComponent text = { `${ param.rpcNetwork.value.name } is not a supported network. The Interceptor is disabled while you are using ${ param.rpcNetwork.value.name }.` }/>
+			<ErrorComponent text = { `${ param.rpcNetwork.value.name } is not a supported network. PhisGuard is disabled while you are using ${ param.rpcNetwork.value.name }.` }/>
 		: <></> }
 
 		<FirstCard

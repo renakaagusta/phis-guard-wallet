@@ -84,7 +84,7 @@ function AccessRequest({ renameAddressCallBack, accessRequest, changeActiveAddre
 			<p className = 'title is-4' style = 'text-align: center; margin-top: 40px; margin-bottom: 40px;'>
 				<Title icon = { accessRequest.website.icon } title = { accessRequest.website.title === undefined ? accessRequest.website.websiteOrigin : accessRequest.website.title }/>
 				<br/>
-				would like to connect to The Interceptor
+				would like to connect to PhisGuard
 			</p>
 		</div> :
 			<>

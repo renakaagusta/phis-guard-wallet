@@ -33,7 +33,7 @@ function listenContentScript(connectionName: string | undefined) {
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message?.includes('Extension context invalidated.')) {
-					// this error happens when the extension is refreshed and the page cannot reach The Interceptor anymore
+					// this error happens when the extension is refreshed and the page cannot reach PhisGuard anymore
 					return
 				}
 				if (error.message?.includes('User denied')) return // user denied signature

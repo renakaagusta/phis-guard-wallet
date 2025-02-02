@@ -27,10 +27,10 @@ async function setInterceptorIcon(tabId: number, icon: TabIcon, iconReason: stri
 export async function updateExtensionIcon(websiteTabConnections: WebsiteTabConnections, tabId: number, websiteOrigin: string) {
 	const blockingWebsitePromise = areWeBlocking(websiteTabConnections, tabId, websiteOrigin)
 	const addShieldIfNeeded = async (icon: TabIcon): Promise<TabIcon> => await blockingWebsitePromise && icon !== ICON_INTERCEPTOR_DISABLED ? TabIcon.parse(icon.replace('.png', '-shield.png')) : icon
-	const setIcon = async (icon: TabIcon, iconReason: string) => setInterceptorIcon(tabId, await addShieldIfNeeded(icon), await blockingWebsitePromise ? `${ iconReason } The Interceptor is blocking external requests made by the website.` : iconReason)
+	const setIcon = async (icon: TabIcon, iconReason: string) => setInterceptorIcon(tabId, await addShieldIfNeeded(icon), await blockingWebsitePromise ? `${ iconReason } PhisGuard is blocking external requests made by the website.` : iconReason)
 
 	const settings = await getSettings()
-	if (hasAccess(settings.websiteAccess, websiteOrigin) === 'interceptorDisabled') return setIcon(ICON_INTERCEPTOR_DISABLED, `The Interceptor is disabled for ${ websiteOrigin } by user request.`)
+	if (hasAccess(settings.websiteAccess, websiteOrigin) === 'interceptorDisabled') return setIcon(ICON_INTERCEPTOR_DISABLED, `PhisGuard is disabled for ${ websiteOrigin } by user request.`)
 	const activeAddress = await getActiveAddress(settings, tabId)
 	if (activeAddress === undefined) return setIcon(ICON_NOT_ACTIVE, 'No active address selected.')
 	const addressAccess = hasAddressAccess(settings.websiteAccess, websiteOrigin, activeAddress)
@@ -41,10 +41,10 @@ export async function updateExtensionIcon(websiteTabConnections: WebsiteTabConne
 		}
 		return setIcon(ICON_ACCESS_DENIED, `The access to ${ activeAddress.name } for ${ websiteOrigin } has been DENIED!`)
 	}
-	if (settings.simulationMode) return setIcon(ICON_SIMULATING, 'The Interceptor simulates your sent transactions.')
-	if (settings.activeRpcNetwork.httpsRpc === undefined) return setIcon(ICON_SIGNING_NOT_SUPPORTED, `The Interceptor is disabled while it's on an unsupported network`)
+	if (settings.simulationMode) return setIcon(ICON_SIMULATING, 'PhisGuard simulates your sent transactions.')
+	if (settings.activeRpcNetwork.httpsRpc === undefined) return setIcon(ICON_SIGNING_NOT_SUPPORTED, `PhisGuard is disabled while it's on an unsupported network`)
 	const tabState = await getTabState(tabId)
-	return setIcon(ICON_SIGNING, `The Interceptor forwards your transactions to ${ getPrettySignerName(tabState.signerName) } once sent.`)
+	return setIcon(ICON_SIGNING, `PhisGuard forwards your transactions to ${ getPrettySignerName(tabState.signerName) } once sent.`)
 }
 
 export function noNewBlockForOverTwoMins(connectionStatus: RpcConnectionStatus) {

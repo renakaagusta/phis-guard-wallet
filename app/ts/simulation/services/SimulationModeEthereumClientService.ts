@@ -977,7 +977,7 @@ export const getSimulatedFeeHistory = async (ethereumClientService: EthereumClie
 					{ dataPoint: min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - (newestBlockBaseFeePerGas ?? 0n)), weight: tx.gas }
 					: { dataPoint: tx.gasPrice - (newestBlockBaseFeePerGas ?? 0n), weight: tx.gas })
 
-				// we can have negative values here, as The Interceptor creates maxFeePerGas = 0 transactions that are intended to have zero base fee, which is not possible in reality
+				// we can have negative values here, as PhisGuard creates maxFeePerGas = 0 transactions that are intended to have zero base fee, which is not possible in reality
 				const zeroOutNegativeValues = effectivePriorityAndGasWeights.map((point) => modifyObject(point, { dataPoint: max(0n, point.dataPoint) }))
 				return calculateWeightedPercentile(zeroOutNegativeValues, BigInt(percentile))
 			})]

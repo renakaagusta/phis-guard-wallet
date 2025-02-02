@@ -1,18 +1,39 @@
 import { createContext, type ComponentChildren } from 'preact'
 import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { useContext, useRef } from 'preact/hooks'
+import { useContext, useEffect, useRef } from 'preact/hooks'
 import { Network, JsonRpcProvider } from 'ethers'
 import { AsyncStates, useAsyncState } from '../../utils/preact-utilities.js'
 import { TextInput } from './TextField.js'
-import { RpcEntry } from '../../types/rpc.js'
+import { RpcEntries, RpcEntry } from '../../types/rpc.js'
 import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { getSettings } from '../../background/settings.js'
 import { getChainName } from '../../utils/constants.js'
-import { useRpcConnectionsList } from '../pages/SettingsView.js'
 import { EthereumJSONRpcRequestHandler } from '../../simulation/services/EthereumJSONRpcRequestHandler.js'
 import { EthSimulateV1Params, EthSimulateV1Result } from '../../types/ethSimulate-types.js'
 import { JsonRpcResponseError } from '../../utils/errors.js'
 import { XMarkIcon } from './icons.js'
+import { MessageToPopup } from '../../types/interceptor-messages.js'
+import { getRpcList } from '../../background/storageVariables.js'
+
+export function useRpcConnectionsList() {
+	const entries = useSignal<RpcEntries>([])
+
+	const trackRpcListChanges = (message: unknown) => {
+		const parsedMessage = MessageToPopup.safeParse(message)
+		if (parsedMessage.success === false) return
+		if (parsedMessage.value.method === 'popup_update_rpc_list') { entries.value = parsedMessage.value.data }
+	}
+
+	const initiallyLoadEntriesFromStorage = async () => { entries.value = await getRpcList() }
+
+	useEffect(() => {
+		initiallyLoadEntriesFromStorage()
+		browser.runtime.onMessage.addListener(trackRpcListChanges)
+		return () => browser.runtime.onMessage.removeListener(trackRpcListChanges)
+	}, [])
+
+	return entries
+}
 
 type ConfigureRpcContext = {
 	queryRpcInfo: (url: string) => void
@@ -72,13 +93,13 @@ const RpcQueryProvider = ({ children }: { children: ComponentChildren }) => {
 
 			const parsedResult = EthSimulateV1Result.safeParse(serializedResult)
 
-			if (!resultContainsLog(parsedResult)) throw new Error(`The RPC server does not have a support for eth_simulateV1 (it doesn't return ETH logs). The Interceptor requires this feature to function.`)
+			if (!resultContainsLog(parsedResult)) throw new Error(`The RPC server does not have a support for eth_simulateV1 (it doesn't return ETH logs). PhisGuard requires this feature to function.`)
 		} catch (error) {
 			let errorMessage = 'RPC eth_simulateV1 validation error'
 			console.warn(errorMessage, error)
 			if (error instanceof Error) errorMessage = `${ errorMessage } (${ error.message })`
 			if (error instanceof JsonRpcResponseError) errorMessage = error.message
-			throw new Error('The RPC server does not have a support for eth_simulateV1. The Interceptor requires this feature to function.')
+			throw new Error('The RPC server does not have a support for eth_simulateV1. PhisGuard requires this feature to function.')
 		}
 	}
 

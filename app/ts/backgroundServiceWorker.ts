@@ -12,7 +12,7 @@ const setPopupFile = async () => {
 setPopupFile()
 
 self.addEventListener('install', () => {
-	console.info('The Interceptor installed')
+	console.info('PhisGuard installed')
 })
 
 self.addEventListener('activate', () => clearTabStates())

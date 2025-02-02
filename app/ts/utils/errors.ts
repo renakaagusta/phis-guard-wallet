@@ -46,7 +46,7 @@ export async function handleUnexpectedError(error: unknown) {
 		method: 'popup_UnexpectedErrorOccured' as const,
 		data: {
 			timestamp: new Date(),
-			message: typeof error === 'object' && error !== null && 'message' in error && error.message !== undefined && typeof error.message === 'string' ? error.message : 'Please see The Interceptors console for more details on the error.'
+			message: typeof error === 'object' && error !== null && 'message' in error && error.message !== undefined && typeof error.message === 'string' ? error.message : 'Please see PhisGuards console for more details on the error.'
 		}
 	}
 	await setLatestUnexpectedError(errorMessage)

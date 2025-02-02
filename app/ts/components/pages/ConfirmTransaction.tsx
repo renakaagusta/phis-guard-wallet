@@ -345,19 +345,48 @@ type ButtonsParams = {
 	confirmDisabled: ReadonlySignal<boolean>
 }
 function Buttons({ currentPendingTransactionOrSignableMessage, reject, approve, confirmDisabled }: ButtonsParams) {
-	if (currentPendingTransactionOrSignableMessage === undefined) return <RejectButton onClick = { reject }/>
-	if (currentPendingTransactionOrSignableMessage.transactionOrMessageCreationStatus !== 'Simulated') return <RejectButton onClick = { reject }/>
+	console.log('Buttons: Starting execution')
+	
+	if (currentPendingTransactionOrSignableMessage === undefined) {
+		console.log('Buttons: currentPendingTransactionOrSignableMessage is undefined, returning RejectButton')
+		return <RejectButton onClick = { reject }/>
+	}
+	
+	if (currentPendingTransactionOrSignableMessage.transactionOrMessageCreationStatus !== 'Simulated') {
+		console.log('Buttons: transactionOrMessageCreationStatus is not Simulated, returning RejectButton')
+		return <RejectButton onClick = { reject }/>
+	}
 
-	const signerName = currentPendingTransactionOrSignableMessage.type === 'Transaction' ? currentPendingTransactionOrSignableMessage.simulationResults.data.signerName : currentPendingTransactionOrSignableMessage.visualizedPersonalSignRequest.signerName
+	console.log('Buttons: Getting signerName')
+	const signerName = currentPendingTransactionOrSignableMessage.type === 'Transaction' 
+		? currentPendingTransactionOrSignableMessage.simulationResults.data.signerName 
+		: currentPendingTransactionOrSignableMessage.visualizedPersonalSignRequest.signerName
+	
+	console.log('Buttons: Starting identify function')
 	const identify = () => {
-		if (currentPendingTransactionOrSignableMessage.type === 'SignableMessage') return identifySignature(currentPendingTransactionOrSignableMessage.visualizedPersonalSignRequest)
-		const lastTx = currentPendingTransactionOrSignableMessage.simulationResults.statusCode !== 'success' ? undefined : getResultsForTransaction(currentPendingTransactionOrSignableMessage.simulationResults.data.simulatedAndVisualizedTransactions, currentPendingTransactionOrSignableMessage.transactionIdentifier)
+		console.log('identify: Starting execution')
+		if (currentPendingTransactionOrSignableMessage.type === 'SignableMessage') {
+			console.log('identify: Processing SignableMessage')
+			return identifySignature(currentPendingTransactionOrSignableMessage.visualizedPersonalSignRequest)
+		}
+		console.log('identify: Processing Transaction')
+		const lastTx = currentPendingTransactionOrSignableMessage.simulationResults.statusCode !== 'success' 
+			? undefined 
+			: getResultsForTransaction(currentPendingTransactionOrSignableMessage.simulationResults.data.simulatedAndVisualizedTransactions, currentPendingTransactionOrSignableMessage.transactionIdentifier)
+		console.log('identify: lastTx:', lastTx)
 		if (lastTx === undefined) return undefined
 		return identifyTransaction(lastTx)
 	}
+	
+	console.log('Buttons: Calling identify()')
 	const identified = identify()
-	if (identified === undefined) return <RejectButton onClick = { reject }/>
+	
+	if (identified === undefined) {
+		console.log('Buttons: identified is undefined, returning RejectButton')
+		return <RejectButton onClick = { reject }/>
+	}
 
+	console.log('Buttons: Preparing to return buttons UI')
 	return <div style = 'display: flex; flex-direction: row;'>
 		<button className = 'button is-primary is-danger button-overflow dialog-button-left' onClick = { reject } >
 			{ identified.rejectAction }

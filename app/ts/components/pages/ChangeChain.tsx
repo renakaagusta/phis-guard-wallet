@@ -72,11 +72,11 @@ export function ChangeChain() {
 								<b> { chainChangeData.rpcNetwork.name } </b>
 							</p>
 							{ chainChangeData.rpcNetwork.httpsRpc === undefined && chainChangeData.simulationMode ?
-								<ErrorComponent text = { 'This chain is not supported by The Interceptor. If you want to use this chain anyway. Select Signing mode instead of Simulation mode and attempt to change the chain again. You will then be able to disable The Interceptor and send transactions without its protection.' }/>
+								<ErrorComponent text = { 'This chain is not supported by PhisGuard. If you want to use this chain anyway. Select Signing mode instead of Simulation mode and attempt to change the chain again. You will then be able to disable PhisGuard and send transactions without its protection.' }/>
 							: <></> }
 							{ chainChangeData.rpcNetwork.httpsRpc === undefined && !chainChangeData.simulationMode ?
 								<ErrorCheckBox
-									text = { 'This chain is not supported by The Interceptor. Would you like to disable The Interceptor and attempt to connect anyway?' }
+									text = { 'This chain is not supported by PhisGuard. Would you like to disable PhisGuard and attempt to connect anyway?' }
 									checked = { connectAnyway }
 									onInput = { setConnectAnyway }
 								/>
@@ -95,7 +95,7 @@ export function ChangeChain() {
 							disabled = { chainChangeData.rpcNetwork.httpsRpc === undefined && ( (!connectAnyway && !chainChangeData.simulationMode ) || chainChangeData.simulationMode ) }
 							style = 'flex-grow: 1; margin-left: 5px; margin-right: 5px;'
 							onClick = { approve }>
-							{ chainChangeData.rpcNetwork.httpsRpc !== undefined? 'Change chain' : 'Disable The Interceptor and change' }
+							{ chainChangeData.rpcNetwork.httpsRpc !== undefined? 'Change chain' : 'Disable PhisGuard and change' }
 						</button>
 					</div>
 				</div>

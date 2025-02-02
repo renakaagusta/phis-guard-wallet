@@ -1,5 +1,5 @@
 {
-	"name": "The Interceptor",
+	"name": "PhisGuard",
 	"description": "Understand Ethereum transactions before risking assets. Simulate actions and spot scams to avoid mistakes before signing anything.",
 	"version": "0.0.0",
 	"manifest_version": 3,
@@ -7,7 +7,7 @@
 		"default_icon": {
 			"128": "img/head-not-active.png"
 		},
-		"default_title": "The Interceptor"
+		"default_title": "PhisGuard"
 	},
 	"background": {
 		"service_worker": "./js/backgroundServiceWorker.js",

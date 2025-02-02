@@ -1,4 +1,4 @@
-import { ETHEREUM_COIN_ICON, MOCK_PRIVATE_KEYS_ADDRESS } from '../utils/constants.js'
+import { ETHEREUM_COIN_ICON } from '../utils/constants.js'
 import { ActiveAddress, ExportedSettings, Page } from '../types/exportedSettingsTypes.js'
 import { Settings } from '../types/interceptor-messages.js'
 import { Semaphore } from '../utils/semaphore.js'
@@ -14,21 +14,12 @@ export const defaultActiveAddresses: AddressBookEntries = [
 	{
 		type: 'contact' as const,
 		entrySource: 'User' as const,
-		name: 'vitalik.eth',
-		address: 0xd8da6bf26964af9d7eed9e03e53415d37aa96045n,
+		name: 'anvil',
+		address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266n,
 		askForAddressAccess: false,
 		useAsActiveAddress: true,
 		chainId: 'AllChains',
 	},
-	{
-		type: 'contact' as const,
-		entrySource: 'User' as const,
-		name: 'Public private key',
-		address: MOCK_PRIVATE_KEYS_ADDRESS,
-		askForAddressAccess: false,
-		useAsActiveAddress: true,
-		chainId: 'AllChains',
-	}
 ]
 
 export const networkPriceSources = {
@@ -41,6 +32,16 @@ export const networkPriceSources = {
 } as const
 
 export const defaultRpcs = [
+	{
+		name: 'Anvil',
+		chainId: 31337n,
+		httpsRpc: 'http://localhost:8545',
+		currencyName: 'Ether',
+		currencyTicker: 'ETH',
+		currencyLogoUri: ETHEREUM_COIN_ICON,
+		primary: true,
+		minimized: true,
+	},
 	{
 		name: 'Ethereum Mainnet',
 		chainId: 1n,

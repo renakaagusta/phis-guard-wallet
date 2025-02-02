@@ -1,9 +1,9 @@
 <img src = "app/img/LOGOA_400x400.png" alt = "The cutest dino" style = "width: 200px;"/>
 
-# The Interceptor
-The Interceptor is a powerful tool for simulating transactions on EVM-based chains, including Ethereum Mainnet, Base, Optimism, Gnosis, and more. It offers clear, intuitive explanations for the transactions you initiate. The Interceptor can seamlessly complement your browser wallet, like MetaMask, or function as a standalone transaction simulation tool.
+# PhisGuard
+PhisGuard is a powerful tool for simulating transactions on EVM-based chains, including Ethereum Mainnet, Base, Optimism, Gnosis, and more. It offers clear, intuitive explanations for the transactions you initiate. PhisGuard can seamlessly complement your browser wallet, like MetaMask, or function as a standalone transaction simulation tool.
 
-With MetaMask integration, you can forward transactions for signing and send them effortlessly. What truly sets The Interceptor apart, however, is its Simulation Mode. This feature lets you simulate multiple transactions sequentially, providing a detailed preview of their outcomes-even enabling you to interact with DApps at no cost!
+With MetaMask integration, you can forward transactions for signing and send them effortlessly. What truly sets PhisGuard apart, however, is its Simulation Mode. This feature lets you simulate multiple transactions sequentially, providing a detailed preview of their outcomes-even enabling you to interact with DApps at no cost!
 
 Install for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/the-interceptor/) or [Chrome](https://www.dark.florist/google-chrome-install)
 
@@ -15,19 +15,19 @@ Install for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/the-interce
 - Rich mode, browse dapps with extra 200 000 ETH in your pocket!
 - Simulate your transactions before sending them to be sure on what they do
 - Avoid common token pitfalls such as sending tokens to tokens contract address
-- Rescue assets with The Interceptor and [Bouquet](https://bouquet.dark.florist/)
+- Rescue assets with PhisGuard and [Bouquet](https://bouquet.dark.florist/)
 - And more!
 
 <img src = "popup_view.png" alt = "The cutest dino" style = "width: 300px;"/>
 
 ## Privacy
-Your privacy is our priority. The Interceptor is purpose-built to minimize data leakage: no external queries are made without direct user input except for calls to the configured Ethereum RPC server. By default, it connects to Ethereum RPC nodes operated by [Dark Florist (us)](https://www.dark.florist/) which doesn't log requests, though you can configure it to connect to other RPC nodes if desired. Please note, The Interceptor requires RPC nodes that support the `eth_simulateV1` endpoint, currently available in Geth and Nethermind.
+Your privacy is our priority. PhisGuard is purpose-built to minimize data leakage: no external queries are made without direct user input except for calls to the configured Ethereum RPC server. By default, it connects to Ethereum RPC nodes operated by [Dark Florist (us)](https://www.dark.florist/) which doesn't log requests, though you can configure it to connect to other RPC nodes if desired. Please note, PhisGuard requires RPC nodes that support the `eth_simulateV1` endpoint, currently available in Geth and Nethermind.
 
-## Using The Interceptor on various EVM chains
+## Using PhisGuard on various EVM chains
 We are not currently operating nodes for Base, Optimism etc, in order to use these chains you will need to add your own RPC.
 
-## Good tools to use with The Interceptor
-The Interceptor requires websites to be decentralized and only use users' own wallet to access the network. The following tools are tested to work on The Interceptor:
+## Good tools to use with PhisGuard
+PhisGuard requires websites to be decentralized and only use users' own wallet to access the network. The following tools are tested to work on PhisGuard:
 - [Lunaria](https://lunaria.dark.florist/)
 - [NFT sender](https://nftsender.dark.florist/)
 - [Horswap 2](https://2.horswap.eth.limo/)

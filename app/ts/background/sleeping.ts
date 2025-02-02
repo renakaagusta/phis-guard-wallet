@@ -18,7 +18,7 @@ const updateConnectionStatusRetry = async (ethereumClientService: EthereumClient
 export const makeSureInterceptorIsNotSleeping = async (ethereumClientService: EthereumClientService) => {
 	setInterceptorStartSleepingTimestamp(Date.now() + TIME_BETWEEN_BLOCKS * 2 * 1000)
 	if (!ethereumClientService.isBlockPolling()) {
-		console.info('The Interceptor woke up! ⏰')
+		console.info('PhisGuard woke up! ⏰')
 		ethereumClientService.setBlockPolling(true)
 		await updateConnectionStatusRetry(ethereumClientService)
 	}
@@ -32,7 +32,7 @@ export const checkIfInterceptorShouldSleep = async (ethereumClientService: Ether
 	await checkConfirmTransaction(ethereumClientService)
 	const startSleping = await getInterceptorStartSleepingTimestamp()
 	if (startSleping < Date.now() && ethereumClientService.isBlockPolling()) {
-		console.info('The Interceptor started to sleep 😴')
+		console.info('PhisGuard started to sleep 😴')
 		ethereumClientService.setBlockPolling(false)
 		await updateConnectionStatusRetry(ethereumClientService)
 	}

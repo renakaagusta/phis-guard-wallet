@@ -92,7 +92,7 @@ export const METAMASK_ERROR_BLANKET_ERROR = -32603
 // const METAMASK_ERROR_METHOD_NOT_SUPPORTED = -32004
 // const METAMASK_ERROR_RATE_LIMITED = -32005
 
-export const ERROR_INTERCEPTOR_DISABLED = { error: { code: METAMASK_ERROR_USER_REJECTED_REQUEST, message: 'The Interceptor is disabled' } }
+export const ERROR_INTERCEPTOR_DISABLED = { error: { code: METAMASK_ERROR_USER_REJECTED_REQUEST, message: 'PhisGuard is disabled' } }
 export const METAMASK_ERROR_ALREADY_PENDING = { error: { code: -32002, message: 'Access request pending already.' } }
 export const ERROR_INTERCEPTOR_NO_ACTIVE_ADDRESS = { error: { code: 2, message: 'Interceptor: No active address' } }
 export const METAMASK_ERROR_NOT_CONNECTED_TO_CHAIN = { error: { code: 4900, message: 'Interceptor: Not connected to chain' } }
@@ -142,8 +142,8 @@ export const ICON_SIMULATING_WITH_SHIELD = '../img/head-simulating-shield.png' a
 export const ICON_SIGNING_WITH_SHIELD = '../img/head-signing-shield.png' as const
 export const ICON_SIGNING_NOT_SUPPORTED_WITH_SHIELD = '../img/head-signing-unsupported-network-shield.png' as const
 
-export const DEFAULT_TAB_CONNECTION = { icon: ICON_NOT_ACTIVE, iconReason: 'The website has not requested to connect to The Interceptor.' }
-// export const DEFAULT_TAB_CONNECTION_INTERCEPTOR_DISABLED = { icon: ICON_INTERCEPTOR_DISABLED, iconReason: 'The Interceptor is completely disabled by user request.' }
+export const DEFAULT_TAB_CONNECTION = { icon: ICON_NOT_ACTIVE, iconReason: 'The website has not requested to connect to PhisGuard.' }
+// export const DEFAULT_TAB_CONNECTION_INTERCEPTOR_DISABLED = { icon: ICON_INTERCEPTOR_DISABLED, iconReason: 'PhisGuard is completely disabled by user request.' }
 
 export const ETHEREUM_COIN_ICON = '../../img/coins/ethereum.png'
 
@@ -182,8 +182,8 @@ export const MAKE_YOU_RICH_TRANSACTION = {
 		accessList: [],
 	},
 	website: {
-		websiteOrigin: 'The Interceptor',
-		title: 'The Interceptor',
+		websiteOrigin: 'PhisGuard',
+		title: 'PhisGuard',
 		icon: undefined,
 	},
 	transactionSendingFormat: 'eth_sendTransaction' as const,

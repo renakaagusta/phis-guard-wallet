@@ -219,7 +219,7 @@ export function InterceptorAccessList(param: InterceptorAccessListParams) {
 								<div class = 'card-content'>
 									<div class = 'media'>
 										<div class = 'media-content' style = 'overflow-y: visible; overflow-x: unset;'>
-											<p className = 'paragraph'> No website is given access to The Interceptor </p>
+											<p className = 'paragraph'> No website is given access to PhisGuard </p>
 										</div>
 									</div>
 								</div>
