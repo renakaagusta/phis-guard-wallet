@@ -9,8 +9,6 @@ import { PopupOrTabId, Website, WebsiteAccessArray } from './websiteAccessTypes.
 import { SignerName } from './signerTypes.js'
 import { ICON_ACCESS_DENIED, ICON_ACCESS_DENIED_WITH_SHIELD, ICON_ACTIVE, ICON_ACTIVE_WITH_SHIELD, ICON_INTERCEPTOR_DISABLED, ICON_NOT_ACTIVE, ICON_NOT_ACTIVE_WITH_SHIELD, ICON_SIGNING, ICON_SIGNING_NOT_SUPPORTED, ICON_SIGNING_NOT_SUPPORTED_WITH_SHIELD, ICON_SIGNING_WITH_SHIELD, ICON_SIMULATING, ICON_SIMULATING_WITH_SHIELD } from '../utils/constants.js'
 import { CodeMessageError, RpcEntries, RpcEntry, RpcNetwork } from './rpc.js'
-import { TransactionOrMessageIdentifier } from './interceptor-messages.js'
-import { EditEnsNamedHashCallBack } from '../components/subcomponents/ens.js'
 import { EnrichedEthereumEventWithMetadata } from './EnrichedEthereumData.js'
 import { Signal } from '@preact/signals'
 
@@ -44,7 +42,6 @@ export type HomeParams = {
 	tabIconDetails: TabIconDetails,
 	currentBlockNumber: bigint | undefined,
 	renameAddressCallBack: RenameAddressCallBack,
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack,
 	rpcConnectionStatus: Signal<RpcConnectionStatus>,
 	rpcEntries: Signal<RpcEntries>
 	simulationUpdatingState: SimulationUpdatingState | undefined,
@@ -76,20 +73,6 @@ export type FirstCardParams = {
 	rpcEntries: Signal<RpcEntries>,
 }
 
-export type SimulationStateParam = {
-	simulationAndVisualisationResults: SimulationAndVisualisationResults | undefined
-	removeTransactionOrSignedMessage: (transactionOrMessageIdentifier: TransactionOrMessageIdentifier) => void
-	currentBlockNumber: bigint | undefined
-	renameAddressCallBack: RenameAddressCallBack
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
-	disableReset: boolean
-	resetSimulation: () => void
-	removedTransactionOrSignedMessages: readonly TransactionOrMessageIdentifier[]
-	rpcConnectionStatus: Signal<RpcConnectionStatus>
-	simulationUpdatingState: SimulationUpdatingState | undefined
-	simulationResultState: SimulationResultState | undefined
-}
-
 export type LogAnalysisParams = {
 	simulatedAndVisualizedTransaction: SimulatedAndVisualizedTransaction,
 	identifiedSwap: IdentifiedSwapWithMetadata,
@@ -100,7 +83,6 @@ export type NonLogAnalysisParams = {
 	nonTokenLogs: readonly EnrichedEthereumEventWithMetadata[]
 	addressMetaData: readonly AddressBookEntry[]
 	renameAddressCallBack: RenameAddressCallBack
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 }
 
 export type RenameAddressCallBack = (addressBookEntry: AddressBookEntry) => void

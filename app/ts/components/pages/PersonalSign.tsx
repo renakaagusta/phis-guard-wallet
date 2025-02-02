@@ -1,35 +1,30 @@
 import { useState } from 'preact/hooks'
-import { isHexEncodedNumber, stringToUint8Array } from '../../utils/bigint.js'
-import { RenameAddressCallBack } from '../../types/user-interface-types.js'
-import { MOCK_PRIVATE_KEYS_ADDRESS, getChainName } from '../../utils/constants.js'
-import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
-import { assertNever } from '../../utils/typescript.js'
-import { SimpleTokenApprovalVisualisation } from '../simulationExplaining/customExplainers/SimpleTokenApprovalVisualisation.js'
-import { SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
-import { SomeTimeAgo } from '../subcomponents/SomeTimeAgo.js'
-import { VisualizedPersonalSignRequest, VisualizedPersonalSignRequestPermit, VisualizedPersonalSignRequestPermit2, VisualizedPersonalSignRequestSafeTx } from '../../types/personal-message-definitions.js'
-import { OrderComponents, OrderComponentsExtraDetails } from '../simulationExplaining/customExplainers/OpenSeaOrder.js'
-import { Ether } from '../subcomponents/coins.js'
-import { humanReadableDateFromSeconds, CellElement } from '../ui-utils.js'
+import { PendingTransactionOrSignableMessage } from '../../types/accessRequest.js'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
 import { EnrichedEIP712, EnrichedEIP712Message, TypeEnrichedEIP712MessageRecord } from '../../types/eip721.js'
+import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
+import { VisualizedPersonalSignRequest, VisualizedPersonalSignRequestPermit, VisualizedPersonalSignRequestPermit2, VisualizedPersonalSignRequestSafeTx } from '../../types/personal-message-definitions.js'
+import { RenameAddressCallBack } from '../../types/user-interface-types.js'
+import { isHexEncodedNumber, stringToUint8Array } from '../../utils/bigint.js'
+import { MOCK_PRIVATE_KEYS_ADDRESS, getChainName } from '../../utils/constants.js'
+import { assertNever } from '../../utils/typescript.js'
 import { TransactionCreated } from '../simulationExplaining/SimulationSummary.js'
-import { EnrichedSolidityTypeComponent } from '../subcomponents/solidityType.js'
 import { QuarantineReasons } from '../simulationExplaining/Transactions.js'
-import { GnosisSafeVisualizer } from '../simulationExplaining/customExplainers/GnosisSafeVisualizer.js'
-import { EditEnsNamedHashCallBack } from '../subcomponents/ens.js'
-import { ViewSelector, ViewSelector as Viewer } from '../subcomponents/ViewSelector.js'
+import { SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
+import { Ether } from '../subcomponents/coins.js'
+import { ErrorComponent } from '../subcomponents/Error.js'
 import { ChevronIcon, XMarkIcon } from '../subcomponents/icons.js'
 import { TransactionInput } from '../subcomponents/ParsedInputData.js'
-import { ErrorComponent } from '../subcomponents/Error.js'
-import { PendingTransactionOrSignableMessage } from '../../types/accessRequest.js'
+import { EnrichedSolidityTypeComponent } from '../subcomponents/solidityType.js'
+import { SomeTimeAgo } from '../subcomponents/SomeTimeAgo.js'
+import { ViewSelector, ViewSelector as Viewer } from '../subcomponents/ViewSelector.js'
+import { CellElement, humanReadableDateFromSeconds } from '../ui-utils.js'
 
 type SignatureCardParams = {
 	visualizedPersonalSignRequest: VisualizedPersonalSignRequest
 	renameAddressCallBack: RenameAddressCallBack
 	removeTransactionOrSignedMessage: ((transactionOrMessageIdentifier: TransactionOrMessageIdentifier) => void) | undefined
 	numberOfUnderTransactions: number
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 }
 
 type SignatureHeaderParams = {
@@ -116,7 +111,6 @@ export function SignatureHeader(params: SignatureHeaderParams) {
 type SignRequestParams = {
 	visualizedPersonalSignRequest: VisualizedPersonalSignRequest
 	renameAddressCallBack: RenameAddressCallBack
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 }
 
 const decodeMessage = (message: string) => {
@@ -131,7 +125,7 @@ function isNinetyFivePercentNumbersOrASCII(input: string): boolean {
 	return validCount / input.length >= 0.95
 }
 
-function SignRequest({ visualizedPersonalSignRequest, renameAddressCallBack, editEnsNamedHashCallBack }: SignRequestParams) {
+function SignRequest({ visualizedPersonalSignRequest, renameAddressCallBack }: SignRequestParams) {
 	switch (visualizedPersonalSignRequest.type) {
 		case 'NotParsed': {
 			const decoded = decodeMessage(visualizedPersonalSignRequest.message)
@@ -152,57 +146,10 @@ function SignRequest({ visualizedPersonalSignRequest, renameAddressCallBack, edi
 				<Viewer.Triggers />
 			</Viewer>
 		}
-		case 'SafeTx': return <GnosisSafeVisualizer
-			gnosisSafeMessage = { visualizedPersonalSignRequest }
-			activeAddress = { visualizedPersonalSignRequest.activeAddress.address }
-			renameAddressCallBack = { renameAddressCallBack }
-			editEnsNamedHashCallBack = { editEnsNamedHashCallBack }
-		/>
 		case 'EIP712': {
 			return <ArbitraryEIP712 enrichedEIP712 = { visualizedPersonalSignRequest.message } renameAddressCallBack = { renameAddressCallBack } />
 		}
-		case 'OrderComponents': {
-			return <OrderComponents
-				openSeaOrderMessage = { visualizedPersonalSignRequest.message }
-				rpcNetwork = { visualizedPersonalSignRequest.rpcNetwork }
-				renameAddressCallBack = { renameAddressCallBack }
-			/>
-		}
-		case 'Permit': {
-			if (visualizedPersonalSignRequest.verifyingContract.type !== 'ERC20') return <ErrorComponent text = { 'Malformed Permit1 request. The tokentype is not ERC20' }/>
-			return <SimpleTokenApprovalVisualisation
-				approval = { {
-					type: 'ERC20',
-					from: visualizedPersonalSignRequest.account,
-					to: visualizedPersonalSignRequest.spender,
-					token: visualizedPersonalSignRequest.verifyingContract,
-					amount: visualizedPersonalSignRequest.message.message.value,
-					isApproval: true,
-					logObject: undefined,
-				} }
-				transactionGasses = { { gasSpent: 0n, realizedGasPrice: 0n } }
-				rpcNetwork = { visualizedPersonalSignRequest.rpcNetwork }
-				renameAddressCallBack = { renameAddressCallBack }
-			/>
-		}
-		case 'Permit2': {
-			if (visualizedPersonalSignRequest.token.type !== 'ERC20') return <ErrorComponent text = { 'Malformed Permit2 request. The tokentype is not ERC20' }/>
-			return <SimpleTokenApprovalVisualisation
-				approval = { {
-					type: 'ERC20',
-					token: visualizedPersonalSignRequest.token,
-					amount: visualizedPersonalSignRequest.message.message.details.amount,
-					from: visualizedPersonalSignRequest.account,
-					to: visualizedPersonalSignRequest.spender,
-					isApproval: true,
-					logObject: undefined,
-				} }
-				transactionGasses = { { gasSpent: 0n, realizedGasPrice: 0n } }
-				rpcNetwork = { visualizedPersonalSignRequest.rpcNetwork }
-				renameAddressCallBack = { renameAddressCallBack }
-			/>
-		}
-		default: assertNever(visualizedPersonalSignRequest)
+		default: return <></>
 	}
 }
 
@@ -369,7 +316,6 @@ function ExtraDetails({ visualizedPersonalSignRequest, renameAddressCallBack }: 
 						<span class = 'log-table' style = 'justify-content: center; column-gap: 5px; grid-template-columns: auto auto'>
 							{ visualizedPersonalSignRequest.type !== 'Permit2' ? <></> : <Permit2ExtraDetails permit2 = { visualizedPersonalSignRequest }/> }
 							{ visualizedPersonalSignRequest.type !== 'Permit' ? <></> : <PermitExtraDetails permit = { visualizedPersonalSignRequest }/> }
-							{ visualizedPersonalSignRequest.type !== 'OrderComponents' ? <></> : <OrderComponentsExtraDetails orderComponents = { visualizedPersonalSignRequest.message } renameAddressCallBack = { renameAddressCallBack }/> }
 						</span>
 						{ visualizedPersonalSignRequest.type !== 'SafeTx' ? <></> : <GnosisSafeExtraDetails visualizedPersonalSignRequestSafeTx = { visualizedPersonalSignRequest } renameAddressCallBack = { renameAddressCallBack }/> }
 					</div>

@@ -1,19 +1,17 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
 import { createEthereumSubscription, createNewFilter, getEthFilterChanges, getEthFilterLogs, removeEthereumSubscription } from '../simulation/services/EthereumSubscriptionService.js'
-import { getSimulatedBalance, getSimulatedBlock, getSimulatedBlockNumber, getSimulatedCode, getSimulatedLogs, getSimulatedStack, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas, getInputFieldFromDataOrInput, getSimulatedBlockByHash, getSimulatedFeeHistory, getSimulatedStackOld } from '../simulation/services/SimulationModeEthereumClientService.js'
-import { DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GET_CODE_FAILED } from '../utils/constants.js'
+import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedCode, getSimulatedFeeHistory, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
+import { Simulator } from '../simulation/simulator.js'
+import { SignMessageParams } from '../types/jsonRpc-signing-types.js'
+import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, EthNewFilter, EthSubscribeParams, EthUnSubscribeParams, FeeHistory, GetCode, GetFilterChanges, GetFilterLogs, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams, UninstallFilter } from '../types/JsonRpc-types.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { SimulationState } from '../types/visualizer-types.js'
-import { openChangeChainDialog } from './windows/changeChain.js'
-import { assertNever } from '../utils/typescript.js'
-import { InterceptedRequest, WebsiteSocket } from '../utils/requests.js'
-import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, EthNewFilter, EthGetLogsParams, EthSubscribeParams, EthUnSubscribeParams, FeeHistory, GetCode, GetFilterChanges, GetSimulationStack, GetTransactionCount, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams, UninstallFilter, GetFilterLogs, InterceptorError } from '../types/JsonRpc-types.js'
-import { Simulator } from '../simulation/simulator.js'
 import { Website } from '../types/websiteAccessTypes.js'
-import { SignMessageParams } from '../types/jsonRpc-signing-types.js'
-import { METAMASK_ERROR_BLANKET_ERROR } from '../utils/constants.js'
-import { openConfirmTransactionDialogForMessage, openConfirmTransactionDialogForTransaction } from './windows/confirmTransaction.js'
+import { DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GET_CODE_FAILED, METAMASK_ERROR_BLANKET_ERROR } from '../utils/constants.js'
 import { handleUnexpectedError } from '../utils/errors.js'
+import { InterceptedRequest, WebsiteSocket } from '../utils/requests.js'
+import { openChangeChainDialog } from './windows/changeChain.js'
+import { openConfirmTransactionDialogForMessage, openConfirmTransactionDialogForTransaction } from './windows/confirmTransaction.js'
 
 export async function getBlockByHash(ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined, request: EthBlockByHashParams) {
 	return { type: 'result' as const, method: request.method, result: await getSimulatedBlockByHash(ethereumClientService, undefined, simulationState, request.params[0], request.params[1]) }
@@ -141,26 +139,8 @@ export async function getCode(ethereumClientService: EthereumClientService, simu
 	return { type: 'result' as const, method: request.method, result: code.getCodeReturn }
 }
 
-export async function getPermissions() {
-	return { type: 'result' as const, method: 'wallet_getPermissions', params: [], result: [ { eth_accounts: {} } ] } as const
-}
-
 export async function getTransactionCount(ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined, request: GetTransactionCount) {
 	return { type: 'result' as const, method: request.method, result: await getSimulatedTransactionCount(ethereumClientService, undefined, simulationState, request.params[0], request.params[1]) }
-}
-
-export async function getSimulationStack(simulationState: SimulationState | undefined, request: GetSimulationStack) {
-	const version = request.params[0]
-	switch (version) {
-		case '2.0.0': return { type: 'result' as const, method: request.method, result: { version, payload: getSimulatedStack(simulationState) } as const }
-		case '1.0.0':
-		case '1.0.1': return { type: 'result' as const, method: request.method, result: { version, payload: getSimulatedStackOld(simulationState, version) } as const }
-		default: assertNever(version)
-	}
-}
-
-export async function getLogs(ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined, request: EthGetLogsParams) {
-	return { type: 'result' as const, method: request.method, result: await getSimulatedLogs(ethereumClientService, undefined, simulationState, request.params[0]) }
 }
 
 export async function web3ClientVersion(ethereumClientService: EthereumClientService) {

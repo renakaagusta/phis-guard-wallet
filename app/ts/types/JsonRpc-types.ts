@@ -385,7 +385,6 @@ export const EthereumJsonRpcRequest = funtypes.Union(
 	OldSignTypedDataParams,
 	SwitchEthereumChainParams,
 	RequestPermissions,
-	funtypes.ReadonlyObject({ method: funtypes.Literal('wallet_getPermissions') }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_accounts') }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_requestAccounts') }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_gasPrice') }),

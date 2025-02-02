@@ -2,14 +2,11 @@ import { JSX } from 'preact/jsx-runtime'
 import { EthereumBytes32 } from '../../types/wire-types.js'
 import { bytes32String } from '../../utils/bigint.js'
 
-export type EditEnsNamedHashCallBack = (type: 'nameHash' | 'labelHash', nameHash: EthereumBytes32, name: string | undefined) => void
-
 type NameHashComponentParams = {
 	readonly type: 'nameHash' | 'labelHash'
 	readonly nameHash: EthereumBytes32,
 	readonly name: string | undefined,
 	readonly style?: JSX.CSSProperties
-	readonly editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 	readonly addDotEth?: boolean
 }
 

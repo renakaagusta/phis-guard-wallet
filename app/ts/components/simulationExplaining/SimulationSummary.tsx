@@ -1,28 +1,27 @@
-import { Erc1155TokenBalanceChange, Erc721and1155OperatorChange, LogSummarizer, SummaryOutcome } from '../../simulation/services/LogSummarizer.js'
-import { RenameAddressCallBack, RpcConnectionStatus } from '../../types/user-interface-types.js'
-import { Erc721TokenApprovalChange, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, ERC20TokenApprovalChange, Erc20TokenBalanceChange, TransactionWithAddressBookEntries, NamedTokenId } from '../../types/visualizer-types.js'
-import { BigAddress, SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
-import { Ether, EtherAmount, EtherSymbol, TokenWithAmount, TokenAmount, TokenPrice, TokenSymbol, TokenOrEth } from '../subcomponents/coins.js'
-import { NonTokenLogAnalysis, TokenLogAnalysis } from './Transactions.js'
-import { SomeTimeAgo, humanReadableDateDeltaLessDetailed } from '../subcomponents/SomeTimeAgo.js'
-import { addressString, bytes32String, nanoString } from '../../utils/bigint.js'
-import { identifyTransaction } from './identifyTransaction.js'
-import { identifySwap } from './SwapTransactions.js'
+import { Signal } from '@preact/signals'
 import { useState } from 'preact/hooks'
-import { convertNumberToCharacterRepresentationIfSmallEnough, upperCaseFirstCharacter } from '../ui-utils.js'
-import { EthereumTimestamp } from '../../types/wire-types.js'
-import { RpcNetwork } from '../../types/rpc.js'
-import { AddressBookEntry, Erc1155Entry, Erc20TokenEntry, Erc721Entry } from '../../types/addressBookTypes.js'
-import { Website } from '../../types/websiteAccessTypes.js'
+import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { extractTokenEvents } from '../../background/metadataUtils.js'
-import { EditEnsNamedHashCallBack } from '../subcomponents/ens.js'
+import { Erc1155TokenBalanceChange, Erc721and1155OperatorChange, LogSummarizer, SummaryOutcome } from '../../simulation/services/LogSummarizer.js'
+import { AddressBookEntry, Erc1155Entry, Erc20TokenEntry, Erc721Entry } from '../../types/addressBookTypes.js'
 import { EnrichedEthereumInputData } from '../../types/EnrichedEthereumData.js'
+import { RpcNetwork } from '../../types/rpc.js'
+import { RenameAddressCallBack, RpcConnectionStatus } from '../../types/user-interface-types.js'
+import { ERC20TokenApprovalChange, Erc20TokenBalanceChange, Erc721TokenApprovalChange, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, TransactionWithAddressBookEntries } from '../../types/visualizer-types.js'
+import { Website } from '../../types/websiteAccessTypes.js'
+import { EthereumTimestamp } from '../../types/wire-types.js'
+import { addressString, bytes32String, nanoString } from '../../utils/bigint.js'
+import { useOptionalSignal } from '../../utils/OptionalSignal.js'
+import { BigAddress, SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
+import { IntegerInput } from '../subcomponents/AutosizingInput.js'
+import { Ether, EtherAmount, EtherSymbol, TokenAmount, TokenOrEth, TokenPrice, TokenSymbol, TokenWithAmount } from '../subcomponents/coins.js'
 import { ChevronIcon, XMarkIcon } from '../subcomponents/icons.js'
 import { TransactionInput } from '../subcomponents/ParsedInputData.js'
-import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
-import { IntegerInput } from '../subcomponents/AutosizingInput.js'
-import { useOptionalSignal } from '../../utils/OptionalSignal.js'
-import { Signal } from '@preact/signals'
+import { SomeTimeAgo, humanReadableDateDeltaLessDetailed } from '../subcomponents/SomeTimeAgo.js'
+import { convertNumberToCharacterRepresentationIfSmallEnough, upperCaseFirstCharacter } from '../ui-utils.js'
+import { identifyTransaction } from './identifyTransaction.js'
+import { identifySwap } from './SwapTransactions.js'
+import { NonTokenLogAnalysis, TokenLogAnalysis } from './Transactions.js'
 
 type Erc20BalanceChangeParams = {
 	erc20TokenBalanceChanges: Erc20TokenBalanceChange[]
@@ -447,11 +446,10 @@ export function TokenLogAnalysisCard({ simTx, renameAddressCallBack }: TokenLogA
 type NonTokenLogAnalysisCardParams = {
 	simTx: SimulatedAndVisualizedTransaction
 	renameAddressCallBack: RenameAddressCallBack
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 	addressMetaData: readonly AddressBookEntry[]
 }
 
-export function NonTokenLogAnalysisCard({ simTx, addressMetaData, renameAddressCallBack, editEnsNamedHashCallBack }: NonTokenLogAnalysisCardParams) {
+export function NonTokenLogAnalysisCard({ simTx, addressMetaData, renameAddressCallBack }: NonTokenLogAnalysisCardParams) {
 	const [showLogs, setShowLogs] = useState<boolean>(false)
 	if (simTx === undefined) return <></>
 	const nonTokenLogs = simTx.events.filter((event) => event.type !== 'TokenEvent')
@@ -468,7 +466,7 @@ export function NonTokenLogAnalysisCard({ simTx, addressMetaData, renameAddressC
 			{ !showLogs
 				? <></>
 				: <div class = 'card-content' style = 'border-bottom-left-radius: 0.25rem; border-bottom-right-radius: 0.25rem; border-left: 2px solid var(--card-bg-color); border-right: 2px solid var(--card-bg-color); border-bottom: 2px solid var(--card-bg-color);'>
-					<NonTokenLogAnalysis nonTokenLogs = { nonTokenLogs } addressMetaData = { addressMetaData } renameAddressCallBack = { renameAddressCallBack } editEnsNamedHashCallBack = { editEnsNamedHashCallBack }/>
+					<NonTokenLogAnalysis nonTokenLogs = { nonTokenLogs } addressMetaData = { addressMetaData } renameAddressCallBack = { renameAddressCallBack }/>
 				</div>
 			}
 		</div>

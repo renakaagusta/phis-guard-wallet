@@ -1,18 +1,17 @@
 
 import * as funtypes from 'funtypes'
-import { EthereumAddress, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSendableSignedTransaction, EthereumTimestamp, EthereumUnsignedTransaction, OptionalEthereumAddress } from './wire-types.js'
-import { RenameAddressCallBack } from './user-interface-types.js'
-import { EthNewFilter, EthSubscribeParams, OriginalSendRequestParameters, SendRawTransactionParams, SendTransactionParams } from './JsonRpc-types.js'
 import { InterceptedRequest, WebsiteSocket } from '../utils/requests.js'
-import { AddressBookEntry, Erc721Entry, Erc20TokenEntry, IncompleteAddressBookEntry } from './addressBookTypes.js'
-import { Website } from './websiteAccessTypes.js'
+import { AddressBookEntry, Erc20TokenEntry, Erc721Entry, IncompleteAddressBookEntry } from './addressBookTypes.js'
+import { EnrichedEthereumEvent, EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData } from './EnrichedEthereumData.js'
+import { EthSimulateV1CallResult } from './ethSimulate-types.js'
+import { TransactionOrMessageIdentifier } from './interceptor-messages.js'
+import { SignMessageParams } from './jsonRpc-signing-types.js'
+import { EthNewFilter, EthSubscribeParams, OriginalSendRequestParameters, SendRawTransactionParams, SendTransactionParams } from './JsonRpc-types.js'
 import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
 import { RpcNetwork } from './rpc.js'
-import { SignMessageParams } from './jsonRpc-signing-types.js'
-import { TransactionOrMessageIdentifier } from './interceptor-messages.js'
-import { EthSimulateV1CallResult } from './ethSimulate-types.js'
-import { EditEnsNamedHashCallBack } from '../components/subcomponents/ens.js'
-import { EnrichedEthereumEvent, EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData } from './EnrichedEthereumData.js'
+import { RenameAddressCallBack } from './user-interface-types.js'
+import { Website } from './websiteAccessTypes.js'
+import { EthereumAddress, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSendableSignedTransaction, EthereumTimestamp, EthereumUnsignedTransaction, OptionalEthereumAddress } from './wire-types.js'
 
 export type TokenBalancesAfter = funtypes.Static<typeof TokenBalancesAfter>
 export const TokenBalancesAfter = funtypes.ReadonlyArray(funtypes.ReadonlyObject({
@@ -199,7 +198,6 @@ export type TransactionVisualizationParameters = {
 	activeAddress: bigint
 	renameAddressCallBack: RenameAddressCallBack
 	addressMetaData: readonly AddressBookEntry[]
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 }
 
 export type Erc20TokenBalanceChange = Erc20TokenEntry & {

@@ -10,7 +10,7 @@ import { RpcEntries } from '../../types/rpc.js'
 import { RenameAddressCallBack, RpcConnectionStatus } from '../../types/user-interface-types.js'
 import { CompleteVisualizedSimulation, EditEnsNamedHashWindowState, ModifyAddressWindowState, SimulatedAndVisualizedTransaction } from '../../types/visualizer-types.js'
 import { Website } from '../../types/websiteAccessTypes.js'
-import { EthereumBytes32, serialize } from '../../types/wire-types.js'
+import { serialize } from '../../types/wire-types.js'
 import { addressString, checksummedAddress, stringifyJSONWithBigInts } from '../../utils/bigint.js'
 import { WebsiteSocket, checkAndThrowRuntimeLastError } from '../../utils/requests.js'
 import { getWebsiteWarningMessage } from '../../utils/websiteData.js'
@@ -22,12 +22,10 @@ import { ErrorCheckBox, ErrorComponent, UnexpectedError } from '../subcomponents
 import Hint from '../subcomponents/Hint.js'
 import { Spinner } from '../subcomponents/Spinner.js'
 import { WebsiteOriginText } from '../subcomponents/address.js'
-import { EditEnsNamedHashCallBack } from '../subcomponents/ens.js'
 import { Link } from '../subcomponents/link.js'
 import { SignerLogoText, SignersLogoName } from '../subcomponents/signers.js'
 import { tryFocusingTabOrWindow } from '../ui-utils.js'
 import { AddNewAddress } from './AddNewAddress.js'
-import { EditEnsLabelHash } from './EditEnsLabelHash.js'
 import { InvalidMessage, SignatureCard, SignatureHeader, identifySignature, isPossibleToSignMessage } from './PersonalSign.js'
 
 type UnderTransactionsParams = {
@@ -127,7 +125,6 @@ type TransactionCardParams = {
 	currentPendingTransaction: SimulatedPendingTransaction,
 	pendingTransactionsAndSignableMessages: readonly PendingTransactionOrSignableMessage[],
 	renameAddressCallBack: RenameAddressCallBack,
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack,
 	currentBlockNumber: bigint | undefined,
 	rpcConnectionStatus: Signal<RpcConnectionStatus>,
 	numberOfUnderTransactions: number,
@@ -402,13 +399,6 @@ export function ConfirmTransaction() {
 		}
 	}
 
-	function editEnsNamedHashCallBack(type: 'nameHash' | 'labelHash', nameHash: EthereumBytes32, name: string | undefined) {
-		modalState.value = {
-			page: 'editEns',
-			state: { type, nameHash, name }
-		}
-	}
-
 	async function clearUnexpectedError() {
 		unexpectedError.value = undefined
 		await sendPopupMessageToBackgroundPage({ method: 'popup_clearUnexpectedError' })
@@ -419,12 +409,6 @@ export function ConfirmTransaction() {
 			<main>
 				<Hint>
 					<div class={`modal ${modalState.value.page !== 'noModal' ? 'is-active' : ''}`}>
-						{modalState.value.page === 'editEns' ?
-							<EditEnsLabelHash
-								close={() => { modalState.value = { page: 'noModal' } }}
-								editEnsNamedHashWindowState={modalState.value.state}
-							/>
-							: <></>}
 						{modalState.value.page === 'modifyAddress' ?
 							<AddNewAddress
 								setActiveAddressAndInformAboutIt={undefined}
@@ -452,12 +436,6 @@ export function ConfirmTransaction() {
 		<main>
 			<Hint>
 				<div class={`modal ${modalState.value.page !== 'noModal' ? 'is-active' : ''}`}>
-					{modalState.value.page === 'editEns' ?
-						<EditEnsLabelHash
-							close={() => { modalState.value = { page: 'noModal' } }}
-							editEnsNamedHashWindowState={modalState.value.state}
-						/>
-						: <></>}
 					{modalState.value.page === 'modifyAddress' ?
 						<AddNewAddress
 							setActiveAddressAndInformAboutIt={undefined}
@@ -501,7 +479,6 @@ export function ConfirmTransaction() {
 									currentPendingTransaction={currentPendingTransactionOrSignableMessage.value}
 									pendingTransactionsAndSignableMessages={pendingTransactionsAndSignableMessages.value}
 									renameAddressCallBack={renameAddressCallBack}
-									editEnsNamedHashCallBack={editEnsNamedHashCallBack}
 									currentBlockNumber={currentBlockNumber.value}
 									rpcConnectionStatus={rpcConnectionStatus}
 									numberOfUnderTransactions={underTransactions.value.length}
@@ -512,7 +489,6 @@ export function ConfirmTransaction() {
 										renameAddressCallBack={renameAddressCallBack}
 										removeTransactionOrSignedMessage={undefined}
 										numberOfUnderTransactions={underTransactions.value.length}
-										editEnsNamedHashCallBack={editEnsNamedHashCallBack}
 									/>
 								</>}
 						</div>

@@ -10,13 +10,12 @@ import { VisualizedPersonalSignRequest } from '../types/personal-message-definit
 import { RpcEntries, RpcEntry, RpcNetwork } from '../types/rpc.js'
 import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-interface-types.js'
 import { EditEnsNamedHashWindowState, ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState, TokenPriceEstimate } from '../types/visualizer-types.js'
-import { EthereumAddress, EthereumBytes32 } from '../types/wire-types.js'
+import { EthereumAddress } from '../types/wire-types.js'
 import { checksummedAddress } from '../utils/bigint.js'
 import { DEFAULT_TAB_CONNECTION, METAMASK_ERROR_ALREADY_PENDING, METAMASK_ERROR_USER_REJECTED_REQUEST, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
 import { truncateAddr } from '../utils/ethereum.js'
 import { AddNewAddress } from './pages/AddNewAddress.js'
 import { ChangeActiveAddress } from './pages/ChangeActiveAddress.js'
-import { EditEnsLabelHash } from './pages/EditEnsLabelHash.js'
 import { Home } from './pages/Home.js'
 import { ErrorComponent, UnexpectedError } from './subcomponents/Error.js'
 import Hint from './subcomponents/Hint.js'
@@ -310,12 +309,6 @@ export function App() {
 		sendPopupMessageToBackgroundPage({ method: 'popup_changePage', data: newPage })
 	}
 
-	function editEnsNamedHashCallBack(type: 'nameHash' | 'labelHash', nameHash: EthereumBytes32, name: string | undefined) {
-		const newPage = { page: 'EditEnsNamedHash', state: { type, nameHash, name } } as const
-		appPage.value = newPage
-		sendPopupMessageToBackgroundPage({ method: 'popup_changePage', data: newPage })
-	}
-
 	async function openAddressBook() {
 		await sendPopupMessageToBackgroundPage({ method: 'popup_openAddressBook' })
 		return globalThis.close() // close extension popup, chrome closes it by default, but firefox does not
@@ -361,7 +354,6 @@ export function App() {
 							currentBlockNumber = { currentBlockNumber }
 							tabState = { tabState }
 							renameAddressCallBack = { renameAddressCallBack }
-							editEnsNamedHashCallBack = { editEnsNamedHashCallBack }
 							rpcConnectionStatus = { rpcConnectionStatus }
 							rpcEntries = { rpcEntries }
 							simulationUpdatingState = { simulationUpdatingState }
@@ -369,12 +361,6 @@ export function App() {
 						/>
 
 						<div class = { `modal ${ appPage.value.page !== 'Home' && appPage.value.page !== 'Unknown' ? 'is-active' : ''}` }>
-							{ appPage.value.page === 'EditEnsNamedHash' ?
-								<EditEnsLabelHash
-									close = { goHome }
-									editEnsNamedHashWindowState = { appPage.value.state }
-								/>
-							: <></> }
 							{ appPage.value.page === 'ChangeActiveAddress' ?
 								<ChangeActiveAddress
 									setActiveAddressAndInformAboutIt = { setActiveAddressAndInformAboutIt }

@@ -1,47 +1,47 @@
-import { InpageScriptRequest, PopupMessage, RPCReply, Settings, SimulateExecutionReplyData } from '../types/interceptor-messages.js'
+import { Interface, ethers } from 'ethers'
 import 'webextension-polyfill'
-import { Simulator, parseEvents, parseInputData, runProtectorsForTransaction } from '../simulation/simulator.js'
-import { getSimulationResults, getTabState, getTransactionStack, promoteRpcAsPrimary, setLatestUnexpectedError, updateSimulationResults, updateSimulationResultsWithCallBack, updateTransactionStack } from './storageVariables.js'
-import { changeSimulationMode, getSettings, getWethForChainId } from './settings.js'
-import { blockNumber, call, chainId, estimateGas, gasPrice, getAccounts, getBalance, getBlockByNumber, getCode, getLogs, getPermissions, getSimulationStack, getTransactionByHash, getTransactionCount, getTransactionReceipt, netVersion, personalSign, sendTransaction, subscribe, switchEthereumChain, unsubscribe, web3ClientVersion, getBlockByHash, feeHistory, installNewFilter, uninstallNewFilter, getFilterChanges, getFilterLogs, handleIterceptorError } from './simulationModeHanders.js'
-import { changeActiveAddress, changeMakeMeRich, changePage, confirmDialog, refreshSimulation, removeTransactionOrSignedMessage, requestAccountsFromSigner, refreshPopupConfirmTransactionSimulation, confirmRequestAccess, changeInterceptorAccess, changeChainDialog, popupChangeActiveRpc, enableSimulationMode, addOrModifyAddressBookEntry, getAddressBookData, removeAddressBookEntry, refreshHomeData, interceptorAccessChangeAddressOrRefresh, refreshPopupConfirmTransactionMetadata, changeSettings, importSettings, exportSettings, setNewRpcList, simulateGovernanceContractExecutionOnPass, openNewTab, settingsOpened, changeAddOrModifyAddressWindowState, popupfetchAbiAndNameFromBlockExplorer, openWebPage, disableInterceptor, requestNewHomeData, setEnsNameForHash, simulateGnosisSafeTransactionOnPass, retrieveWebsiteAccess, blockOrAllowExternalRequests, removeWebsiteAccess, allowOrPreventAddressAccessForWebsite, removeWebsiteAddressAccess, forceSetGasLimitForTransaction } from './popupMessageHandlers.js'
-import { CompleteVisualizedSimulation, SimulationState, VisualizedSimulatorState, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from '../types/visualizer-types.js'
-import { WebsiteTabConnections } from '../types/user-interface-types.js'
-import { askForSignerAccountsFromSignerIfNotAvailable, interceptorAccessMetadataRefresh, requestAccessFromUser, updateInterceptorAccessViewWithPendingRequests } from './windows/interceptorAccess.js'
-import { FourByteExplanations, METAMASK_ERROR_FAILED_TO_PARSE_REQUEST, METAMASK_ERROR_NOT_AUTHORIZED, METAMASK_ERROR_NOT_CONNECTED_TO_CHAIN, ERROR_INTERCEPTOR_DISABLED, NEW_BLOCK_ABORT, ETHEREUM_LOGS_LOGGER_ADDRESS } from '../utils/constants.js'
-import { sendActiveAccountChangeToApprovedWebsitePorts, sendMessageToApprovedWebsitePorts, updateWebsiteApprovalAccesses, verifyAccess } from './accessManagement.js'
-import { getActiveAddressEntry, getAddressBookEntriesForVisualiser, identifyAddress, nameTokenIds, retrieveEnsNodeAndLabelHashes } from './metadataUtils.js'
-import { getActiveAddress, sendPopupMessageToOpenWindows } from './backgroundUtils.js'
-import { DistributiveOmit, assertNever, assertUnreachable, modifyObject } from '../utils/typescript.js'
+import { formSimulatedAndVisualizedTransaction } from '../components/formVisualizerResults.js'
+import { simulateCompoundGovernanceExecution } from '../simulation/compoundGovernanceFaking.js'
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
 import { appendTransaction, calculateRealizedEffectiveGasPrice, copySimulationState, fixNonceErrorsIfNeeded, getAddressToMakeRich, getBaseFeeAdjustedTransactions, getNonceFixedSimulatedTransactions, getSimulatedCode, getTokenBalancesAfter, getWebsiteCreatedEthereumUnsignedTransactions, mockSignTransaction, setSimulationTransactionsAndSignedMessages, simulationGasLeft } from '../simulation/services/SimulationModeEthereumClientService.js'
-import { Semaphore } from '../utils/semaphore.js'
-import { JsonRpcResponseError, handleUnexpectedError, isFailedToFetchError, isNewBlockAbort, printError } from '../utils/errors.js'
-import { formSimulatedAndVisualizedTransaction } from '../components/formVisualizerResults.js'
-import { updateConfirmTransactionView } from './windows/confirmTransaction.js'
-import { updateChainChangeViewWithPendingRequest } from './windows/changeChain.js'
-import { craftPersonalSignPopupMessage } from './windows/personalSign.js'
-import { InterceptedRequest, UniqueRequestIdentifier, WebsiteSocket } from '../utils/requests.js'
-import { replyToInterceptedRequest } from './messageSending.js'
+import { TokenPriceService } from '../simulation/services/priceEstimator.js'
+import { Simulator, parseEvents, parseInputData, runProtectorsForTransaction } from '../simulation/simulator.js'
+import { EnrichedEthereumEvents, EnrichedEthereumInputData } from '../types/EnrichedEthereumData.js'
 import { EthGetStorageAtParams, EthereumJsonRpcRequest, SendRawTransactionParams, SendTransactionParams, SupportedEthereumJsonRpcRequestMethods, WalletAddEthereumChain } from '../types/JsonRpc-types.js'
-import { AddressBookEntry, Erc20TokenEntry } from '../types/addressBookTypes.js'
-import { Website } from '../types/websiteAccessTypes.js'
 import { ConfirmTransactionTransactionSingleVisualization, PendingTransaction } from '../types/accessRequest.js'
+import { AddressBookEntry, Erc20TokenEntry } from '../types/addressBookTypes.js'
+import { InpageScriptRequest, PopupMessage, RPCReply, Settings, SimulateExecutionReplyData } from '../types/interceptor-messages.js'
+import { VisualizedPersonalSignRequestSafeTx } from '../types/personal-message-definitions.js'
 import { RpcNetwork } from '../types/rpc.js'
+import { WebsiteTabConnections } from '../types/user-interface-types.js'
+import { CompleteVisualizedSimulation, SimulationState, VisualizedSimulatorState, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from '../types/visualizer-types.js'
+import { Website } from '../types/websiteAccessTypes.js'
 import { serialize } from '../types/wire-types.js'
-import { get4Byte, get4ByteString } from '../utils/calldata.js'
-import { simulateCompoundGovernanceExecution } from '../simulation/compoundGovernanceFaking.js'
-import { Interface, ethers } from 'ethers'
 import { CompoundGovernanceAbi } from '../utils/abi.js'
 import { addressString, dataStringWith0xStart, stringToUint8Array } from '../utils/bigint.js'
-import { connectedToSigner, ethAccountsReply, signerChainChanged, signerReply, walletSwitchEthereumChainReply } from './providerMessageHandlers.js'
-import { makeSureInterceptorIsNotSleeping } from './sleeping.js'
+import { get4Byte, get4ByteString } from '../utils/calldata.js'
+import { ERROR_INTERCEPTOR_DISABLED, ETHEREUM_LOGS_LOGGER_ADDRESS, FourByteExplanations, METAMASK_ERROR_FAILED_TO_PARSE_REQUEST, METAMASK_ERROR_NOT_AUTHORIZED, METAMASK_ERROR_NOT_CONNECTED_TO_CHAIN, NEW_BLOCK_ABORT } from '../utils/constants.js'
 import { decodeEthereumError } from '../utils/errorDecoding.js'
-import { EnrichedEthereumEvents, EnrichedEthereumInputData } from '../types/EnrichedEthereumData.js'
-import { VisualizedPersonalSignRequestSafeTx } from '../types/personal-message-definitions.js'
-import { TokenPriceService } from '../simulation/services/priceEstimator.js'
-import { areEqualArrays } from '../utils/typed-arrays.js'
+import { JsonRpcResponseError, handleUnexpectedError, isFailedToFetchError, isNewBlockAbort, printError } from '../utils/errors.js'
 import { getGnosisSafeProxyProxy } from '../utils/ethereumByteCodes.js'
+import { InterceptedRequest, UniqueRequestIdentifier, WebsiteSocket } from '../utils/requests.js'
+import { Semaphore } from '../utils/semaphore.js'
+import { areEqualArrays } from '../utils/typed-arrays.js'
+import { DistributiveOmit, assertNever, assertUnreachable, modifyObject } from '../utils/typescript.js'
+import { sendActiveAccountChangeToApprovedWebsitePorts, sendMessageToApprovedWebsitePorts, updateWebsiteApprovalAccesses, verifyAccess } from './accessManagement.js'
+import { getActiveAddress, sendPopupMessageToOpenWindows } from './backgroundUtils.js'
+import { replyToInterceptedRequest } from './messageSending.js'
+import { getActiveAddressEntry, getAddressBookEntriesForVisualiser, identifyAddress, nameTokenIds, retrieveEnsNodeAndLabelHashes } from './metadataUtils.js'
+import { addOrModifyAddressBookEntry, allowOrPreventAddressAccessForWebsite, blockOrAllowExternalRequests, changeActiveAddress, changeAddOrModifyAddressWindowState, changeChainDialog, changeInterceptorAccess, changeMakeMeRich, changePage, changeSettings, confirmDialog, confirmRequestAccess, disableInterceptor, enableSimulationMode, exportSettings, forceSetGasLimitForTransaction, getAddressBookData, importSettings, interceptorAccessChangeAddressOrRefresh, openNewTab, openWebPage, popupChangeActiveRpc, popupfetchAbiAndNameFromBlockExplorer, refreshHomeData, refreshPopupConfirmTransactionMetadata, refreshPopupConfirmTransactionSimulation, refreshSimulation, removeAddressBookEntry, removeTransactionOrSignedMessage, removeWebsiteAccess, removeWebsiteAddressAccess, requestAccountsFromSigner, requestNewHomeData, retrieveWebsiteAccess, setEnsNameForHash, setNewRpcList, settingsOpened, simulateGnosisSafeTransactionOnPass, simulateGovernanceContractExecutionOnPass } from './popupMessageHandlers.js'
+import { connectedToSigner, ethAccountsReply, signerChainChanged, signerReply, walletSwitchEthereumChainReply } from './providerMessageHandlers.js'
+import { changeSimulationMode, getSettings, getWethForChainId } from './settings.js'
+import { blockNumber, call, chainId, estimateGas, gasPrice, getAccounts, getBalance, getBlockByHash, getBlockByNumber, getCode, getTransactionByHash, getTransactionCount, getTransactionReceipt, handleIterceptorError, netVersion, personalSign, sendTransaction, subscribe, unsubscribe, web3ClientVersion } from './simulationModeHanders.js'
+import { makeSureInterceptorIsNotSleeping } from './sleeping.js'
+import { getSimulationResults, getTabState, getTransactionStack, promoteRpcAsPrimary, setLatestUnexpectedError, updateSimulationResults, updateSimulationResultsWithCallBack, updateTransactionStack } from './storageVariables.js'
+import { updateChainChangeViewWithPendingRequest } from './windows/changeChain.js'
+import { updateConfirmTransactionView } from './windows/confirmTransaction.js'
+import { askForSignerAccountsFromSignerIfNotAvailable, interceptorAccessMetadataRefresh, requestAccessFromUser, updateInterceptorAccessViewWithPendingRequests } from './windows/interceptorAccess.js'
+import { craftPersonalSignPopupMessage } from './windows/personalSign.js'
 
 async function updateMetadataForSimulation(
 	simulationState: SimulationState,
@@ -492,15 +492,10 @@ async function handleRPCRequest(
 		case 'eth_signTypedData_v2':
 		case 'eth_signTypedData_v3':
 		case 'eth_signTypedData_v4': return await personalSign(simulator, activeAddress, simulator.ethereum, parsedRequest, request, website, websiteTabConnections, !forwardToSigner)
-		case 'wallet_switchEthereumChain': return await switchEthereumChain(simulator, websiteTabConnections, simulator.ethereum, parsedRequest, request, settings.simulationMode, website)
-		case 'wallet_requestPermissions': return await getAccounts(activeAddress)
-		case 'wallet_getPermissions': return await getPermissions()
 		case 'eth_accounts': return await getAccounts(activeAddress)
 		case 'eth_requestAccounts': return await getAccounts(activeAddress)
 		case 'eth_gasPrice': return await gasPrice(simulator.ethereum)
 		case 'eth_getTransactionCount': return await getTransactionCount(simulator.ethereum, simulationState, parsedRequest)
-		case 'interceptor_getSimulationStack': return await getSimulationStack(simulationState, parsedRequest)
-		case 'eth_simulateV1': return { type: 'result', method: parsedRequest.method, error: { code: 10000, message: 'Cannot call eth_simulateV1 directly' } }
 		case 'wallet_addEthereumChain': {
 			if (forwardToSigner) return getForwardingMessage(parsedRequest)
 			return { type: 'result' as const, method: parsedRequest.method, error: { code: 10000, message: 'wallet_addEthereumChain not implemented' } }
@@ -509,7 +504,6 @@ async function handleRPCRequest(
 			if (forwardToSigner) return getForwardingMessage(parsedRequest)
 			return { type: 'result' as const, method: parsedRequest.method, error: { code: 10000, message: 'eth_getStorageAt not implemented' } }
 		}
-		case 'eth_getLogs': return await getLogs(simulator.ethereum, simulationState, parsedRequest)
 		case 'eth_sign': return { type: 'result' as const,method: parsedRequest.method, error: { code: 10000, message: 'eth_sign is deprecated' } }
 		case 'eth_sendRawTransaction':
 		case 'eth_sendTransaction': {
@@ -517,32 +511,8 @@ async function handleRPCRequest(
 			return await sendTransaction(simulator, activeAddress, parsedRequest, request, website, websiteTabConnections, !forwardToSigner)
 		}
 		case 'web3_clientVersion': return await web3ClientVersion(simulator.ethereum)
-		case 'eth_feeHistory': return await feeHistory(simulator.ethereum, parsedRequest)
-		case 'eth_newFilter': return await installNewFilter(socket, parsedRequest, simulator.ethereum, simulationState)
-		case 'eth_uninstallFilter': return await uninstallNewFilter(socket, parsedRequest)
-		case 'eth_getFilterChanges': return await getFilterChanges(parsedRequest, simulator.ethereum, simulationState)
-		case 'eth_getFilterLogs': return await getFilterLogs(parsedRequest, simulator.ethereum, simulationState)
 		case 'InterceptorError': return await handleIterceptorError(parsedRequest)
-		/*
-		Missing methods:
-		case 'eth_getProof': return
-		case 'eth_getBlockTransactionCountByNumber': return
-		case 'eth_getTransactionByBlockHashAndIndex': return
-		case 'eth_getTransactionByBlockNumberAndIndex': return
-		case 'eth_getBlockReceipts': return
-
-		case 'eth_newBlockFilter': return
-		case 'eth_newPendingTransactionFilter': return
-
-		case 'eth_protocolVersion': return
-		case 'eth_maxPriorityFeePerGas': return
-		case 'net_listening': return
-
-		case 'eth_getUncleByBlockHashAndIndex': return
-		case 'eth_getUncleByBlockNumberAndIndex': return
-		case 'eth_getUncleCountByBlockHash': return
-		case 'eth_getUncleCountByBlockNumber': return
-		*/
+		default: return { type: 'result' as const, method: parsedRequest.method, error: { code: 10000, message: 'Method not implemented' } }
 	}
 }
 

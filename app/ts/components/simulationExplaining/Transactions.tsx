@@ -1,30 +1,23 @@
-import { SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, TransactionVisualizationParameters } from '../../types/visualizer-types.js'
-import { SmallAddress } from '../subcomponents/address.js'
-import { TokenSymbol, TokenAmount, AllApproval } from '../subcomponents/coins.js'
-import { LogAnalysisParams, NonLogAnalysisParams, RenameAddressCallBack } from '../../types/user-interface-types.js'
-import { ErrorComponent } from '../subcomponents/Error.js'
-import { identifyRoutes, identifySwap, SwapVisualization } from './SwapTransactions.js'
-import { RawTransactionDetailsCard, GasFee, TokenLogAnalysisCard, TransactionCreated, TransactionHeader, NonTokenLogAnalysisCard, TransactionsAccountChangesCard } from './SimulationSummary.js'
-import { identifyTransaction } from './identifyTransaction.js'
-import { ApproveIcon, ArrowIcon } from '../subcomponents/icons.js'
-import { SimpleTokenTransferVisualisation } from './customExplainers/SimpleSendVisualisations.js'
-import { SimpleTokenApprovalVisualisation } from './customExplainers/SimpleTokenApprovalVisualisation.js'
-import { assertNever } from '../../utils/typescript.js'
-import { CatchAllVisualizer, tokenEventToTokenSymbolParams } from './customExplainers/CatchAllVisualizer.js'
+import { extractTokenEvents } from '../../background/metadataUtils.js'
+import { EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData, TokenVisualizerResultWithMetadata } from '../../types/EnrichedEthereumData.js'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
-import { SignatureCard } from '../pages/PersonalSign.js'
+import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
 import { VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
+import { RpcNetwork } from '../../types/rpc.js'
+import { LogAnalysisParams, NonLogAnalysisParams, RenameAddressCallBack } from '../../types/user-interface-types.js'
+import { SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, TransactionVisualizationParameters } from '../../types/visualizer-types.js'
 import { bytes32String, dataStringWith0xStart } from '../../utils/bigint.js'
-import { GovernanceVoteVisualizer } from './customExplainers/GovernanceVoteVisualizer.js'
+import { SignatureCard } from '../pages/PersonalSign.js'
+import { ErrorComponent } from '../subcomponents/Error.js'
+import { SmallAddress } from '../subcomponents/address.js'
+import { AllApproval, TokenAmount } from '../subcomponents/coins.js'
+import { EnsNamedHashComponent } from '../subcomponents/ens.js'
+import { ApproveIcon, ArrowIcon } from '../subcomponents/icons.js'
+import { insertBetweenElements } from '../subcomponents/misc.js'
 import { EnrichedSolidityTypeComponentWithAddressBook, StringElement } from '../subcomponents/solidityType.js'
 import { getAddressBookEntryOrAFiller } from '../ui-utils.js'
-import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
-import { RpcNetwork } from '../../types/rpc.js'
-import { ProxyTokenTransferVisualisation } from './customExplainers/ProxySendVisualisations.js'
-import { extractTokenEvents } from '../../background/metadataUtils.js'
-import { EditEnsNamedHashCallBack, EnsNamedHashComponent } from '../subcomponents/ens.js'
-import { insertBetweenElements } from '../subcomponents/misc.js'
-import { EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData, TokenVisualizerResultWithMetadata } from '../../types/EnrichedEthereumData.js'
+import { GasFee, NonTokenLogAnalysisCard, RawTransactionDetailsCard, TokenLogAnalysisCard, TransactionCreated, TransactionHeader, TransactionsAccountChangesCard } from './SimulationSummary.js'
+import { identifyRoutes } from './SwapTransactions.js'
 
 function isPositiveEvent(visResult: TokenVisualizerResultWithMetadata, ourAddressInReferenceFrame: bigint) {
 	if (visResult.type === 'ERC20') {
@@ -56,39 +49,13 @@ export type TransactionImportanceBlockParams = {
 	simTx: SimulatedAndVisualizedTransaction
 	activeAddress: bigint
 	renameAddressCallBack: RenameAddressCallBack
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 	addressMetadata: readonly AddressBookEntry[]
 	rpcNetwork: RpcNetwork
 }
 
 // showcases the most important things the transaction does
-export function TransactionImportanceBlock(param: TransactionImportanceBlockParams) {
-	if (param.simTx.statusCode === 'failure') return <ErrorComponent text = { `The transaction fails with an error '${ param.simTx.error.decodedErrorMessage }'` } containerStyle = { { margin: '0px' } } />
-	const transactionIdentification = identifyTransaction(param.simTx)
-	switch (transactionIdentification.type) {
-		case 'SimpleTokenTransfer': return <SimpleTokenTransferVisualisation simTx = { transactionIdentification.identifiedTransaction } renameAddressCallBack = { param.renameAddressCallBack }/>
-		case 'SimpleTokenApproval': {
-			const approval = transactionIdentification.identifiedTransaction.events[0]
-			if (approval === undefined || approval.type !== 'TokenEvent') throw new Error('approval was undefined')
-			return <SimpleTokenApprovalVisualisation
-				approval = { approval.logInformation }
-				transactionGasses = { transactionIdentification.identifiedTransaction }
-				rpcNetwork = { transactionIdentification.identifiedTransaction.transaction.rpcNetwork }
-				renameAddressCallBack = { param.renameAddressCallBack }
-			/>
-		}
-		case 'Swap': {
-			const identifiedSwap = identifySwap(param.simTx)
-			if (identifiedSwap === undefined) throw new Error('Not a swap!')
-			return <SwapVisualization identifiedSwap = { identifiedSwap } renameAddressCallBack = { param.renameAddressCallBack }/>
-		}
-		case 'ProxyTokenTransfer': return <ProxyTokenTransferVisualisation simTx = { transactionIdentification.identifiedTransaction } renameAddressCallBack = { param.renameAddressCallBack }/>
-		case 'ContractDeployment':
-		case 'ContractFallbackMethod':
-		case 'ArbitraryContractExecution': return <CatchAllVisualizer { ...param } />
-		case 'GovernanceVote': return <GovernanceVoteVisualizer { ...param } governanceVoteInputParameters = { transactionIdentification.governanceVoteInputParameters }/>
-		default: assertNever(transactionIdentification)
-	}
+export function TransactionImportanceBlock(_: TransactionImportanceBlockParams) {
+	return <></>
 }
 
 export function SenderReceiver({ from, to, renameAddressCallBack }: { from: AddressBookEntry, to: AddressBookEntry | undefined, renameAddressCallBack: (entry: AddressBookEntry) => void, }) {
@@ -152,7 +119,7 @@ export function Transaction(param: TransactionVisualizationParameters) {
 					namedTokenIds = { param.simulationAndVisualisationResults.namedTokenIds }
 				/>
 				<TokenLogAnalysisCard simTx = { param.simTx } renameAddressCallBack = { param.renameAddressCallBack } />
-				<NonTokenLogAnalysisCard simTx = { param.simTx } renameAddressCallBack = { param.renameAddressCallBack } addressMetaData = { param.addressMetaData } editEnsNamedHashCallBack = { param.editEnsNamedHashCallBack }/>
+				<NonTokenLogAnalysisCard simTx = { param.simTx } renameAddressCallBack = { param.renameAddressCallBack } addressMetaData = { param.addressMetaData }/>
 				<RawTransactionDetailsCard transaction = { param.simTx.transaction } transactionIdentifier = { param.simTx.transactionIdentifier } parsedInputData = { param.simTx.parsedInputData } renameAddressCallBack = { param.renameAddressCallBack } gasSpent = { param.simTx.gasSpent } addressMetaData = { param.simulationAndVisualisationResults.addressBookEntries } />
 				<SenderReceiver from = { param.simTx.transaction.from } to = { param.simTx.transaction.to } renameAddressCallBack = { param.renameAddressCallBack }/>
 
@@ -174,7 +141,6 @@ type TransactionsAndSignedMessagesParams = {
 	removeTransactionOrSignedMessage: (transactionOrMessageIdentifier: TransactionOrMessageIdentifier) => void
 	activeAddress: bigint
 	renameAddressCallBack: RenameAddressCallBack
-	editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 	removedTransactionOrSignedMessages: readonly TransactionOrMessageIdentifier[]
 	addressMetaData: readonly AddressBookEntry[]
 }
@@ -191,7 +157,6 @@ export function TransactionsAndSignedMessages(param: TransactionsAndSignedMessag
 						visualizedPersonalSignRequest = { simTx }
 						renameAddressCallBack = { param.renameAddressCallBack }
 						removeTransactionOrSignedMessage = { param.removeTransactionOrSignedMessage }
-						editEnsNamedHashCallBack = { param.editEnsNamedHashCallBack }
 						numberOfUnderTransactions = { 0 }
 					/>
 				</> : <>
@@ -202,7 +167,6 @@ export function TransactionsAndSignedMessages(param: TransactionsAndSignedMessag
 						activeAddress = { param.activeAddress }
 						renameAddressCallBack = { param.renameAddressCallBack }
 						addressMetaData = { param.addressMetaData }
-						editEnsNamedHashCallBack = { param.editEnsNamedHashCallBack }
 					/>
 				</> }
 			</li>
@@ -240,15 +204,6 @@ function TokenLogEvent(params: TokenLogEventParams ) {
 					: <></>
 				} </>
 			}
-		</div>
-		<div class = 'log-cell' style = 'padding-right: 0.2em'>
-			<TokenSymbol
-				{ ...tokenEventToTokenSymbolParams(params.tokenVisualizerResult) }
-				style = { style }
-				useFullTokenName = { false }
-				renameAddressCallBack = { params.renameAddressCallBack }
-				fontSize = 'normal'
-			/>
 		</div>
 		<div class = 'log-cell-flexless' style = 'margin: 2px;'>
 			<SmallAddress
@@ -298,7 +253,6 @@ type NonTokenLogEventParams = {
 	nonTokenLog: EnrichedEthereumEventWithMetadata
 	addressMetaData: readonly AddressBookEntry[]
 	renameAddressCallBack: RenameAddressCallBack
-	readonly editEnsNamedHashCallBack: EditEnsNamedHashCallBack
 }
 
 function NonTokenLogEvent(params: NonTokenLogEventParams) {
@@ -334,13 +288,13 @@ function NonTokenLogEvent(params: NonTokenLogEventParams) {
 				if (arg.paramName === 'node' && 'logInformation' in params.nonTokenLog && 'node' in params.nonTokenLog.logInformation) {
 					return <>
 						<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } =` }&nbsp;</p>
-						<EnsNamedHashComponent type = 'nameHash' nameHash = { params.nonTokenLog.logInformation.node.nameHash } name = { params.nonTokenLog.logInformation.node.name } editEnsNamedHashCallBack = { params.editEnsNamedHashCallBack }/>
+						<EnsNamedHashComponent type = 'nameHash' nameHash = { params.nonTokenLog.logInformation.node.nameHash } name = { params.nonTokenLog.logInformation.node.name }/>
 					</>
 				}
 				if ((arg.paramName === 'id' || arg.paramName === 'label') && 'logInformation' in params.nonTokenLog && 'labelHash' in params.nonTokenLog.logInformation) {
 					return <>
 						<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } =` }&nbsp;</p>
-						<EnsNamedHashComponent type = 'labelHash' nameHash = { params.nonTokenLog.logInformation.labelHash.labelHash } name = { params.nonTokenLog.logInformation.labelHash.label } editEnsNamedHashCallBack = { params.editEnsNamedHashCallBack }/>
+						<EnsNamedHashComponent type = 'labelHash' nameHash = { params.nonTokenLog.logInformation.labelHash.labelHash } name = { params.nonTokenLog.logInformation.labelHash.label } />
 					</>
 				}
 				if (arg.paramName === 'fuses' && 'logInformation' in params.nonTokenLog && 'fuses' in params.nonTokenLog.logInformation) {
@@ -363,7 +317,7 @@ function NonTokenLogEvent(params: NonTokenLogEventParams) {
 export function NonTokenLogAnalysis(param: NonLogAnalysisParams) {
 	if (param.nonTokenLogs.length === 0) return <p class = 'paragraph'> No non-token events </p>
 	return <span class = 'nontoken-log-table' style = 'justify-content: center; column-gap: 5px; row-gap: 5px;'>
-		{ param.nonTokenLogs.map((nonTokenLog) => <NonTokenLogEvent nonTokenLog = { nonTokenLog } addressMetaData = { param.addressMetaData } renameAddressCallBack = { param.renameAddressCallBack } editEnsNamedHashCallBack = { param.editEnsNamedHashCallBack }/> ) }
+		{ param.nonTokenLogs.map((nonTokenLog) => <NonTokenLogEvent nonTokenLog = { nonTokenLog } addressMetaData = { param.addressMetaData } renameAddressCallBack = { param.renameAddressCallBack } /> ) }
 	</span>
 }
 
