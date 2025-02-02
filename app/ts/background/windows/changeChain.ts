@@ -1,17 +1,17 @@
 import { PopupOrTab, addWindowTabListeners, closePopupOrTabById, getPopupOrTabById, openPopupOrTab, removeWindowTabListeners } from '../../components/ui-utils.js'
+import { Simulator } from '../../simulation/simulator.js'
+import { ChainChangeConfirmation, SignerChainChangeConfirmation } from '../../types/interceptor-messages.js'
+import { SwitchEthereumChainParams } from '../../types/JsonRpc-types.js'
+import { RpcNetwork } from '../../types/rpc.js'
+import { WebsiteTabConnections } from '../../types/user-interface-types.js'
+import { PopupOrTabId, Website } from '../../types/websiteAccessTypes.js'
 import { METAMASK_ERROR_USER_REJECTED_REQUEST } from '../../utils/constants.js'
 import { Future } from '../../utils/future.js'
-import { ChainChangeConfirmation, SignerChainChangeConfirmation } from '../../types/interceptor-messages.js'
-import { WebsiteTabConnections } from '../../types/user-interface-types.js'
-import { changeActiveRpc } from '../background.js'
-import { getHtmlFile, sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
-import { getChainChangeConfirmationPromise, getRpcNetworkForChain, setChainChangeConfirmationPromise } from '../storageVariables.js'
-import { RpcNetwork } from '../../types/rpc.js'
 import { InterceptedRequest, UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch } from '../../utils/requests.js'
+import { changeActiveRpc } from '../background.js'
+import { sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
 import { replyToInterceptedRequest } from '../messageSending.js'
-import { SwitchEthereumChainParams } from '../../types/JsonRpc-types.js'
-import { Simulator } from '../../simulation/simulator.js'
-import { PopupOrTabId, Website } from '../../types/websiteAccessTypes.js'
+import { getChainChangeConfirmationPromise, getRpcNetworkForChain, setChainChangeConfirmationPromise } from '../storageVariables.js'
 
 let pendForUserReply: Future<ChainChangeConfirmation> | undefined = undefined
 let pendForSignerReply: Future<SignerChainChangeConfirmation> | undefined = undefined
@@ -92,7 +92,7 @@ export const openChangeChainDialog = async (
 			await setChainChangeConfirmationPromise(undefined)
 		}
 		openedDialog = await openPopupOrTab({
-			url: getHtmlFile('changeChain'),
+			url: `/html/changeChainV3.html`,
 			type: 'popup',
 			height: 800,
 			width: 600,

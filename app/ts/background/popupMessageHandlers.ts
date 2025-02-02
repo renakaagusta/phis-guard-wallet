@@ -11,7 +11,7 @@ import { checkAndThrowRuntimeLastError, updateTabIfExists } from '../utils/reque
 import { assertNever, modifyObject } from '../utils/typescript.js'
 import { sendMessageToApprovedWebsitePorts, setInterceptorDisabledForWebsite, updateWebsiteApprovalAccesses } from './accessManagement.js'
 import { changeActiveAddressAndChainAndResetSimulation, changeActiveRpc } from './background.js'
-import { getHtmlFile, sendPopupMessageToOpenWindows } from './backgroundUtils.js'
+import { sendPopupMessageToOpenWindows } from './backgroundUtils.js'
 import { getMetadataForAddressBookData } from './medataSearch.js'
 import { getActiveAddresses, getAddressBookEntriesForVisualiser, identifyAddress } from './metadataUtils.js'
 import { getMakeMeRich, getPage, getSettings, setMetamaskCompatibilityMode, setPage, setUseSignersAddressAsActiveAddress, setUseTabsInsteadOfPopup, updateWebsiteAccess } from './settings.js'
@@ -258,7 +258,7 @@ export async function getAddressBookData(parsed: GetAddressBookData) {
 
 export const openNewTab = async (tabName: 'settingsView' | 'addressBook' | 'websiteAccess') => {
 	const openInNewTab = async () => {
-		const tab = await browser.tabs.create({ url: getHtmlFile(tabName) })
+		const tab = await browser.tabs.create({ url: `/html/${tabName}V3.html` })
 		if (tab.id !== undefined) await setIdsOfOpenedTabs({ [tabName]: tab.id })
 	}
 

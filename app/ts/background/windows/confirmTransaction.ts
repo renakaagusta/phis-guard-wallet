@@ -18,7 +18,7 @@ import { JsonRpcResponseError, handleUnexpectedError, printError } from '../../u
 import { InterceptedRequest, UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch, getUniqueRequestIdentifierString } from '../../utils/requests.js'
 import { Semaphore } from '../../utils/semaphore.js'
 import { modifyObject } from '../../utils/typescript.js'
-import { getHtmlFile, sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
+import { sendPopupMessageToOpenWindows } from '../backgroundUtils.js'
 import { replyToInterceptedRequest } from '../messageSending.js'
 import { getSettings } from '../settings.js'
 import { appendPendingTransactionOrMessage, clearPendingTransactions, getPendingTransactionsAndMessages, getSimulationResults, removePendingTransactionOrMessage, updatePendingTransactionOrMessage } from '../storageVariables.js'
@@ -232,7 +232,7 @@ const getPendingTransactionWindow = async (simulator: Simulator, websiteTabConne
 		if (alreadyOpenWindow) return alreadyOpenWindow
 		await resolveAllPendingTransactionsAndMessageAsNoResponse(pendingTransactions, simulator, websiteTabConnections)
 	}
-	return await openPopupOrTab({ url: getHtmlFile('confirmTransaction'), type: 'popup', height: 800, width: 600 })
+	return await openPopupOrTab({ url: '/html/confirmTransactionV3.html', type: 'popup', height: 800, width: 600 })
 }
 
 export async function openConfirmTransactionDialogForMessage(
