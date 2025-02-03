@@ -1,5 +1,5 @@
 import { extractTokenEvents } from '../../background/metadataUtils.js'
-import { EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData, TokenVisualizerResultWithMetadata } from '../../types/EnrichedEthereumData.js'
+import { EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData } from '../../types/EnrichedEthereumData.js'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
 import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
 import { VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
@@ -8,41 +8,11 @@ import { LogAnalysisParams, NonLogAnalysisParams, RenameAddressCallBack } from '
 import { SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, TransactionVisualizationParameters } from '../../types/visualizer-types.js'
 import { bytes32String, dataStringWith0xStart } from '../../utils/bigint.js'
 import { SignatureCard } from '../pages/PersonalSign.js'
-import { ErrorComponent } from '../subcomponents/Error.js'
 import { SmallAddress } from '../subcomponents/address.js'
-import { AllApproval, TokenAmount } from '../subcomponents/coins.js'
-import { EnsNamedHashComponent } from '../subcomponents/ens.js'
-import { ApproveIcon, ArrowIcon } from '../subcomponents/icons.js'
+import { ArrowIcon } from '../subcomponents/icons.js'
 import { insertBetweenElements } from '../subcomponents/misc.js'
 import { EnrichedSolidityTypeComponentWithAddressBook, StringElement } from '../subcomponents/solidityType.js'
 import { getAddressBookEntryOrAFiller } from '../ui-utils.js'
-import { identifyRoutes } from './SwapTransactions.js'
-
-function isPositiveEvent(visResult: TokenVisualizerResultWithMetadata, ourAddressInReferenceFrame: bigint) {
-	if (visResult.type === 'ERC20') {
-		if (!visResult.isApproval) {
-			return visResult.amount >= 0 // simple transfer
-		}
-		return visResult.amount === 0n // zero is only positive approve event
-	}
-
-	// nfts
-	if (visResult.type === 'NFT All approval') { // all approval is only positive if someone all approves us, or all approval is removed from us
-		return (visResult.allApprovalAdded && visResult.to.address === ourAddressInReferenceFrame) || (!visResult.allApprovalAdded && visResult.from.address === ourAddressInReferenceFrame)
-	}
-
-	if (visResult.isApproval) {
-		return visResult.to.address === ourAddressInReferenceFrame // approval is only positive if we are getting approved
-	}
-
-	return visResult.to.address === ourAddressInReferenceFrame // send is positive if we are receiving
-}
-
-export function QuarantineReasons({ quarantineReasons }: { quarantineReasons: readonly string[] }) {
-	return <> {
-		quarantineReasons.map((quarantineReason) => <ErrorComponent text = { quarantineReason } containerStyle = { { margin: '0px', 'margin-top': '10px', 'margin-bottom': '10px' } }/>)
-	} </>
-}
 
 export type TransactionImportanceBlockParams = {
 	simTx: SimulatedAndVisualizedTransaction
@@ -100,9 +70,7 @@ export function Transaction(param: TransactionVisualizationParameters) {
 			<div class = 'card-content' style = 'padding-bottom: 5px;'>
 				<div class = 'container'>
 					<TransactionImportanceBlock { ...param } rpcNetwork = { param.simulationAndVisualisationResults.rpcNetwork } addressMetadata = { param.addressMetaData }/>
-				</div>
-				<QuarantineReasons quarantineReasons = { param.simTx.quarantineReasons }/>
-				
+				</div>				
 				<SenderReceiver from = { param.simTx.transaction.from } to = { param.simTx.transaction.to } renameAddressCallBack = { param.renameAddressCallBack }/>
 			</div>
 		</div>
@@ -147,79 +115,11 @@ export function TransactionsAndSignedMessages(param: TransactionsAndSignedMessag
 	</ul>
 }
 
-type TokenLogEventParams = {
-	tokenVisualizerResult: TokenVisualizerResultWithMetadata
-	ourAddressInReferenceFrame: bigint,
-	renameAddressCallBack: RenameAddressCallBack,
-}
-
-function TokenLogEvent(params: TokenLogEventParams ) {
-	const style = { color: isPositiveEvent(params.tokenVisualizerResult, params.ourAddressInReferenceFrame) ? 'var(--dim-text-color)' : 'var(--negative-dim-color)' }
-
-	return <>
-		<div class = 'log-cell' style = 'justify-content: right;'>
-			{ params.tokenVisualizerResult.type === 'NFT All approval' ?
-				<AllApproval
-					{ ...params.tokenVisualizerResult }
-					style = { style }
-					fontSize = 'normal'
-				/>
-			: <> { 'amount' in params.tokenVisualizerResult && params.tokenVisualizerResult.amount >= (2n ** 96n - 1n ) && params.tokenVisualizerResult.isApproval ?
-					<p class = 'ellipsis' style = { `color: ${ style.color }` }><b>ALL</b></p>
-				:
-					'amount' in params.tokenVisualizerResult ?
-						<TokenAmount
-							amount = { params.tokenVisualizerResult.amount }
-							tokenEntry = { params.tokenVisualizerResult.token }
-							style = { style }
-							fontSize = 'normal'
-						/>
-					: <></>
-				} </>
-			}
-		</div>
-		<div class = 'log-cell-flexless' style = 'margin: 2px;'>
-			<SmallAddress
-				addressBookEntry = { params.tokenVisualizerResult.from }
-				textColor = { style.color }
-				renameAddressCallBack = { params.renameAddressCallBack }
-			/>
-		</div>
-		<div class = 'log-cell' style = 'padding-right: 0.2em; padding-left: 0.2em'>
-			{ params.tokenVisualizerResult.isApproval ? <ApproveIcon color = { style.color } /> : <ArrowIcon color = { style.color } /> }
-		</div>
-		<div class = 'log-cell-flexless' style = 'margin: 2px;'>
-			<SmallAddress
-				addressBookEntry = { params.tokenVisualizerResult.to }
-				textColor = { style.color }
-				renameAddressCallBack = { params.renameAddressCallBack }
-			/>
-		</div>
-	</>
-}
-
 export function TokenLogAnalysis(param: LogAnalysisParams) {
 	const tokenEvents = extractTokenEvents(param.simulatedAndVisualizedTransaction.events)
 
 	if (tokenEvents.length === 0) return <p class = 'paragraph'> No token events </p>
-	const routes = identifyRoutes(param.simulatedAndVisualizedTransaction, param.identifiedSwap)
-	return <span class = 'log-table' style = 'justify-content: center; column-gap: 5px;'> { routes ?
-		routes.map((tokenVisualizerResult) => (
-			<TokenLogEvent
-				tokenVisualizerResult = { tokenVisualizerResult }
-				ourAddressInReferenceFrame = { param.simulatedAndVisualizedTransaction.transaction.from.address }
-				renameAddressCallBack = { param.renameAddressCallBack }
-			/>
-		))
-	:
-		tokenEvents.map((tokenEvent) => (
-			<TokenLogEvent
-				tokenVisualizerResult = { tokenEvent }
-				ourAddressInReferenceFrame = { param.simulatedAndVisualizedTransaction.transaction.from.address }
-				renameAddressCallBack = { param.renameAddressCallBack }
-			/>
-		))
-	} </span>
+	return <span class = 'token-log-table' style = 'justify-content: center; column-gap: 5px; row-gap: 5px;'></span>
 }
 
 type NonTokenLogEventParams = {
@@ -258,18 +158,6 @@ function NonTokenLogEvent(params: NonTokenLogEventParams) {
 		<div class = 'log-cell' style = { { 'grid-column-start': 2, 'grid-column-end': 4, display: 'flex', 'flex-wrap': 'wrap' } }>
 			<p class = 'paragraph' style = { textStyle }> { `${ params.nonTokenLog.name }(` } </p>
 			{ insertBetweenElements(params.nonTokenLog.args.map((arg) => {
-				if (arg.paramName === 'node' && 'logInformation' in params.nonTokenLog && 'node' in params.nonTokenLog.logInformation) {
-					return <>
-						<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } =` }&nbsp;</p>
-						<EnsNamedHashComponent type = 'nameHash' nameHash = { params.nonTokenLog.logInformation.node.nameHash } name = { params.nonTokenLog.logInformation.node.name }/>
-					</>
-				}
-				if ((arg.paramName === 'id' || arg.paramName === 'label') && 'logInformation' in params.nonTokenLog && 'labelHash' in params.nonTokenLog.logInformation) {
-					return <>
-						<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } =` }&nbsp;</p>
-						<EnsNamedHashComponent type = 'labelHash' nameHash = { params.nonTokenLog.logInformation.labelHash.labelHash } name = { params.nonTokenLog.logInformation.labelHash.label } />
-					</>
-				}
 				if (arg.paramName === 'fuses' && 'logInformation' in params.nonTokenLog && 'fuses' in params.nonTokenLog.logInformation) {
 					return <>
 						<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } = [` }</p>

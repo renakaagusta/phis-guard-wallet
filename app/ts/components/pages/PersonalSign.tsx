@@ -8,7 +8,6 @@ import { RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { isHexEncodedNumber, stringToUint8Array } from '../../utils/bigint.js'
 import { MOCK_PRIVATE_KEYS_ADDRESS, getChainName } from '../../utils/constants.js'
 import { assertNever } from '../../utils/typescript.js'
-import { QuarantineReasons } from '../simulationExplaining/Transactions.js'
 import { SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
 import { Ether } from '../subcomponents/coins.js'
 import { ErrorComponent } from '../subcomponents/Error.js'
@@ -376,7 +375,6 @@ export function SignatureCard(params: SignatureCardParams) {
 			<div class = 'container'>
 				<SignRequest { ...params }/>
 			</div>
-			<QuarantineReasons quarantineReasons = { params.visualizedPersonalSignRequest.quarantineReasons }/>
 			<ExtraDetails { ...params }/>
 			{ params.visualizedPersonalSignRequest.type === 'NotParsed' ? <></> : <RawMessage { ...params }/> }
 

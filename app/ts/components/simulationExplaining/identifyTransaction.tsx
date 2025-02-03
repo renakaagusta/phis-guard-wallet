@@ -2,7 +2,6 @@ import { get4Byte, get4ByteString } from '../../utils/calldata.js'
 import { FourByteExplanations } from '../../utils/constants.js'
 import { assertNever, createGuard } from '../../utils/typescript.js'
 import { SimulatedAndVisualizedTransaction, SimulatedAndVisualizedTransactionBase, TransactionWithAddressBookEntries } from '../../types/visualizer-types.js'
-import { getSwapName, identifySwap } from './SwapTransactions.js'
 import * as funtypes from 'funtypes'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
 import { Interface } from 'ethers'
@@ -223,17 +222,6 @@ const getProxyTokenTransferOrUndefined = createGuard<SimulatedAndVisualizedTrans
 
 export function identifyTransaction(simTx: SimulatedAndVisualizedTransaction): IdentifiedTransaction {
 	const tokenResults = extractTokenEvents(simTx.events)
-	const identifiedSwap = identifySwap(simTx)
-	if (identifiedSwap) {
-		const swapname = getSwapName(identifiedSwap)
-		return {
-			type: 'Swap',
-			title: swapname === undefined ? 'Swap' : swapname,
-			signingAction: 'Swap',
-			simulationAction: 'Simulate Swap',
-			rejectAction: 'Reject Swap',
-		}
-	}
 
 	if (getSimpleTokenTransferOrUndefined(simTx)) {
 		const tokenResult = tokenResults[0]
