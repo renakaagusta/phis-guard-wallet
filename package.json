@@ -4,14 +4,11 @@
 	"type": "module",
 	"scripts": {
 		"test": "tsc --project tsconfig-test.json && node test/js/test/run-all.js",
-		"setup-firefox": "npm run vendor && npm run inpage && npm run build-firefox",
-		"setup-chrome": "npm run vendor && npm run inpage && npm run build-chrome",
-		"build-firefox": "tsc && npm run firefox",
-		"build-chrome": "tsc && npm run bundle && npm run chrome",
+		"setup": "npm run vendor && npm run inpage && npm run build",
+		"build": "tsc && npm run bundle && npm run manifest",
 		"vendor": "cd build && npm ci --ignore-scripts && npm run vendor",
 		"bundle": "cd build && npm run bundle",
-		"firefox": "node -e \"const fs = require('fs'); fs.copyFileSync('app/manifestV2.json', 'app/manifest.json');\"",
-		"chrome": "node -e \"const fs = require('fs'); fs.copyFileSync('app/manifestV3.json', 'app/manifest.json');\"",
+		"manifest": "node -e \"const fs = require('fs'); fs.copyFileSync('app/manifestV3.json', 'app/manifest.json');\"",
 		"inpage": "tsc --project tsconfig-inpage.json",
 		"cleanup": "npx knip@5.1.6 --fix",
 		"cleanup:dryrun": "npx knip@5.1.6",
@@ -28,7 +25,7 @@
 		"webextension-polyfill": "0.10.0"
 	},
 	"devDependencies": {
-		"@types/firefox-webext-browser": "120.0.3",
+		"@types/webextension-polyfill": "^0.12.1",
 		"typescript": "5.4.5"
 	}
 }
