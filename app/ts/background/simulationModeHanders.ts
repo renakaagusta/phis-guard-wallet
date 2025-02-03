@@ -1,9 +1,9 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { createEthereumSubscription, createNewFilter, getEthFilterChanges, getEthFilterLogs, removeEthereumSubscription } from '../simulation/services/EthereumSubscriptionService.js'
+import { createNewFilter, getEthFilterChanges, getEthFilterLogs, removeEthereumSubscription } from '../simulation/services/EthereumSubscriptionService.js'
 import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedCode, getSimulatedFeeHistory, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
 import { Simulator } from '../simulation/simulator.js'
 import { SignMessageParams } from '../types/jsonRpc-signing-types.js'
-import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, EthNewFilter, EthSubscribeParams, EthUnSubscribeParams, FeeHistory, GetCode, GetFilterChanges, GetFilterLogs, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams, UninstallFilter } from '../types/JsonRpc-types.js'
+import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, EthNewFilter, FeeHistory, GetCode, GetFilterChanges, GetFilterLogs, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams, UninstallFilter } from '../types/JsonRpc-types.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { SimulationState } from '../types/visualizer-types.js'
 import { Website } from '../types/websiteAccessTypes.js'
@@ -82,14 +82,6 @@ export async function estimateGas(ethereumClientService: EthereumClientService, 
 	const estimatedGas = await simulateEstimateGas(ethereumClientService, undefined, simulationState, request.params[0])
 	if ('error' in estimatedGas) return { type: 'result' as const, method: request.method, ...estimatedGas }
 	return { type: 'result' as const, method: request.method, result: estimatedGas.gas }
-}
-
-export async function subscribe(socket: WebsiteSocket, request: EthSubscribeParams) {
-	return { type: 'result' as const, method: request.method, result: await createEthereumSubscription(request, socket) }
-}
-
-export async function unsubscribe(socket: WebsiteSocket, request: EthUnSubscribeParams) {
-	return { type: 'result' as const, method: request.method, result: await removeEthereumSubscription(socket, request.params[0]) }
 }
 
 export async function getAccounts(activeAddress: bigint | undefined) {

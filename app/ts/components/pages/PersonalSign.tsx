@@ -9,7 +9,6 @@ import { isHexEncodedNumber, stringToUint8Array } from '../../utils/bigint.js'
 import { MOCK_PRIVATE_KEYS_ADDRESS, getChainName } from '../../utils/constants.js'
 import { assertNever } from '../../utils/typescript.js'
 import { SmallAddress, WebsiteOriginText } from '../subcomponents/address.js'
-import { Ether } from '../subcomponents/coins.js'
 import { ErrorComponent } from '../subcomponents/Error.js'
 import { ChevronIcon, XMarkIcon } from '../subcomponents/icons.js'
 import { TransactionInput } from '../subcomponents/ParsedInputData.js'
@@ -281,7 +280,6 @@ function GnosisSafeExtraDetails({ visualizedPersonalSignRequestSafeTx, renameAdd
 			<CellElement text = 'to: '/>
 			<CellElement text = { <SmallAddress addressBookEntry = { visualizedPersonalSignRequestSafeTx.to } renameAddressCallBack = { renameAddressCallBack } /> }/>
 			<CellElement text = 'value: '/>
-			<CellElement text = { <Ether amount = { visualizedPersonalSignRequestSafeTx.message.message.value } rpcNetwork = { visualizedPersonalSignRequestSafeTx.rpcNetwork } fontSize = 'normal'/>  }/>
 		</span>
 		<p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>Gnosis Safe meta transaction input: </p>
 		<TransactionInput parsedInputData = { visualizedPersonalSignRequestSafeTx.parsedMessageData } to = { visualizedPersonalSignRequestSafeTx.to } input = { visualizedPersonalSignRequestSafeTx.parsedMessageData.input } addressMetaData = { visualizedPersonalSignRequestSafeTx.parsedMessageDataAddressBookEntries } renameAddressCallBack = { renameAddressCallBack }/>
