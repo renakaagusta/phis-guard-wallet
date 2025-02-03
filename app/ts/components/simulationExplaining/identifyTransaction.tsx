@@ -1,18 +1,14 @@
-import { get4Byte, get4ByteString } from '../../utils/calldata.js'
-import { FourByteExplanations } from '../../utils/constants.js'
-import { assertNever, createGuard } from '../../utils/typescript.js'
-import { SimulatedAndVisualizedTransaction, SimulatedAndVisualizedTransactionBase, TransactionWithAddressBookEntries } from '../../types/visualizer-types.js'
 import * as funtypes from 'funtypes'
-import { AddressBookEntry } from '../../types/addressBookTypes.js'
-import { Interface } from 'ethers'
-import { CompoundGovernanceAbi } from '../../utils/abi.js'
-import { dataStringWith0xStart } from '../../utils/bigint.js'
-import { parseVoteInputParameters } from '../../simulation/compoundGovernanceFaking.js'
-import { GovernanceVoteInputParameters } from '../../types/interceptor-messages.js'
-import { UniqueRequestIdentifier } from '../../utils/requests.js'
-import { findDeadEnds } from '../../utils/findDeadEnds.js'
-import { EthereumAddress, EthereumQuantity } from '../../types/wire-types.js'
 import { extractTokenEvents } from '../../background/metadataUtils.js'
+import { AddressBookEntry } from '../../types/addressBookTypes.js'
+import { GovernanceVoteInputParameters } from '../../types/interceptor-messages.js'
+import { SimulatedAndVisualizedTransaction, SimulatedAndVisualizedTransactionBase, TransactionWithAddressBookEntries } from '../../types/visualizer-types.js'
+import { EthereumAddress, EthereumQuantity } from '../../types/wire-types.js'
+import { get4Byte } from '../../utils/calldata.js'
+import { FourByteExplanations } from '../../utils/constants.js'
+import { findDeadEnds } from '../../utils/findDeadEnds.js'
+import { UniqueRequestIdentifier } from '../../utils/requests.js'
+import { assertNever, createGuard } from '../../utils/typescript.js'
 import { removeDuplicates } from '../ui-utils.js'
 
 type IdentifiedTransactionBase = {
@@ -87,39 +83,6 @@ function identifySimpleApproval(simTx: SimulatedAndVisualizedTransaction) {
 		}
 	}
 	return undefined
-}
-
-function identifyGovernanceVote(simTx: SimulatedAndVisualizedTransaction) {
-	const fourByte = get4Byte(simTx.transaction.input)
-	if (fourByte === undefined) return undefined
-	const explanation = FourByteExplanations[fourByte]
-	if (explanation !== 'Cast Vote'
-		&& explanation !== 'Submit Vote'
-		&& explanation !== 'Cast Vote by Signature'
-		&& explanation !== 'Cast Vote with Reason'
-		&& explanation !== 'Cast Vote with Reason and Additional Info'
-		&& explanation !== 'Cast Vote with Reason And Additional Info by Signature'
-	) return undefined
-	const fourByteString = get4ByteString(simTx.transaction.input)
-	if (fourByteString === undefined) return undefined
-	const governanceContractInterface = new Interface(CompoundGovernanceAbi)
-	try {
-		const functionFragment = governanceContractInterface.getFunction(fourByteString)
-		if (functionFragment === null) return undefined
-		const functionData = governanceContractInterface.decodeFunctionData(functionFragment, dataStringWith0xStart(simTx.transaction.input))
-		return {
-			type: 'GovernanceVote' as const,
-			title: 'Governance Vote',
-			signingAction: 'Cast Vote',
-			simulationAction: 'Simulate Vote Casting',
-			rejectAction: `Don't Vote`,
-			governanceVoteInputParameters: parseVoteInputParameters(functionData),
-		}
-	} catch(e) {
-		console.warn('malformed vote cast')
-		console.warn(e)
-		return undefined
-	}
 }
 
 type SimulatedAndVisualizedSimpleApprovalTransaction = funtypes.Static<typeof SimulatedAndVisualizedSimpleApprovalTransaction>
@@ -287,9 +250,6 @@ export function identifyTransaction(simTx: SimulatedAndVisualizedTransaction): I
 
 	const simpleApproval = identifySimpleApproval(simTx)
 	if (simpleApproval !== undefined) return simpleApproval
-
-	const governanceVote = identifyGovernanceVote(simTx)
-	if (governanceVote !== undefined) return governanceVote
 
 	const fourByte = get4Byte(simTx.transaction.input)
 	if (fourByte === undefined) return {
