@@ -1,11 +1,8 @@
-import { Interface } from 'ethers'
-import { MULTICALL3, Multicall3ABI } from '../../utils/constants.js'
-import { EthereumClientService } from './EthereumClientService.js'
-import { TokenPriceEstimate } from '../../types/visualizer-types.js'
-import { calculatePricesFromUniswapLikeReturnData, calculateUniswapLikePools, constructUniswapLikeSpotCalls } from '../../utils/uniswap.js'
-import { addressString, stringToUint8Array } from '../../utils/bigint.js'
 import { Erc20TokenEntry } from '../../types/addressBookTypes.js'
+import { TokenPriceEstimate } from '../../types/visualizer-types.js'
+import { addressString } from '../../utils/bigint.js'
 import { getWithDefault } from '../../utils/typescript.js'
+import { EthereumClientService } from './EthereumClientService.js'
 
 interface TokenDecimals {
 	address: bigint,
@@ -16,15 +13,12 @@ interface CachedTokenPriceEstimate {
 	estimate: TokenPriceEstimate | undefined,
 	estimateCalculated: Date
 }
-const IMulticall3 = new Interface(Multicall3ABI)
 
 export class TokenPriceService {
 	private cachedPrices = new Map<string, Map<string, CachedTokenPriceEstimate> > // quoteTokenAddress -> tokenAddress -> TokenPriceEstimate
 	public cacheAge: number
-	private ethereumClientService: EthereumClientService
-	constructor(ethereumClientService: EthereumClientService, cacheAge: number) {
+	constructor(_: EthereumClientService, cacheAge: number) {
 		this.cacheAge = cacheAge
-		this.ethereumClientService = ethereumClientService
 	}
 
 	public cleanUpCacheIfNeeded() {
@@ -39,22 +33,12 @@ export class TokenPriceService {
 		})
 	}
 
-	private async getTokenPrice(requestAbortController: AbortController | undefined, token: TokenDecimals, quoteToken: Erc20TokenEntry) {
-		const poolAddresses = calculateUniswapLikePools(token.address, quoteToken.address)
-		if (!poolAddresses) return undefined
-
-		const uniswapSpotCalls = constructUniswapLikeSpotCalls(token.address, quoteToken.address, poolAddresses)
-
-		const callData = stringToUint8Array(IMulticall3.encodeFunctionData('aggregate3', [uniswapSpotCalls]))
-		const callTransaction = { type: '1559', to: MULTICALL3, value: 0n, input: callData, }
-		const multicallReturnData: { success: boolean, returnData: string }[] = IMulticall3.decodeFunctionResult('aggregate3', await this.ethereumClientService.call(callTransaction, 'latest', requestAbortController))[0]
-		const prices = calculatePricesFromUniswapLikeReturnData(multicallReturnData, poolAddresses)
-		if (prices.length === 0) return undefined
+	private async getTokenPrice(_: AbortController | undefined, token: TokenDecimals, quoteToken: Erc20TokenEntry) {
 		return {
 			token,
 			quoteToken,
 			// Use pool with most TVL
-			price: prices.reduce((highestLiq, p) => p.liquidity > highestLiq.liquidity ? p : highestLiq).price
+			price: 0n
 		}
 	}
 
