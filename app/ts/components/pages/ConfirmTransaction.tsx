@@ -13,7 +13,7 @@ import { NetworkErrors } from '../App.js'
 import { DinoSaysNotification } from '../subcomponents/DinoSays.js'
 import { ErrorCheckBox, ErrorComponent, UnexpectedError } from '../subcomponents/Error.js'
 import Hint from '../subcomponents/Hint.js'
-import { SignerLogoText, SignersLogoName } from '../subcomponents/signers.js'
+import { SignerLogoText } from '../subcomponents/signers.js'
 import { tryFocusingTabOrWindow } from '../ui-utils.js'
 import { AddNewAddress } from './AddNewAddress.js'
 import { InvalidMessage, isPossibleToSignMessage } from './PersonalSign.js'
@@ -123,7 +123,7 @@ function Buttons({ currentPendingTransactionOrSignableMessage, reject, approve }
 		</button>
 		<button className='button is-primary button-overflow dialog-button-right' onClick={approve}>
 			{currentPendingTransactionOrSignableMessage.approvalStatus.status === 'WaitingForSigner' ? <>
-				<span>Waiting for <SignersLogoName signerName={'NoSigner'} /> </span>
+				<span>Waiting for signer</span>
 			</> : <>
 				{<SignerLogoText signerName={'NoSigner'} text={"Approve"} />
 				}
@@ -269,7 +269,6 @@ export function ConfirmTransaction() {
 				errorState: undefined,
 				incompleteAddressBookEntry: {
 					addingAddress: false,
-					askForAddressAccess: true,
 					symbol: undefined,
 					decimals: undefined,
 					logoUri: undefined,

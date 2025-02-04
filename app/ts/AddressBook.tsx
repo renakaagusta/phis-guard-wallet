@@ -232,7 +232,6 @@ export function AddressBook() {
 				logoUri: undefined,
 				name: undefined,
 				address: undefined,
-				askForAddressAccess: true,
 				entrySource: 'FilledIn',
 				abi: undefined,
 				useAsActiveAddress: filter === 'My Active Addresses',
@@ -249,7 +248,6 @@ export function AddressBook() {
 			errorState: undefined,
 			incompleteAddressBookEntry: {
 				addingAddress: false,
-				askForAddressAccess: true,
 				symbol: undefined,
 				decimals: undefined,
 				logoUri: undefined,
@@ -284,7 +282,6 @@ export function AddressBook() {
 						</div>
 						<aside class = 'menu'>
 							<ul class = 'menu-list'>
-								<p class = 'paragraph' style = 'color: var(--disabled-text-color)'> My Addresses </p>
 								<ul>
 									<li> <FilterLink name = 'My Active Addresses' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
 									<li> <FilterLink name = 'My Contacts' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>

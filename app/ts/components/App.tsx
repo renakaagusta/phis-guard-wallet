@@ -213,7 +213,6 @@ export function App() {
 				type: 'contact',
 				name: `Pasted ${ truncateAddr(addressString) }`,
 				address: checksummedAddress(bigIntReprentation),
-				askForAddressAccess: true,
 				entrySource: 'FilledIn',
 				abi: undefined,
 				useAsActiveAddress: true,
@@ -231,7 +230,6 @@ export function App() {
 			errorState: undefined,
 			incompleteAddressBookEntry: {
 				addingAddress: false,
-				askForAddressAccess: true,
 				symbol: undefined,
 				decimals: undefined,
 				logoUri: undefined,
@@ -259,7 +257,6 @@ export function App() {
 				type: 'contact',
 				name: undefined,
 				address: undefined,
-				askForAddressAccess: true,
 				entrySource: 'FilledIn',
 				abi: undefined,
 				useAsActiveAddress: true,

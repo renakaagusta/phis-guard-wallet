@@ -22,7 +22,6 @@ export async function getActiveAddressEntry(address: bigint): Promise<AddressBoo
 		name: checksummedAddress(address),
 		useAsActiveAddress: true,
 		address: address,
-		askForAddressAccess: true,
 		entrySource: 'FilledIn'
 	}
 }

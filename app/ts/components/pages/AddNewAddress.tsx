@@ -81,7 +81,6 @@ type RenderinCompleteAddressBookParams = {
 	setName: (name: string) => void
 	setAddress: (address: string) => void
 	setSymbol: (symbol: string) => void
-	setAskForAddressAccess: (name: boolean) => void
 	setUseAsActiveAddress: (useAsActiveAddress: boolean) => void
 	setDeclarativeNetRequestBlockMode: (declarativeNetRequestBlockMode: DeclarativeNetRequestBlockMode) => void
 	setAbi: (abi: string) => void
@@ -94,7 +93,7 @@ const CellElement = (param: { element: ComponentChildren }) => {
 	</div>
 }
 
-function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setAskForAddressAccess, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
+function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
 	const Text = (param: { text: ComponentChildren }) => {
 		return <p class = 'paragraph' style = 'color: var(--subtitle-text-color); text-overflow: ellipsis; overflow: hidden; width: 100%'>
 			{ param.text }
@@ -125,10 +124,6 @@ function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEnt
 			<label class = 'form-control'>
 				<input type = 'checkbox' checked = { incompleteAddressBookEntry.value.useAsActiveAddress } onInput = { e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setUseAsActiveAddress(e.target.checked) } } } />
 				<p class = 'paragraph checkbox-text'>Use as active address</p>
-			</label>
-			<label class = 'form-control'>
-				<input type = 'checkbox' checked = { !incompleteAddressBookEntry.value.askForAddressAccess } onInput = { e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setAskForAddressAccess(!e.target.checked) } } } />
-				<p class = 'paragraph checkbox-text'>Don't request for an access when used as active address(insecure)</p>
 			</label>
 			<label class = 'form-control'>
 				<input type = 'checkbox' checked = { 'declarativeNetRequestBlockMode' in incompleteAddressBookEntry && incompleteAddressBookEntry.value.declarativeNetRequestBlockMode === 'block-all' } onInput = { e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setDeclarativeNetRequestBlockMode(e.target.checked ? 'block-all' : 'disabled') } } } />
@@ -176,7 +171,6 @@ export function AddNewAddress(param: AddAddressParam) {
 			address: inputedAddressBigInt,
 			declarativeNetRequestBlockMode: incompleteAddressBookEntry.declarativeNetRequestBlockMode,
 			useAsActiveAddress: incompleteAddressBookEntry.useAsActiveAddress,
-			askForAddressAccess: incompleteAddressBookEntry.askForAddressAccess,
 			chainId: incompleteAddressBookEntry.chainId,
 			entrySource: 'User' as const,
 		}
@@ -257,11 +251,6 @@ export function AddNewAddress(param: AddAddressParam) {
 		if (previous === undefined) return
 		modifyState(modifyObject(previous, { incompleteAddressBookEntry: modifyObject(previous.incompleteAddressBookEntry, { declarativeNetRequestBlockMode }) }))
 	}
-	const setAskForAddressAccess = async (askForAddressAccess: boolean) => {
-		const previous = param.modifyAddressWindowState.peek()
-		if (previous === undefined) return
-		modifyState(modifyObject(previous, { incompleteAddressBookEntry: modifyObject(previous.incompleteAddressBookEntry, { askForAddressAccess }) }))
-	}
 	function showOnChainVerificationErrorBox() {
 		if (param.modifyAddressWindowState.value === undefined) return false
 		const incompleteAddressBookEntry = param.modifyAddressWindowState.value.incompleteAddressBookEntry
@@ -316,7 +305,6 @@ export function AddNewAddress(param: AddAddressParam) {
 							rpcEntries = { param.rpcEntries }
 							setUseAsActiveAddress = { setUseAsActiveAddress }
 							setDeclarativeNetRequestBlockMode = { setDeclarativeNetRequestBlockMode }
-							setAskForAddressAccess = { setAskForAddressAccess }
 							canFetchFromEtherScan = { canFetchFromEtherScan }
 						/>
 					</div>

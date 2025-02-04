@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
-import { SignerName } from '../../types/signerTypes.js'
 import { FirstCardParams, HomeParams, TabIcon, TabIconDetails, TabState } from '../../types/user-interface-types.js'
 import { DEFAULT_TAB_CONNECTION, ICON_NOT_ACTIVE, ICON_NOT_ACTIVE_WITH_SHIELD } from '../../utils/constants.js'
 import { ActiveAddressComponent, getActiveAddressEntry } from '../subcomponents/address.js'
 import { RpcSelector } from '../subcomponents/ChainSelector.js'
 import { DinoSays } from '../subcomponents/DinoSays.js'
 import { ErrorComponent } from '../subcomponents/Error.js'
-import { getPrettySignerName, SignerLogoText, SignersLogoName } from '../subcomponents/signers.js'
+import { getPrettySignerName, SignerLogoText } from '../subcomponents/signers.js'
 
 type SignerExplanationParams = {
 	activeAddress: AddressBookEntry | undefined

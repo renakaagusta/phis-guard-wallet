@@ -28,7 +28,6 @@ export const ContactEntry = funtypes.ReadonlyObject({
 	logoUri: funtypes.String,
 	abi: funtypes.String,
 	useAsActiveAddress: funtypes.Boolean,
-	askForAddressAccess: funtypes.Union(funtypes.Boolean, funtypes.Literal(undefined).withParser(LiteralConverterParserFactory(undefined, true))),
 	declarativeNetRequestBlockMode: DeclarativeNetRequestBlockMode,
 	chainId: ChainIdWithUniversal,
 }))
@@ -50,7 +49,6 @@ export const IncompleteAddressBookEntry = funtypes.ReadonlyObject({
 	addingAddress: funtypes.Boolean, // if false, we are editing addess
 	type: funtypes.Union(funtypes.Literal('contact')),
 	address: funtypes.Union(funtypes.String, funtypes.Undefined),
-	askForAddressAccess: funtypes.Boolean,
 	name: funtypes.Union(funtypes.String, funtypes.Undefined),
 	symbol: funtypes.Union(funtypes.String, funtypes.Undefined),
 	decimals: funtypes.Union(EthereumQuantity, funtypes.Undefined),

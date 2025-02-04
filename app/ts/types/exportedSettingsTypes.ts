@@ -1,6 +1,6 @@
 import * as funtypes from 'funtypes'
 import { ModifyAddressWindowState } from './visualizer-types.js'
-import { EthereumAddress, LiteralConverterParserFactory } from './wire-types.js'
+import { EthereumAddress } from './wire-types.js'
 
 export type Page = funtypes.Static<typeof Page>
 export const Page = funtypes.Union(
@@ -16,5 +16,4 @@ export type ActiveAddress = funtypes.Static<typeof ActiveAddress>
 export const ActiveAddress = funtypes.ReadonlyObject({
 	name: funtypes.String,
 	address: EthereumAddress,
-	askForAddressAccess: funtypes.Union(funtypes.Boolean, funtypes.Literal(undefined).withParser(LiteralConverterParserFactory(undefined, true))),
 }).asReadonly()

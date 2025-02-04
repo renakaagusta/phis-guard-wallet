@@ -226,7 +226,6 @@ export function InterceptorAccess() {
 				errorState: undefined,
 				incompleteAddressBookEntry: {
 					addingAddress: false,
-					askForAddressAccess: true,
 					symbol: undefined,
 					decimals: undefined,
 					logoUri: undefined,
@@ -289,7 +288,6 @@ export function InterceptorAccess() {
 				incompleteAddressBookEntry: {
 					name: undefined,
 					addingAddress: false,
-					askForAddressAccess: true,
 					symbol: undefined,
 					decimals: undefined,
 					logoUri: undefined,
