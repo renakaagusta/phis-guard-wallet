@@ -6,7 +6,7 @@ import { EnrichedEthereumEvent, EnrichedEthereumEventWithMetadata, EnrichedEther
 import { EthSimulateV1CallResult } from './ethSimulate-types.js'
 import { TransactionOrMessageIdentifier } from './interceptor-messages.js'
 import { SignMessageParams } from './jsonRpc-signing-types.js'
-import { EthNewFilter, EthSubscribeParams, OriginalSendRequestParameters, SendRawTransactionParams, SendTransactionParams } from './JsonRpc-types.js'
+import { EthSubscribeParams, OriginalSendRequestParameters, SendRawTransactionParams, SendTransactionParams } from './JsonRpc-types.js'
 import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
 import { RpcNetwork } from './rpc.js'
 import { RenameAddressCallBack } from './user-interface-types.js'
@@ -258,17 +258,8 @@ const NewHeadsSubscription = funtypes.ReadonlyObject({
 	subscriptionCreatorSocket: WebsiteSocket,
 })
 
-type NewEthfilter = funtypes.Static<typeof NewEthfilter>
-const NewEthfilter = funtypes.ReadonlyObject({
-	type: funtypes.Literal('eth_newFilter'),
-	subscriptionOrFilterId: funtypes.String,
-	params: EthNewFilter,
-	subscriptionCreatorSocket: WebsiteSocket,
-	calledInlastBlock: EthereumQuantity,
-})
-
 export type EthereumSubscriptionsAndFilters = funtypes.Static<typeof EthereumSubscriptionsAndFilters>
-export const EthereumSubscriptionsAndFilters = funtypes.ReadonlyArray(funtypes.Union(NewEthfilter, NewHeadsSubscription))
+export const EthereumSubscriptionsAndFilters = funtypes.ReadonlyArray(funtypes.Union(NewHeadsSubscription))
 
 export type VisualizedSimulatorState = funtypes.Static<typeof VisualizedSimulatorState>
 export const VisualizedSimulatorState = funtypes.ReadonlyObject({

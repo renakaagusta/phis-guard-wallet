@@ -1,15 +1,14 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { createNewFilter, getEthFilterChanges, getEthFilterLogs, removeEthereumSubscription } from '../simulation/services/EthereumSubscriptionService.js'
 import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedCode, getSimulatedFeeHistory, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
 import { Simulator } from '../simulation/simulator.js'
 import { SignMessageParams } from '../types/jsonRpc-signing-types.js'
-import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, EthNewFilter, FeeHistory, GetCode, GetFilterChanges, GetFilterLogs, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams, UninstallFilter } from '../types/JsonRpc-types.js'
+import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, FeeHistory, GetCode, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams } from '../types/JsonRpc-types.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { SimulationState } from '../types/visualizer-types.js'
 import { Website } from '../types/websiteAccessTypes.js'
-import { DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GET_CODE_FAILED, METAMASK_ERROR_BLANKET_ERROR } from '../utils/constants.js'
+import { DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GET_CODE_FAILED } from '../utils/constants.js'
 import { handleUnexpectedError } from '../utils/errors.js'
-import { InterceptedRequest, WebsiteSocket } from '../utils/requests.js'
+import { InterceptedRequest } from '../utils/requests.js'
 import { openChangeChainDialog } from './windows/changeChain.js'
 import { openConfirmTransactionDialogForMessage, openConfirmTransactionDialogForTransaction } from './windows/confirmTransaction.js'
 
@@ -141,27 +140,6 @@ export async function web3ClientVersion(ethereumClientService: EthereumClientSer
 
 export async function feeHistory(ethereumClientService: EthereumClientService, request: FeeHistory) {
 	return { type: 'result' as const, method: 'eth_feeHistory' as const, result: await getSimulatedFeeHistory(ethereumClientService, undefined, request) }
-}
-
-export async function installNewFilter(socket: WebsiteSocket, request: EthNewFilter, ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined) {
-	return { type: 'result' as const, method: request.method, result: await createNewFilter(request, socket, ethereumClientService, undefined, simulationState) }
-}
-
-export async function uninstallNewFilter(socket: WebsiteSocket, request: UninstallFilter) {
-	return { type: 'result' as const, method: request.method, result: await removeEthereumSubscription(socket, request.params[0]) }
-}
-
-export async function getFilterChanges(request: GetFilterChanges, ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined) {
-	const result = await getEthFilterChanges(request.params[0], ethereumClientService, undefined, simulationState)
-	if (result === undefined) return { type: 'result' as const, method: request.method, error: { code: METAMASK_ERROR_BLANKET_ERROR, message: 'No filter found for identifier' } }
-
-	return { type: 'result' as const, method: request.method, result }
-}
-
-export async function getFilterLogs(request: GetFilterLogs, ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined) {
-	const result = await getEthFilterLogs(request.params[0], ethereumClientService, undefined, simulationState)
-	if (result === undefined) return { type: 'result' as const, method: request.method, error: { code: METAMASK_ERROR_BLANKET_ERROR, message: 'No filter found for identifier' } }
-	return { type: 'result' as const, method: request.method, result }
 }
 
 export async function handleIterceptorError(request: InterceptorError) {
