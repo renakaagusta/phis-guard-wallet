@@ -1,10 +1,9 @@
-import { extractTokenEvents } from '../../background/metadataUtils.js'
 import { EnrichedEthereumInputData } from '../../types/EnrichedEthereumData.js'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
 import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
 import { VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
 import { RpcNetwork } from '../../types/rpc.js'
-import { LogAnalysisParams, NonLogAnalysisParams, RenameAddressCallBack } from '../../types/user-interface-types.js'
+import { RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, TransactionVisualizationParameters } from '../../types/visualizer-types.js'
 import { dataStringWith0xStart } from '../../utils/bigint.js'
 import { SignatureCard } from '../pages/PersonalSign.js'
@@ -112,17 +111,6 @@ export function TransactionsAndSignedMessages(param: TransactionsAndSignedMessag
 			</li>
 		)) }
 	</ul>
-}
-
-export function TokenLogAnalysis(param: LogAnalysisParams) {
-	const tokenEvents = extractTokenEvents(param.simulatedAndVisualizedTransaction.events)
-
-	if (tokenEvents.length === 0) return <p class = 'paragraph'> No token events </p>
-	return <span class = 'token-log-table' style = 'justify-content: center; column-gap: 5px; row-gap: 5px;'></span>
-}
-
-export function NonTokenLogAnalysis(_: NonLogAnalysisParams) {
-	return <></>
 }
 
 type ParsedInputDataParams = {

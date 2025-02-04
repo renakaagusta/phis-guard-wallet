@@ -4,7 +4,6 @@ import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUti
 import { PendingTransactionOrSignableMessage } from '../../types/accessRequest.js'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
 import { MessageToPopup, UnexpectedErrorOccured, UpdateConfirmTransactionDialog } from '../../types/interceptor-messages.js'
-import { VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
 import { RpcEntries } from '../../types/rpc.js'
 import { RenameAddressCallBack, RpcConnectionStatus } from '../../types/user-interface-types.js'
 import { CompleteVisualizedSimulation, ModifyAddressWindowState, SimulatedAndVisualizedTransaction } from '../../types/visualizer-types.js'
@@ -13,7 +12,6 @@ import { addressString, checksummedAddress, stringifyJSONWithBigInts } from '../
 import { WebsiteSocket, checkAndThrowRuntimeLastError } from '../../utils/requests.js'
 import { getWebsiteWarningMessage } from '../../utils/websiteData.js'
 import { NetworkErrors } from '../App.js'
-import { identifyTransaction } from '../simulationExplaining/identifyTransaction.js'
 import { DinoSaysNotification } from '../subcomponents/DinoSays.js'
 import { ErrorCheckBox, ErrorComponent, UnexpectedError } from '../subcomponents/Error.js'
 import Hint from '../subcomponents/Hint.js'
@@ -22,60 +20,13 @@ import { Link } from '../subcomponents/link.js'
 import { SignerLogoText, SignersLogoName } from '../subcomponents/signers.js'
 import { tryFocusingTabOrWindow } from '../ui-utils.js'
 import { AddNewAddress } from './AddNewAddress.js'
-import { InvalidMessage, identifySignature, isPossibleToSignMessage } from './PersonalSign.js'
-
-type UnderTransactionsParams = {
-	pendingTransactionsAndSignableMessages: PendingTransactionOrSignableMessage[]
-}
+import { InvalidMessage, isPossibleToSignMessage } from './PersonalSign.js'
 
 const getResultsForTransaction = (results: readonly SimulatedAndVisualizedTransaction[], transactionIdentifier: bigint) => {
 	return results.find((result) => result.transactionIdentifier === transactionIdentifier)
 }
 
 const HALF_HEADER_HEIGHT = 48 / 2
-
-function UnderTransactions(_: UnderTransactionsParams) {
-	return <></>
-}
-
-type TransactionNamesParams = {
-	completeVisualizedSimulation: CompleteVisualizedSimulation | undefined
-	currentPendingTransaction: PendingTransactionOrSignableMessage
-}
-const TransactionNames = (param: TransactionNamesParams) => {
-	if (param.completeVisualizedSimulation === undefined || param.completeVisualizedSimulation.simulationResultState !== 'done') return <></>
-	const transactionsAndMessages: readonly (VisualizedPersonalSignRequest | SimulatedAndVisualizedTransaction)[] = [...param.completeVisualizedSimulation.visualizedPersonalSignRequests, ...param.completeVisualizedSimulation.simulatedAndVisualizedTransactions].sort((n1, n2) => n1.created.getTime() - n2.created.getTime())
-	const names = transactionsAndMessages.map((transactionOrMessage) => 'transaction' in transactionOrMessage ? identifyTransaction(transactionOrMessage).title : identifySignature(transactionOrMessage).title)
-	const makingRich = param.completeVisualizedSimulation.simulationState?.addressToMakeRich !== undefined
-	const titleOfCurrentPendingTransaction = () => {
-		const currentPendingTransactionOrSignableMessage = param.currentPendingTransaction
-		if (currentPendingTransactionOrSignableMessage === undefined) return 'Loading...'
-		if (currentPendingTransactionOrSignableMessage.transactionOrMessageCreationStatus !== 'Simulated') return currentPendingTransactionOrSignableMessage.transactionOrMessageCreationStatus
-		currentPendingTransactionOrSignableMessage.transactionOrMessageCreationStatus
-		if (currentPendingTransactionOrSignableMessage.type === 'SignableMessage') return identifySignature(currentPendingTransactionOrSignableMessage.visualizedPersonalSignRequest).title
-		if (currentPendingTransactionOrSignableMessage.simulationResults.statusCode === 'failed') return 'Failing transaction'
-		const lastTx = currentPendingTransactionOrSignableMessage.simulationResults.statusCode !== 'success' ? undefined : getResultsForTransaction(currentPendingTransactionOrSignableMessage.simulationResults.data.simulatedAndVisualizedTransactions, currentPendingTransactionOrSignableMessage.transactionIdentifier)
-		if (lastTx === undefined) return 'Could not find transaction...'
-		return identifyTransaction(lastTx).title
-	}
-
-	const namesWithCurrentTransaction = [...makingRich ? ['Simply making you rich'] : [], ...names, titleOfCurrentPendingTransaction()]
-	return <div class='block' style='margin-bottom: 10px;'>
-		<nav class='breadcrumb has-succeeds-separator is-small'>
-			<ul>
-				{namesWithCurrentTransaction.map((name, index) => (
-					<li style='margin: 0px;'>
-						<div class='card' style={`padding: 5px; margin: 5px; ${index !== namesWithCurrentTransaction.length - 1 ? 'background-color: var(--disabled-card-color)' : ''}`}>
-							<p class='paragraph' style={`margin: 0px; ${index !== namesWithCurrentTransaction.length - 1 ? 'color: var(--disabled-text-color)' : ''}`}>
-								{name}
-							</p>
-						</div>
-					</li>
-				))}
-			</ul>
-		</nav>
-	</div>
-}
 
 type TransactionCardParams = {
 	pendingTransactionsAndSignableMessages: readonly PendingTransactionOrSignableMessage[],
@@ -420,8 +371,6 @@ export function ConfirmTransaction() {
 								/>
 								: <></>
 							}
-							<TransactionNames completeVisualizedSimulation={completeVisualizedSimulation.value} currentPendingTransaction={currentPendingTransactionOrSignableMessage.value} />
-							<UnderTransactions pendingTransactionsAndSignableMessages={underTransactions.value} />
 							<div style={`top: ${underTransactions.value.length * -HALF_HEADER_HEIGHT}px`}></div>
 							{currentPendingTransactionOrSignableMessage.value.type === 'Transaction' ?
 								<TransactionCard

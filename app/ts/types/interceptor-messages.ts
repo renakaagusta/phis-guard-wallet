@@ -575,21 +575,6 @@ export const ChangeSettings = funtypes.ReadonlyObject({
 	})
 })
 
-export type ImportSettings = funtypes.Static<typeof ImportSettings>
-export const ImportSettings = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_import_settings'),
-	data: funtypes.ReadonlyObject({ fileContents: funtypes.String })
-})
-
-export type ImportSettingsReply = funtypes.Static<typeof ImportSettingsReply>
-export const ImportSettingsReply = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_initiate_export_settings_reply'),
-	data: funtypes.Union(
-		funtypes.ReadonlyObject({ success: funtypes.Literal(true) }),
-		funtypes.ReadonlyObject({ success: funtypes.Literal(false), errorMessage: funtypes.String })
-	)
-})
-
 export type SetRpcList = funtypes.Static<typeof SetRpcList>
 export const SetRpcList = funtypes.ReadonlyObject({
 	method: funtypes.Union(funtypes.Literal('popup_set_rpc_list')),
@@ -887,7 +872,6 @@ export const MessageToPopup = funtypes.Union(
 	UpdateConfirmTransactionDialogPartial,
 	UpdateConfirmTransactionDialogPendingTransactions,
 	funtypes.ReadonlyObject({ method: funtypes.Literal('popup_initiate_export_settings'), data: funtypes.ReadonlyObject({ fileContents: funtypes.String }) }),
-	ImportSettingsReply,
 	ActiveSigningAddressChanged,
 	UpdateRPCList,
 	SimulationUpdateStartedOrEnded,

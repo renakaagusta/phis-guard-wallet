@@ -1,14 +1,12 @@
-import { ETHEREUM_COIN_ICON } from '../utils/constants.js'
-import { ActiveAddress, ExportedSettings, Page } from '../types/exportedSettingsTypes.js'
+import { AddressBookEntries } from '../types/addressBookTypes.js'
+import { Page } from '../types/exportedSettingsTypes.js'
 import { Settings } from '../types/interceptor-messages.js'
-import { Semaphore } from '../utils/semaphore.js'
-import { EthereumAddress } from '../types/wire-types.js'
-import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
 import { BlockExplorer, RpcNetwork } from '../types/rpc.js'
+import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
+import { EthereumAddress } from '../types/wire-types.js'
+import { ETHEREUM_COIN_ICON } from '../utils/constants.js'
+import { Semaphore } from '../utils/semaphore.js'
 import { browserStorageLocalGet, browserStorageLocalSafeParseGet, browserStorageLocalSet } from '../utils/storageUtils.js'
-import { getUserAddressBookEntries, updateUserAddressBookEntries } from './storageVariables.js'
-import { getUniqueItemsByProperties } from '../utils/typed-arrays.js'
-import { AddressBookEntries, AddressBookEntry } from '../types/addressBookTypes.js'
 
 export const defaultActiveAddresses: AddressBookEntries = [
 	{
@@ -158,59 +156,3 @@ export const setUseTabsInsteadOfPopup = async(useTabsInsteadOfPopup: boolean) =>
 
 export const getMetamaskCompatibilityMode = async() => (await browserStorageLocalGet('metamaskCompatibilityMode'))?.metamaskCompatibilityMode ?? false
 export const setMetamaskCompatibilityMode = async(metamaskCompatibilityMode: boolean) => await browserStorageLocalSet({ metamaskCompatibilityMode })
-
-export async function exportSettingsAndAddressBook(): Promise<ExportedSettings> {
-	const exportDate = (new Date).toISOString().split('T')[0]
-	if (exportDate === undefined) throw new Error('Datestring did not contain Date')
-	const settings = await getSettings()
-	return {
-		name: 'InterceptorSettingsAndAddressBook' as const,
-		version: '1.4' as const,
-		exportedDate: exportDate,
-		settings: {
-			activeSimulationAddress: settings.activeSimulationAddress,
-			openedPage: settings.openedPage,
-			useSignersAddressAsActiveAddress: settings.useSignersAddressAsActiveAddress,
-			websiteAccess: settings.websiteAccess,
-			rpcNetwork: settings.activeRpcNetwork,
-			simulationMode: settings.simulationMode,
-			addressBookEntries: await getUserAddressBookEntries(),
-			useTabsInsteadOfPopup: await getUseTabsInsteadOfPopup(),
-			metamaskCompatibilityMode: await getMetamaskCompatibilityMode(),
-		}
-	}
-}
-
-export async function importSettingsAndAddressBook(exportedSetings: ExportedSettings) {
-	if (exportedSetings.version === '1.3') {
-		await setPage(exportedSetings.settings.openedPage)
-	} else if (exportedSetings.version === '1.0') {
-		await changeSimulationMode({
-			simulationMode: exportedSetings.settings.simulationMode,
-			rpcNetwork: defaultRpcs[0],
-			activeSimulationAddress: exportedSetings.settings.activeSimulationAddress,
-			activeSigningAddress: undefined,
-		})
-	} else {
-		await changeSimulationMode({
-			simulationMode: exportedSetings.settings.simulationMode,
-			rpcNetwork: exportedSetings.settings.rpcNetwork,
-			activeSimulationAddress: exportedSetings.settings.activeSimulationAddress,
-			activeSigningAddress: undefined,
-		})
-	}
-	await setUseSignersAddressAsActiveAddress(exportedSetings.settings.useSignersAddressAsActiveAddress)
-	await updateWebsiteAccess(() => exportedSetings.settings.websiteAccess)
-	await setUseTabsInsteadOfPopup(exportedSetings.settings.useTabsInsteadOfPopup)
-	if (exportedSetings.version === '1.2') {
-		await setUseTabsInsteadOfPopup(exportedSetings.settings.metamaskCompatibilityMode)
-	}
-	if (exportedSetings.version === '1.4') {
-		await updateUserAddressBookEntries(() => exportedSetings.settings.addressBookEntries)
-	} else {
-		await updateUserAddressBookEntries((previousEntries) => {
-			const convertActiveAddressToAddressBookEntry = (info: ActiveAddress): AddressBookEntry => ({ ...info, type: 'contact' as const, useAsActiveAddress: true, entrySource: 'User' as const })
-			return getUniqueItemsByProperties(previousEntries.concat(exportedSetings.settings.addressInfos.map((x) => convertActiveAddressToAddressBookEntry(x))).concat(exportedSetings.settings.contacts ?? []), ['address'])
-		})
-	}
-}
