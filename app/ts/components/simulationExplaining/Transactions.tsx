@@ -1,18 +1,17 @@
 import { extractTokenEvents } from '../../background/metadataUtils.js'
-import { EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData } from '../../types/EnrichedEthereumData.js'
+import { EnrichedEthereumInputData } from '../../types/EnrichedEthereumData.js'
 import { AddressBookEntry } from '../../types/addressBookTypes.js'
 import { TransactionOrMessageIdentifier } from '../../types/interceptor-messages.js'
 import { VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
 import { RpcNetwork } from '../../types/rpc.js'
 import { LogAnalysisParams, NonLogAnalysisParams, RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, TransactionVisualizationParameters } from '../../types/visualizer-types.js'
-import { bytes32String, dataStringWith0xStart } from '../../utils/bigint.js'
+import { dataStringWith0xStart } from '../../utils/bigint.js'
 import { SignatureCard } from '../pages/PersonalSign.js'
 import { SmallAddress } from '../subcomponents/address.js'
 import { ArrowIcon } from '../subcomponents/icons.js'
 import { insertBetweenElements } from '../subcomponents/misc.js'
-import { EnrichedSolidityTypeComponentWithAddressBook, StringElement } from '../subcomponents/solidityType.js'
-import { getAddressBookEntryOrAFiller } from '../ui-utils.js'
+import { EnrichedSolidityTypeComponentWithAddressBook } from '../subcomponents/solidityType.js'
 
 export type TransactionImportanceBlockParams = {
 	simTx: SimulatedAndVisualizedTransaction
@@ -122,66 +121,9 @@ export function TokenLogAnalysis(param: LogAnalysisParams) {
 	return <span class = 'token-log-table' style = 'justify-content: center; column-gap: 5px; row-gap: 5px;'></span>
 }
 
-type NonTokenLogEventParams = {
-	nonTokenLog: EnrichedEthereumEventWithMetadata
-	addressMetaData: readonly AddressBookEntry[]
-	renameAddressCallBack: RenameAddressCallBack
+export function NonTokenLogAnalysis(_: NonLogAnalysisParams) {
+	return <></>
 }
-
-function NonTokenLogEvent(params: NonTokenLogEventParams) {
-	const cellStyle = 'align-items: normal;'
-	const textStyle = 'text-overflow: ellipsis; overflow: hidden;'
-	if (params.nonTokenLog.isParsed === 'NonParsed') {
-		return <>
-			<div class = 'log-cell' style = { cellStyle }>
-				<SmallAddress
-					addressBookEntry = { getAddressBookEntryOrAFiller(params.addressMetaData, params.nonTokenLog.address) }
-					renameAddressCallBack = { params.renameAddressCallBack }
-				/>
-			</div>
-			<div class = 'log-cell' style = { cellStyle }>
-				<p class = 'paragraph' style = { textStyle }> { dataStringWith0xStart(params.nonTokenLog.data) } </p>
-			</div>
-			<div class = 'log-cell' style = { 'grid-column: 2 / 4; display: flex; flex-wrap: wrap;' } >
-				{ params.nonTokenLog.topics.map((topic) => <p class = 'paragraph' style = { textStyle }> { bytes32String(topic) } </p>) }
-			</div>
-		</>
-	}
-	return <>
-		<div class = 'log-cell' style = { cellStyle }>
-			<SmallAddress
-				addressBookEntry = { getAddressBookEntryOrAFiller(params.addressMetaData, params.nonTokenLog.address) }
-				renameAddressCallBack = { params.renameAddressCallBack }
-			/>
-		</div>
-		<div style = 'display: contents;'/>
-		<div class = 'log-cell' style = { { 'grid-column-start': 2, 'grid-column-end': 4, display: 'flex', 'flex-wrap': 'wrap' } }>
-			<p class = 'paragraph' style = { textStyle }> { `${ params.nonTokenLog.name }(` } </p>
-			{ insertBetweenElements(params.nonTokenLog.args.map((arg) => {
-				if (arg.paramName === 'fuses' && 'logInformation' in params.nonTokenLog && 'fuses' in params.nonTokenLog.logInformation) {
-					return <>
-						<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } = [` }</p>
-						<StringElement text = { params.nonTokenLog.logInformation.fuses.join(', ') } />
-						<p style = { textStyle } class = 'paragraph'>]</p>
-					</>
-				}
-				return <>
-					<p style = { textStyle } class = 'paragraph'> { `${ arg.paramName } =` }&nbsp;</p>
-					<EnrichedSolidityTypeComponentWithAddressBook valueType = { arg.typeValue } addressMetaData = { params.addressMetaData } renameAddressCallBack = { params.renameAddressCallBack } />
-				</>
-			}), <p style = { textStyle } class = 'paragraph'>,&nbsp;</p>) }
-			<p class = 'paragraph' style = { textStyle }> { ')' } </p>
-		</div>
-	</>
-}
-
-export function NonTokenLogAnalysis(param: NonLogAnalysisParams) {
-	if (param.nonTokenLogs.length === 0) return <p class = 'paragraph'> No non-token events </p>
-	return <span class = 'nontoken-log-table' style = 'justify-content: center; column-gap: 5px; row-gap: 5px;'>
-		{ param.nonTokenLogs.map((nonTokenLog) => <NonTokenLogEvent nonTokenLog = { nonTokenLog } addressMetaData = { param.addressMetaData } renameAddressCallBack = { param.renameAddressCallBack } /> ) }
-	</span>
-}
-
 
 type ParsedInputDataParams = {
 	inputData: EnrichedEthereumInputData

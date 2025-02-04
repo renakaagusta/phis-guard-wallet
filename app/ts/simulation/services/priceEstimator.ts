@@ -1,5 +1,4 @@
-import { Erc20TokenEntry } from '../../types/addressBookTypes.js'
-import { TokenPriceEstimate } from '../../types/visualizer-types.js'
+
 import { addressString } from '../../utils/bigint.js'
 import { getWithDefault } from '../../utils/typescript.js'
 import { EthereumClientService } from './EthereumClientService.js'
@@ -10,7 +9,7 @@ interface TokenDecimals {
 }
 
 interface CachedTokenPriceEstimate {
-	estimate: TokenPriceEstimate | undefined,
+	estimate: any | undefined,
 	estimateCalculated: Date
 }
 
@@ -33,7 +32,7 @@ export class TokenPriceService {
 		})
 	}
 
-	private async getTokenPrice(_: AbortController | undefined, token: TokenDecimals, quoteToken: Erc20TokenEntry) {
+	private async getTokenPrice(_: AbortController | undefined, token: TokenDecimals, quoteToken: any) {
 		return {
 			token,
 			quoteToken,
@@ -42,11 +41,11 @@ export class TokenPriceService {
 		}
 	}
 
-	public async estimateEthereumPricesForTokens (requestAbortController: AbortController | undefined, quoteToken: Erc20TokenEntry, tokens: TokenDecimals[]) : Promise<TokenPriceEstimate[]> {
+	public async estimateEthereumPricesForTokens (requestAbortController: AbortController | undefined, quoteToken: any, tokens: TokenDecimals[]) : Promise<any[]> {
 		if (tokens.length === 0) return []
 		this.cleanUpCacheIfNeeded()
 		const quoteTokenAddressString = addressString(quoteToken.address)
-		const tokenPricePromises: Promise<TokenPriceEstimate | undefined>[] = tokens.map(async (token) => {
+		const tokenPricePromises: Promise<any | undefined>[] = tokens.map(async (token) => {
 			const tokenAddressString = addressString(token.address)
 			if (token.address === quoteToken.address) return { token, quoteToken, price: 10n ** quoteToken.decimals }
 			const cachedEstimate = this.cachedPrices.get(quoteTokenAddressString)?.get(tokenAddressString)
@@ -59,10 +58,10 @@ export class TokenPriceService {
 			this.cachedPrices.set(quoteTokenAddressString, quoteTokenAddressCache)
 			return estimate
 		})
-		return (await Promise.all(tokenPricePromises)).filter((tokenPrice): tokenPrice is TokenPriceEstimate => tokenPrice !== undefined)
+		return (await Promise.all(tokenPricePromises)).filter((tokenPrice): tokenPrice is any => tokenPrice !== undefined)
 	}
 }
 
-export function getTokenAmountsWorth(tokenAmount: bigint, tokenPriceEstimate: TokenPriceEstimate) {
+export function getTokenAmountsWorth(tokenAmount: bigint, tokenPriceEstimate: any) {
 	return (tokenPriceEstimate.price * tokenAmount) / (10n ** (tokenPriceEstimate.quoteToken.decimals))
 }

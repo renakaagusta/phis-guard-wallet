@@ -10,7 +10,7 @@ import { VisualizedPersonalSignRequest, VisualizedPersonalSignRequestSafeTx } fr
 import { CodeMessageError, RpcEntries, RpcEntry, RpcNetwork } from './rpc.js'
 import { SignerName } from './signerTypes.js'
 import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabIconDetails, TabState } from './user-interface-types.js'
-import { CompleteVisualizedSimulation, ModifyAddressWindowState, NamedTokenId, ProtectorResults, SimulatedAndVisualizedTransaction, SimulationState, TokenPriceEstimate } from './visualizer-types.js'
+import { CompleteVisualizedSimulation, ModifyAddressWindowState, NamedTokenId, ProtectorResults, SimulatedAndVisualizedTransaction, SimulationState } from './visualizer-types.js'
 import { Website, WebsiteAccess, WebsiteAccessArray } from './websiteAccessTypes.js'
 import { EthereumAddress, EthereumBlockHeaderWithTransactionHashes, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSignedTransactionWithBlockData, EthereumTimestamp, NonHexBigInt, OptionalEthereumAddress } from './wire-types.js'
 
@@ -81,13 +81,9 @@ const NonForwardingRPCRequestSuccessfullReturnValue = funtypes.Union(
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_estimateGas'), result: EthereumQuantity }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_getTransactionByHash'), result: funtypes.Union(EthereumSignedTransactionWithBlockData, funtypes.Null) }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_getTransactionReceipt'), result: EthTransactionReceiptResponse }),
-	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_subscribe'), result: funtypes.String }),
-	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_newFilter'), result: funtypes.String }),
-	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_unsubscribe'), result: funtypes.Boolean }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_chainId'), result: EthereumQuantity }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('net_version'), result: NonHexBigInt }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_blockNumber'), result: EthereumQuantity }),
-	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_getCode'), result: EthereumData }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('wallet_switchEthereumChain'), result: funtypes.Null }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_accounts'), result: funtypes.ReadonlyArray(EthereumAddress) }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('eth_gasPrice'), result: EthereumQuantity }),
@@ -249,10 +245,6 @@ export type AddressBookCategory = funtypes.Static<typeof AddressBookCategory>
 export const AddressBookCategory = funtypes.Union(
 	funtypes.Literal('My Active Addresses'),
 	funtypes.Literal('My Contacts'),
-	funtypes.Literal('ERC20 Tokens'),
-	funtypes.Literal('ERC1155 Tokens'),
-	funtypes.Literal('Non Fungible Tokens'),
-	funtypes.Literal('Other Contracts')
 )
 
 export type RemoveAddressBookEntry = funtypes.Static<typeof RemoveAddressBookEntry>
@@ -677,7 +669,6 @@ export const SimulateExecutionReplyData = funtypes.Union(
 			addressBookEntries: funtypes.ReadonlyArray(AddressBookEntry),
 			simulatedAndVisualizedTransactions: funtypes.ReadonlyArray(SimulatedAndVisualizedTransaction),
 			visualizedPersonalSignRequests: funtypes.ReadonlyArray(VisualizedPersonalSignRequest),
-			tokenPriceEstimates: funtypes.ReadonlyArray(TokenPriceEstimate),
 			eventsForEachTransaction: funtypes.ReadonlyArray(funtypes.ReadonlyArray(EnrichedEthereumEvent)),
 			parsedInputData: funtypes.ReadonlyArray(EnrichedEthereumInputData),
 			protectors: funtypes.ReadonlyArray(ProtectorResults),

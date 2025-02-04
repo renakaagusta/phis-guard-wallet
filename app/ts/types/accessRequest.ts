@@ -4,7 +4,7 @@ import { AddressBookEntry } from './addressBookTypes.js'
 import { EthereumAddress, EthereumQuantity, EthereumTimestamp, OptionalEthereumAddress } from './wire-types.js'
 import { SignerName } from './signerTypes.js'
 import { InterceptedRequest, UniqueRequestIdentifier, WebsiteSocket } from '../utils/requests.js'
-import { FailedToCreateWebsiteCreatedEthereumUnsignedTransaction, NamedTokenId, ProtectorResults, SignedMessageTransaction, SimulatedAndVisualizedTransaction, SimulationState, TokenPriceEstimate, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from './visualizer-types.js'
+import { FailedToCreateWebsiteCreatedEthereumUnsignedTransaction, NamedTokenId, ProtectorResults, SignedMessageTransaction, SimulatedAndVisualizedTransaction, SimulationState, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from './visualizer-types.js'
 import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
 import { OriginalSendRequestParameters } from './JsonRpc-types.js'
 import { SignMessageParams } from './jsonRpc-signing-types.js'
@@ -45,7 +45,6 @@ const ConfirmTransactionDialogState = funtypes.Intersect(
 		eventsForEachTransaction: funtypes.ReadonlyArray(funtypes.ReadonlyArray(EnrichedEthereumEvent)),
 		protectors: funtypes.ReadonlyArray(ProtectorResults),
 		addressBookEntries: funtypes.ReadonlyArray(AddressBookEntry),
-		tokenPriceEstimates: funtypes.ReadonlyArray(TokenPriceEstimate),
 		namedTokenIds: funtypes.ReadonlyArray(NamedTokenId),
 		simulationState: SimulationState,
 		activeAddress: OptionalEthereumAddress,

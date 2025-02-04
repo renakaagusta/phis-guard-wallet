@@ -1,30 +1,28 @@
-import { EthereumClientService } from './services/EthereumClientService.js'
-import { selfTokenOops } from './protectors/selfTokenOops.js'
+import { Interface } from 'ethers'
+import { identifyAddress } from '../background/metadataUtils.js'
+import { EnrichedEthereumEvent, EnrichedEthereumInputData, ParsedEvent } from '../types/EnrichedEthereumData.js'
+import { EthereumEvent } from '../types/ethSimulate-types.js'
+import { RpcEntry } from '../types/rpc.js'
+import { SolidityType } from '../types/solidityType.js'
+import { SimulationState, WebsiteCreatedEthereumUnsignedTransaction } from '../types/visualizer-types.js'
 import { EthereumAddress, EthereumBlockHeader, EthereumData, EthereumQuantity } from '../types/wire-types.js'
+import { extractFunctionArgumentTypes, getAbi, removeTextBetweenBrackets } from '../utils/abi.js'
 import { bytes32String } from '../utils/bigint.js'
-import { feeOops } from './protectors/feeOops.js'
+import { ENS_ADDRESS_CHANGED, ENS_ADDR_CHANGED, ENS_BASE_REGISTRAR_NAME_REGISTERED, ENS_BASE_REGISTRAR_NAME_RENEWED, ENS_CONTENT_HASH_CHANGED, ENS_CONTROLLER_NAME_REGISTERED, ENS_CONTROLLER_NAME_RENEWED, ENS_ETHEREUM_NAME_SERVICE, ENS_ETH_REGISTRAR_CONTROLLER, ENS_EXPIRY_EXTENDED, ENS_FUSES_SET, ENS_NAME_CHANGED, ENS_NAME_UNWRAPPED, ENS_NAME_WRAPPED, ENS_NEW_OWNER, ENS_NEW_RESOLVER, ENS_NEW_TTL, ENS_PUBLIC_RESOLVER, ENS_PUBLIC_RESOLVER_2, ENS_REGISTRY_WITH_FALLBACK, ENS_REVERSE_CLAIMED, ENS_REVERSE_REGISTRAR, ENS_TEXT_CHANGED, ENS_TEXT_CHANGED_KEY_VALUE, ENS_TOKEN_WRAPPER, ENS_TRANSFER } from '../utils/constants.js'
+import { parseSolidityValueByTypePure } from '../utils/solidityTypes.js'
+import { handleBaseRegistrarNameRegistered, handleBaseRegistrarNameRenewed, handleControllerNameRegistered, handleEnsAddrChanged, handleEnsAddressChanged, handleEnsContentHashChanged, handleEnsControllerNameRenewed, handleEnsExpiryExtended, handleEnsFusesSet, handleEnsNameChanged, handleEnsNameUnWrapped, handleEnsNewOwner, handleEnsNewResolver, handleEnsNewTtl, handleEnsReverseClaimed, handleEnsTextChanged, handleEnsTextChangedKeyValue, handleEnsTransfer, handleNameWrapped } from './logHandlers.js'
+import { chainIdMismatch } from './protectors/chainIdMismatch.js'
 import { commonTokenOops } from './protectors/commonTokenOops.js'
 import { eoaApproval } from './protectors/eoaApproval.js'
 import { eoaCalldata } from './protectors/eoaCalldata.js'
-import { tokenToContract } from './protectors/tokenToContract.js'
-import { WebsiteCreatedEthereumUnsignedTransaction, SimulationState } from '../types/visualizer-types.js'
-import { EthereumJSONRpcRequestHandler } from './services/EthereumJSONRpcRequestHandler.js'
-import { APPROVAL_LOG, DEPOSIT_LOG, ENS_ADDRESS_CHANGED, ENS_ADDR_CHANGED, ENS_CONTENT_HASH_CHANGED, ENS_ETHEREUM_NAME_SERVICE, ENS_ETH_REGISTRAR_CONTROLLER, ENS_EXPIRY_EXTENDED, ENS_FUSES_SET, ENS_NAME_CHANGED, ENS_CONTROLLER_NAME_REGISTERED, ENS_BASE_REGISTRAR_NAME_RENEWED, ENS_NAME_UNWRAPPED, ENS_NEW_OWNER, ENS_NEW_RESOLVER, ENS_NEW_TTL, ENS_PUBLIC_RESOLVER, ENS_PUBLIC_RESOLVER_2, ENS_CONTROLLER_NAME_RENEWED, ENS_REGISTRY_WITH_FALLBACK, ENS_REVERSE_CLAIMED, ENS_REVERSE_REGISTRAR, ENS_TEXT_CHANGED, ENS_TEXT_CHANGED_KEY_VALUE, ENS_TOKEN_WRAPPER, ENS_TRANSFER, ERC1155_TRANSFERBATCH_LOG, ERC1155_TRANSFERSINGLE_LOG, ERC721_APPROVAL_FOR_ALL_LOG, TRANSFER_LOG, WITHDRAWAL_LOG, ENS_BASE_REGISTRAR_NAME_REGISTERED, ENS_NAME_WRAPPED } from '../utils/constants.js'
-import { handleApprovalLog, handleDepositLog, handleERC1155TransferBatch, handleERC1155TransferSingle, handleERC20TransferLog, handleEnsAddrChanged, handleEnsAddressChanged, handleEnsContentHashChanged, handleEnsExpiryExtended, handleEnsFusesSet, handleEnsNameChanged, handleEnsNameUnWrapped, handleEnsNewOwner, handleEnsNewResolver, handleEnsNewTtl, handleEnsControllerNameRenewed, handleEnsReverseClaimed, handleEnsTextChanged, handleEnsTextChangedKeyValue, handleEnsTransfer, handleErc721ApprovalForAllLog, handleControllerNameRegistered, handleBaseRegistrarNameRenewed, handleWithdrawalLog, handleBaseRegistrarNameRegistered, handleNameWrapped } from './logHandlers.js'
-import { RpcEntry } from '../types/rpc.js'
-import { AddressBookEntryCategory } from '../types/addressBookTypes.js'
-import { parseEventIfPossible, parseTransactionInputIfPossible } from './services/SimulationModeEthereumClientService.js'
-import { Interface } from 'ethers'
-import { getAbi, extractFunctionArgumentTypes, removeTextBetweenBrackets } from '../utils/abi.js'
-import { SolidityType } from '../types/solidityType.js'
-import { parseSolidityValueByTypePure } from '../utils/solidityTypes.js'
-import { identifyAddress } from '../background/metadataUtils.js'
+import { feeOops } from './protectors/feeOops.js'
+import { selfTokenOops } from './protectors/selfTokenOops.js'
 import { sendToNonContact } from './protectors/sendToNonContactAddress.js'
-import { assertNever } from '../utils/typescript.js'
-import { EthereumEvent } from '../types/ethSimulate-types.js'
-import { chainIdMismatch } from './protectors/chainIdMismatch.js'
-import { EnrichedEthereumEvent, EnrichedEthereumInputData, ParsedEvent, TokenVisualizerResult } from '../types/EnrichedEthereumData.js'
+import { tokenToContract } from './protectors/tokenToContract.js'
+import { EthereumClientService } from './services/EthereumClientService.js'
+import { EthereumJSONRpcRequestHandler } from './services/EthereumJSONRpcRequestHandler.js'
 import { TokenPriceService } from './services/priceEstimator.js'
+import { parseEventIfPossible, parseTransactionInputIfPossible } from './services/SimulationModeEthereumClientService.js'
 
 const PROTECTORS = [
 	selfTokenOops,
@@ -36,37 +34,6 @@ const PROTECTORS = [
 	sendToNonContact,
 	chainIdMismatch,
 ]
-
-type TokenLogHandler = (event: EthereumEvent) => TokenVisualizerResult[]
-
-const getTokenEventHandler = (type: AddressBookEntryCategory, logSignature: string) => {
-	const erc20LogHanders = new Map<string, TokenLogHandler>([
-		[TRANSFER_LOG, handleERC20TransferLog],
-		[APPROVAL_LOG, handleApprovalLog],
-		[DEPOSIT_LOG, handleDepositLog],
-		[WITHDRAWAL_LOG, handleWithdrawalLog],
-	])
-	const erc721LogHanders = new Map<string, TokenLogHandler>([
-		[TRANSFER_LOG, handleERC20TransferLog],
-		[APPROVAL_LOG, handleApprovalLog],
-		[ERC721_APPROVAL_FOR_ALL_LOG, handleErc721ApprovalForAllLog],
-	])
-	const erc1155LogHanders = new Map<string, TokenLogHandler>([
-		[ERC721_APPROVAL_FOR_ALL_LOG, handleErc721ApprovalForAllLog],
-		[ERC1155_TRANSFERBATCH_LOG, handleERC1155TransferBatch],
-		[ERC1155_TRANSFERSINGLE_LOG, handleERC1155TransferSingle],
-	])
-
-	switch (type) {
-		case 'ERC1155': return erc1155LogHanders.get(logSignature)
-		case 'ERC20': return erc20LogHanders.get(logSignature)
-		case 'ERC721': return erc721LogHanders.get(logSignature)
-		case 'activeAddress':
-		case 'contact':
-		case 'contract': return undefined
-		default: assertNever(type)
-	}
-}
 
 const ensEventHandler = (parsedEvent: ParsedEvent) => {
 	if (parsedEvent.topics[0] !== undefined) {
@@ -189,8 +156,6 @@ export const parseEvents = async (events: readonly EthereumEvent[], ethereumClie
 		if (parsedEvent.isParsed === 'NonParsed') return [{ ...parsedEvent, type: 'NonParsed' }]
 		const logSignature = parsedEvent.topics[0]
 		if (logSignature === undefined) return [{ ...parsedEvent, type: 'Parsed' }]
-		const tokenEventhandler = getTokenEventHandler(parsedEvent.loggersAddressBookEntry.type, bytes32String(logSignature))
-		if (tokenEventhandler !== undefined) return tokenEventhandler(parsedEvent).map((logInformation) => ({ ...parsedEvent, type: 'TokenEvent', logInformation }))
 
 		const handledEnsEvent = ensEventHandler(parsedEvent)
 		if (handledEnsEvent !== undefined) return [{ ...parsedEvent, ...handledEnsEvent }]

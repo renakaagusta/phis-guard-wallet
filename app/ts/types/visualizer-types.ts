@@ -1,8 +1,8 @@
 
 import * as funtypes from 'funtypes'
 import { InterceptedRequest, WebsiteSocket } from '../utils/requests.js'
-import { AddressBookEntry, Erc20TokenEntry, Erc721Entry, IncompleteAddressBookEntry } from './addressBookTypes.js'
-import { EnrichedEthereumEvent, EnrichedEthereumEventWithMetadata, EnrichedEthereumInputData } from './EnrichedEthereumData.js'
+import { AddressBookEntry, IncompleteAddressBookEntry } from './addressBookTypes.js'
+import { EnrichedEthereumEvent, EnrichedEthereumInputData } from './EnrichedEthereumData.js'
 import { EthSimulateV1CallResult } from './ethSimulate-types.js'
 import { TransactionOrMessageIdentifier } from './interceptor-messages.js'
 import { SignMessageParams } from './jsonRpc-signing-types.js'
@@ -13,40 +13,16 @@ import { RenameAddressCallBack } from './user-interface-types.js'
 import { Website } from './websiteAccessTypes.js'
 import { EthereumAddress, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSendableSignedTransaction, EthereumTimestamp, EthereumUnsignedTransaction, OptionalEthereumAddress } from './wire-types.js'
 
-export type TokenBalancesAfter = funtypes.Static<typeof TokenBalancesAfter>
-export const TokenBalancesAfter = funtypes.ReadonlyArray(funtypes.ReadonlyObject({
-	token: EthereumAddress,
-	tokenId: funtypes.Union(EthereumQuantity, funtypes.Undefined),
-	owner: EthereumAddress,
-	balance: funtypes.Union(EthereumQuantity, funtypes.Undefined),
-}))
-
-export type TokenPriceEstimate = funtypes.Static<typeof TokenPriceEstimate>
-export const TokenPriceEstimate = funtypes.ReadonlyObject({
-	token: funtypes.ReadonlyObject({
-		address: EthereumAddress,
-		decimals: EthereumQuantity
-	}),
-	quoteToken: funtypes.ReadonlyObject({
-		address: EthereumAddress,
-		decimals: EthereumQuantity
-	}),
-	price: EthereumQuantity
-})
-
 export type SimulatedAndVisualizedTransactionBase = funtypes.Static<typeof SimulatedAndVisualizedTransactionBase>
 export const SimulatedAndVisualizedTransactionBase = funtypes.Intersect(
 	funtypes.ReadonlyObject({
-		tokenBalancesAfter: TokenBalancesAfter,
-		tokenPriceEstimates: funtypes.ReadonlyArray(TokenPriceEstimate),
-		tokenPriceQuoteToken: funtypes.Union(Erc20TokenEntry, funtypes.Undefined),
 		website: Website,
 		created: EthereumTimestamp,
 		gasSpent: EthereumQuantity,
 		realizedGasPrice: EthereumQuantity,
 		quarantine: funtypes.Boolean,
 		quarantineReasons: funtypes.ReadonlyArray(funtypes.String),
-		events: funtypes.ReadonlyArray(EnrichedEthereumEventWithMetadata),
+		events: funtypes.ReadonlyArray(EnrichedEthereumEvent),
 		parsedInputData: EnrichedEthereumInputData,
 		transactionIdentifier: EthereumQuantity,
 	}),
@@ -85,7 +61,6 @@ export const SimulatedTransaction = funtypes.ReadonlyObject({
 	realizedGasPrice: EthereumQuantity,
 	preSimulationTransaction: PreSimulationTransaction,
 	ethSimulateV1CallResult: EthSimulateV1CallResult,
-	tokenBalancesAfter: TokenBalancesAfter,
 })
 
 export type EstimateGasError = funtypes.Static<typeof EstimateGasError>
@@ -186,7 +161,6 @@ export type SimulationAndVisualisationResults = {
 	simulatedAndVisualizedTransactions: readonly SimulatedAndVisualizedTransaction[],
 	visualizedPersonalSignRequests: readonly VisualizedPersonalSignRequest[],
 	rpcNetwork: RpcNetwork,
-	tokenPriceEstimates: readonly TokenPriceEstimate[],
 	activeAddress: bigint,
 	namedTokenIds: readonly NamedTokenId[],
 }
@@ -198,22 +172,6 @@ export type TransactionVisualizationParameters = {
 	activeAddress: bigint
 	renameAddressCallBack: RenameAddressCallBack
 	addressMetaData: readonly AddressBookEntry[]
-}
-
-export type Erc20TokenBalanceChange = Erc20TokenEntry & {
-	changeAmount: bigint
-	tokenPriceEstimateQuoteToken: Erc20TokenEntry | undefined
-	tokenPriceEstimate: TokenPriceEstimate | undefined
-}
-
-export type ERC20TokenApprovalChange = Erc20TokenEntry & {
-	approvals: (AddressBookEntry & { change: bigint })[]
-}
-
-export type Erc721TokenApprovalChange = {
-	tokenId: bigint
-	tokenEntry: Erc721Entry
-	approvedEntry: AddressBookEntry
 }
 
 export type SimulationUpdatingState = funtypes.Static<typeof SimulationUpdatingState>
@@ -238,8 +196,6 @@ export const CompleteVisualizedSimulation = funtypes.ReadonlyObject({
 	parsedInputData: funtypes.ReadonlyArray(EnrichedEthereumInputData),
 	protectors: funtypes.ReadonlyArray(ProtectorResults),
 	addressBookEntries: funtypes.ReadonlyArray(AddressBookEntry),
-	tokenPriceEstimates: funtypes.ReadonlyArray(TokenPriceEstimate),
-	tokenPriceQuoteToken: funtypes.Union(funtypes.Undefined, Erc20TokenEntry),
 	namedTokenIds: funtypes.ReadonlyArray(NamedTokenId),
 	simulationState: funtypes.Union(SimulationState, funtypes.Undefined),
 	activeAddress: OptionalEthereumAddress,
@@ -267,8 +223,6 @@ export const VisualizedSimulatorState = funtypes.ReadonlyObject({
 	parsedInputData: funtypes.ReadonlyArray(EnrichedEthereumInputData),
 	protectors: funtypes.ReadonlyArray(ProtectorResults),
 	addressBookEntries: funtypes.ReadonlyArray(AddressBookEntry),
-	tokenPriceEstimates: funtypes.ReadonlyArray(TokenPriceEstimate),
-	tokenPriceQuoteToken: funtypes.Union(Erc20TokenEntry, funtypes.Undefined),
 	namedTokenIds: funtypes.ReadonlyArray(NamedTokenId),
 	simulationState: funtypes.Union(SimulationState),
 	simulatedAndVisualizedTransactions: funtypes.ReadonlyArray(SimulatedAndVisualizedTransaction),
@@ -283,13 +237,6 @@ export const ModifyAddressWindowState = funtypes.ReadonlyObject({
 	windowStateId: funtypes.String,
 	incompleteAddressBookEntry: IncompleteAddressBookEntry,
 	errorState: ModifyAddressWindowStateError,
-})
-
-export type EditEnsNamedHashWindowState = funtypes.Static<typeof EditEnsNamedHashWindowState>
-export const EditEnsNamedHashWindowState = funtypes.ReadonlyObject({
-	type: funtypes.Union(funtypes.Literal('nameHash'), funtypes.Literal('labelHash')),
-	nameHash: EthereumBytes32,
-	name: funtypes.Union(funtypes.Undefined, funtypes.String)
 })
 
 export type TransactionStack = funtypes.Static<typeof TransactionStack>

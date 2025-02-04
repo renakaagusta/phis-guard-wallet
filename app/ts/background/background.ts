@@ -19,7 +19,7 @@ import { getActiveAddressEntry } from './metadataUtils.js'
 import { addOrModifyAddressBookEntry, allowOrPreventAddressAccessForWebsite, blockOrAllowExternalRequests, changeActiveAddress, changeAddOrModifyAddressWindowState, changeChainDialog, changeInterceptorAccess, changePage, confirmDialog, confirmRequestAccess, disableInterceptor, forceSetGasLimitForTransaction, getAddressBookData, interceptorAccessChangeAddressOrRefresh, openNewTab, openWebPage, popupChangeActiveRpc, popupfetchAbiAndNameFromBlockExplorer, refreshHomeData, refreshPopupConfirmTransactionMetadata, removeAddressBookEntry, removeTransactionOrSignedMessage, requestAccountsFromSigner, setNewRpcList } from './popupMessageHandlers.js'
 import { connectedToSigner, ethAccountsReply, signerChainChanged, signerReply, walletSwitchEthereumChainReply } from './providerMessageHandlers.js'
 import { changeSimulationMode, getSettings } from './settings.js'
-import { blockNumber, call, chainId, estimateGas, gasPrice, getAccounts, getBalance, getBlockByHash, getBlockByNumber, getCode, getTransactionByHash, getTransactionCount, getTransactionReceipt, handleIterceptorError, netVersion, personalSign, sendTransaction, web3ClientVersion } from './simulationModeHanders.js'
+import { blockNumber, call, chainId, estimateGas, gasPrice, getAccounts, getBalance, getBlockByHash, getBlockByNumber, getTransactionByHash, getTransactionCount, getTransactionReceipt, handleIterceptorError, netVersion, personalSign, sendTransaction, web3ClientVersion } from './simulationModeHanders.js'
 import { makeSureInterceptorIsNotSleeping } from './sleeping.js'
 import { getSimulationResults, promoteRpcAsPrimary, setLatestUnexpectedError } from './storageVariables.js'
 import { updateChainChangeViewWithPendingRequest } from './windows/changeChain.js'
@@ -80,7 +80,6 @@ async function handleRPCRequest(
 		case 'eth_blockNumber': return await blockNumber(simulator.ethereum, simulationState)
 		case 'eth_chainId': return await chainId(simulator.ethereum)
 		case 'net_version': return await netVersion(simulator.ethereum)
-		case 'eth_getCode': return await getCode(simulator.ethereum, simulationState, parsedRequest)
 		case 'personal_sign':
 		case 'eth_signTypedData':
 		case 'eth_signTypedData_v1':

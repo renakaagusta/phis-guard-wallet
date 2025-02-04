@@ -8,7 +8,7 @@ import { get4Byte } from '../../utils/calldata.js'
 import { FourByteExplanations } from '../../utils/constants.js'
 import { findDeadEnds } from '../../utils/findDeadEnds.js'
 import { UniqueRequestIdentifier } from '../../utils/requests.js'
-import { assertNever, createGuard } from '../../utils/typescript.js'
+import { createGuard } from '../../utils/typescript.js'
 import { removeDuplicates } from '../ui-utils.js'
 
 type IdentifiedTransactionBase = {
@@ -30,19 +30,11 @@ type IdentifiedTransaction =
 
 function identifySimpleApproval(simTx: SimulatedAndVisualizedTransaction) {
 	if (getSimpleTokenApprovalOrUndefined(simTx)) {
-		const tokenResults = extractTokenEvents(simTx.events)
+		const tokenResults = extractTokenEvents([])
 		const tokenResult = tokenResults[0]
 		if (tokenResult === undefined) throw new Error('token result were undefined')
 		const symbol = tokenResult.token.symbol
 		switch (tokenResult.type) {
-			case 'ERC20': return {
-				type: 'SimpleTokenApproval' as const,
-				title: `${ symbol } Approval`,
-				signingAction: `Approve ${ symbol }`,
-				simulationAction: `Simulate ${ symbol } Approval`,
-				rejectAction: `Reject ${ symbol } Approval`,
-				identifiedTransaction: simTx,
-			}
 			case 'NFT All approval': {
 				if (tokenResult.allApprovalAdded) {
 					return {
@@ -79,7 +71,7 @@ function identifySimpleApproval(simTx: SimulatedAndVisualizedTransaction) {
 				rejectAction: `Reject #${ tokenResult.tokenId } ${ symbol } Approval`,
 				identifiedTransaction: simTx,
 			}
-			default: assertNever(tokenResult)
+			default: return undefined
 		}
 	}
 	return undefined
@@ -95,7 +87,7 @@ const SimulatedAndVisualizedSimpleApprovalTransaction = funtypes.Intersect(
 )
 
 function isSimpleTokenApproval(simTx: SimulatedAndVisualizedTransaction): simTx is SimulatedAndVisualizedSimpleApprovalTransaction {
-	const tokenResults = extractTokenEvents(simTx.events)
+	const tokenResults = extractTokenEvents([])
 	const tokenResult = tokenResults[0]
 	if (tokenResult === undefined) return false
 	if (!(simTx.transaction.value === 0n
@@ -118,7 +110,7 @@ export const SimulatedAndVisualizedSimpleTokenTransferTransaction = funtypes.Int
 )
 
 function isSimpleTokenTransfer(transaction: SimulatedAndVisualizedTransaction): transaction is SimulatedAndVisualizedSimpleTokenTransferTransaction {
-	const tokenResults = extractTokenEvents(transaction.events)
+	const tokenResults = extractTokenEvents([])
 	const tokenResult = tokenResults[0]
 	if (tokenResult === undefined) return false
 	if (tokenResults.length === 1
@@ -153,9 +145,7 @@ const getNetSums = (edges: readonly { from: EthereumAddress, to: EthereumAddress
 }
 
 function isProxyTokenTransfer(transaction: SimulatedAndVisualizedTransaction): transaction is SimulatedAndVisualizedProxyTokenTransferTransaction {
-	const tokenResults = extractTokenEvents(transaction.events)
-	// no ENS logs allowed in proxy token transfer
-	if (transaction.events.some((x) => x.type === 'ENS')) return false
+	const tokenResults = extractTokenEvents([])
 	// there need to be atleast two token logs (otherwise its a simple send)
 	if (tokenResults.length < 2) return false
 	// no approvals allowed
@@ -184,7 +174,7 @@ function isProxyTokenTransfer(transaction: SimulatedAndVisualizedTransaction): t
 const getProxyTokenTransferOrUndefined = createGuard<SimulatedAndVisualizedTransaction, SimulatedAndVisualizedSimpleTokenTransferTransaction>((simTx) => isProxyTokenTransfer(simTx) ? simTx : undefined)
 
 export function identifyTransaction(simTx: SimulatedAndVisualizedTransaction): IdentifiedTransaction {
-	const tokenResults = extractTokenEvents(simTx.events)
+	const tokenResults = extractTokenEvents([])
 
 	if (getSimpleTokenTransferOrUndefined(simTx)) {
 		const tokenResult = tokenResults[0]

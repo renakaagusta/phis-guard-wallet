@@ -7,7 +7,7 @@ import { MessageToPopup, UnexpectedErrorOccured, UpdateConfirmTransactionDialog 
 import { VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
 import { RpcEntries } from '../../types/rpc.js'
 import { RenameAddressCallBack, RpcConnectionStatus } from '../../types/user-interface-types.js'
-import { CompleteVisualizedSimulation, EditEnsNamedHashWindowState, ModifyAddressWindowState, SimulatedAndVisualizedTransaction } from '../../types/visualizer-types.js'
+import { CompleteVisualizedSimulation, ModifyAddressWindowState, SimulatedAndVisualizedTransaction } from '../../types/visualizer-types.js'
 import { Website } from '../../types/websiteAccessTypes.js'
 import { addressString, checksummedAddress, stringifyJSONWithBigInts } from '../../utils/bigint.js'
 import { WebsiteSocket, checkAndThrowRuntimeLastError } from '../../utils/requests.js'
@@ -156,7 +156,6 @@ const WebsiteErrors = ({ website, websiteSocket, simulationMode }: NetworkErrorP
 
 type ModalState =
 	{ page: 'modifyAddress', state: Signal<ModifyAddressWindowState> } |
-	{ page: 'editEns', state: EditEnsNamedHashWindowState } |
 	{ page: 'noModal' }
 
 type RejectButtonParams = {

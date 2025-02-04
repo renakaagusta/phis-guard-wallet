@@ -1,19 +1,18 @@
+import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
-import { RenameAddressCallBack } from './types/user-interface-types.js'
-import { GetAddressBookDataReply, MessageToPopup } from './types/interceptor-messages.js'
+import { sendPopupMessageToBackgroundPage } from './background/backgroundUtils.js'
 import { AddNewAddress } from './components/pages/AddNewAddress.js'
 import { BigAddress } from './components/subcomponents/address.js'
-import Hint from './components/subcomponents/Hint.js'
-import { sendPopupMessageToBackgroundPage } from './background/backgroundUtils.js'
-import { assertNever } from './utils/typescript.js'
-import { checksummedAddress } from './utils/bigint.js'
-import { AddressBookEntries, AddressBookEntry } from './types/addressBookTypes.js'
-import { ModifyAddressWindowState } from './types/visualizer-types.js'
-import { XMarkIcon } from './components/subcomponents/icons.js'
-import { DynamicScroller } from './components/subcomponents/DynamicScroller.js'
-import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { ChainEntry, RpcEntries } from './types/rpc.js'
 import { ChainSelector } from './components/subcomponents/ChainSelector.js'
+import { DynamicScroller } from './components/subcomponents/DynamicScroller.js'
+import Hint from './components/subcomponents/Hint.js'
+import { XMarkIcon } from './components/subcomponents/icons.js'
+import { AddressBookEntries, AddressBookEntry } from './types/addressBookTypes.js'
+import { GetAddressBookDataReply, MessageToPopup } from './types/interceptor-messages.js'
+import { ChainEntry, RpcEntries } from './types/rpc.js'
+import { RenameAddressCallBack } from './types/user-interface-types.js'
+import { ModifyAddressWindowState } from './types/visualizer-types.js'
+import { checksummedAddress } from './utils/bigint.js'
 
 type Modals =  { page: 'noModal' }
 	| { page: 'addNewAddress', state: Signal<ModifyAddressWindowState> }
@@ -22,10 +21,6 @@ type Modals =  { page: 'noModal' }
 const filterDefs = {
 	'My Active Addresses': 'Active Address',
 	'My Contacts': 'Contact',
-	'ERC20 Tokens': 'ERC20 Token',
-	'ERC1155 Tokens': 'ERC1155 Token',
-	'Non Fungible Tokens': 'Non Fungible Token',
-	'Other Contracts': 'contract',
 }
 type FilterKey = keyof typeof filterDefs
 
@@ -116,22 +111,6 @@ function AddressBookEntryCard({ removeEntry, renameAddressCallBack, ...entry }: 
 								/>
 							}
 						</div>
-
-						{ entry.category === 'ERC20 Tokens'
-							? <div>
-								<p class = 'paragraph' style = 'display: inline-block; font-size: 13px; vertical-align: top;'>{ `Decimals: ${ 'decimals' in entry && entry.decimals !== undefined ? entry.decimals.toString() : 'MISSING' }` }</p>
-							</div>
-							: <></>
-						}
-
-						{ entry.category === 'Non Fungible Tokens' || entry.category === 'Other Contracts'
-							? <div>
-								<p class = 'paragraph' style = 'display: inline-block; font-size: 13px; vertical-align: top;'>
-									{ `Protocol: ${ 'protocol' in entry ? entry.protocol : '' } ` }
-								</p>
-							</div>
-							: <></>
-						}
 
 						{ entry.category === 'My Active Addresses' ?
 							<label class = 'form-control' style = 'padding-top: 10px'>
@@ -252,27 +231,15 @@ export function AddressBook() {
 	}
 
 	function openNewAddress(filter: FilterKey) {
-		const getTypeFromFilter = (filter: FilterKey) => {
-			switch(filter) {
-				case 'My Active Addresses': return 'contact'
-				case 'My Contacts': return 'contact'
-				case 'ERC20 Tokens': return 'ERC20'
-				case 'ERC1155 Tokens': return 'ERC1155'
-				case 'Non Fungible Tokens': return 'ERC721'
-				case 'Other Contracts': return 'contract'
-				default: assertNever(filter)
-			}
-		}
-
 		modalState.value = { page: 'addNewAddress', state: new Signal({
 			windowStateId: 'AddressBookAdd',
 			errorState: undefined,
 			incompleteAddressBookEntry: {
 				addingAddress: true,
+				type: 'contact',
 				symbol: undefined,
 				decimals: undefined,
 				logoUri: undefined,
-				type: getTypeFromFilter(filter),
 				name: undefined,
 				address: undefined,
 				askForAddressAccess: true,
@@ -331,15 +298,6 @@ export function AddressBook() {
 								<ul>
 									<li> <FilterLink name = 'My Active Addresses' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
 									<li> <FilterLink name = 'My Contacts' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
-								</ul>
-							</ul>
-							<ul class = 'menu-list'>
-								<p class = 'paragraph' style = 'color: var(--disabled-text-color)'> Contracts </p>
-								<ul>
-									<li> <FilterLink name = 'ERC20 Tokens' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
-									<li> <FilterLink name = 'Non Fungible Tokens' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
-									<li> <FilterLink name = 'ERC1155 Tokens' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
-									<li> <FilterLink name = 'Other Contracts' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
 								</ul>
 							</ul>
 						</aside>

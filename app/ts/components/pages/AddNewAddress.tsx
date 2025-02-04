@@ -1,28 +1,24 @@
-import { ethers } from 'ethers'
-import { useEffect, useState } from 'preact/hooks'
-import { AddAddressParam } from '../../types/user-interface-types.js'
-import { ErrorCheckBox, Notice } from '../subcomponents/Error.js'
-import { checksummedAddress, stringToAddress } from '../../utils/bigint.js'
-import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
-import { AddressIcon } from '../subcomponents/address.js'
-import { assertUnreachable, modifyObject } from '../../utils/typescript.js'
-import { ComponentChildren, createRef } from 'preact'
-import { AddressBookEntry, DeclarativeNetRequestBlockMode, IncompleteAddressBookEntry } from '../../types/addressBookTypes.js'
-import { isBlockExplorerAvailableForChain, isValidAbi } from '../../simulation/services/EtherScanAbiFetcher.js'
-import { ModifyAddressWindowState } from '../../types/visualizer-types.js'
-import { MessageToPopup } from '../../types/interceptor-messages.js'
-import { XMarkIcon } from '../subcomponents/icons.js'
-import { ChainSelector } from '../subcomponents/ChainSelector.js'
-import { ChainEntry, RpcEntries } from '../../types/rpc.js'
 import { ReadonlySignal, Signal, useComputed } from '@preact/signals'
+import { ethers } from 'ethers'
+import { ComponentChildren, createRef } from 'preact'
+import { useEffect, useState } from 'preact/hooks'
+import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
+import { isBlockExplorerAvailableForChain, isValidAbi } from '../../simulation/services/EtherScanAbiFetcher.js'
+import { AddressBookEntry, DeclarativeNetRequestBlockMode, IncompleteAddressBookEntry } from '../../types/addressBookTypes.js'
+import { MessageToPopup } from '../../types/interceptor-messages.js'
+import { ChainEntry, RpcEntries } from '../../types/rpc.js'
+import { AddAddressParam } from '../../types/user-interface-types.js'
+import { ModifyAddressWindowState } from '../../types/visualizer-types.js'
+import { checksummedAddress, stringToAddress } from '../../utils/bigint.js'
+import { modifyObject } from '../../utils/typescript.js'
+import { AddressIcon } from '../subcomponents/address.js'
+import { ChainSelector } from '../subcomponents/ChainSelector.js'
+import { ErrorCheckBox, Notice } from '../subcomponents/Error.js'
+import { XMarkIcon } from '../subcomponents/icons.js'
 
 const readableAddressType = {
 	contact: 'Contact',
 	activeAddress: 'Active Address',
-	ERC20: 'ERC20',
-	ERC721: 'ERC721',
-	ERC1155: 'ERC1155',
-	contract: 'contract',
 }
 
 type IncompleteAddressIconParams = {
@@ -121,7 +117,7 @@ function AbiInput({ abiInput, setAbiInput, disabled }: AbiInputParams) {
 	/>
 }
 
-function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setSymbol, setAskForAddressAccess, setAbi, canFetchFromEtherScan, fetchAbiAndNameFromBlockExplorer, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
+function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setAskForAddressAccess, setAbi, canFetchFromEtherScan, fetchAbiAndNameFromBlockExplorer, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
 	const Text = (param: { text: ComponentChildren }) => {
 		return <p class = 'paragraph' style = 'color: var(--subtitle-text-color); text-overflow: ellipsis; overflow: hidden; width: 100%'>
 			{ param.text }
@@ -147,14 +143,6 @@ function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEnt
 					<CellElement element = { <NameInput nameInput = { incompleteAddressBookEntry.value.name } setNameInput = { setName } disabled = { disableDueToSource }/> } />
 					<CellElement element = { <Text text = { 'Address: ' }/> }/>
 					<CellElement element = { <AddressInput disabled = { incompleteAddressBookEntry.value.addingAddress === false || disableDueToSource } addressInput = { incompleteAddressBookEntry.value.address } setAddress = { setAddress } /> } />
-					{ incompleteAddressBookEntry.value.type === 'ERC20' || incompleteAddressBookEntry.value.type === 'ERC1155' ? <>
-						<CellElement element = { <Text text = { 'Symbol: ' }/> }/>
-						<CellElement element = { <input disabled = { disableDueToSource } className = 'input subtitle is-7 is-spaced' style = 'width: 100%' type = 'text' value = { incompleteAddressBookEntry.value.symbol } placeholder = { '...' } onInput = { e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setSymbol(e.target.value) } } } /> } />
-					</> : <></> }
-					{ incompleteAddressBookEntry.value.type === 'ERC20' ? <>
-						<CellElement element = { <Text text = { 'Decimals: ' }/> }/>
-						<CellElement element = { <input disabled = { true } className = 'input subtitle is-7 is-spaced' style = 'width: 100%' type = 'text' value = { incompleteAddressBookEntry.value.decimals !== undefined ? incompleteAddressBookEntry.value.decimals.toString() : incompleteAddressBookEntry.value.decimals } placeholder = { '...' } /> } />
-					</> : <></> }
 					<CellElement element = { <Text text = { 'Abi: ' }/> }/>
 					<CellElement element = { <>
 						<AbiInput abiInput = { incompleteAddressBookEntry.value.abi } setAbiInput = { setAbi } disabled = { false }/>
@@ -203,11 +191,7 @@ export function AddNewAddress(param: AddAddressParam) {
 			if (parsed.method === 'popup_addOrModifyAddressWindowStateInformation') {
 				if (param.modifyAddressWindowState.value === undefined) return
 				if (parsed.data.windowStateId !== param.modifyAddressWindowState.value.windowStateId) return
-				if (parsed.data.identifiedAddress !== undefined && parsed.data.identifiedAddress.type === 'ERC20' && param.modifyAddressWindowState.value.incompleteAddressBookEntry.type === 'ERC20') {
-					param.modifyAddressWindowState.value = modifyObject(param.modifyAddressWindowState.value, { incompleteAddressBookEntry: { ...param.modifyAddressWindowState.value.incompleteAddressBookEntry, decimals: parsed.data.identifiedAddress.decimals }, errorState: parsed.data.errorState })
-				} else {
-					param.modifyAddressWindowState.value = modifyObject(param.modifyAddressWindowState.value, { errorState: parsed.data.errorState })
-				}
+				param.modifyAddressWindowState.value = modifyObject(param.modifyAddressWindowState.value, { errorState: parsed.data.errorState })
 			}
 		}
 		browser.runtime.onMessage.addListener(popupMessageListener)
@@ -237,47 +221,14 @@ export function AddNewAddress(param: AddAddressParam) {
 			entrySource: 'User' as const,
 		}
 
-		switch(incompleteAddressBookEntry.type) {
-			case 'ERC721': {
-				if (incompleteAddressBookEntry.symbol === undefined) return undefined
-				return {
-					...base,
-					type: 'ERC721' as const,
-					symbol: incompleteAddressBookEntry.symbol,
-					logoUri: incompleteAddressBookEntry.logoUri,
-					abi,
-				}
-			}
-			case 'ERC1155': {
-				if (incompleteAddressBookEntry.symbol === undefined) return undefined
-				return {
-					...base,
-					type: 'ERC1155' as const,
-					symbol: incompleteAddressBookEntry.symbol,
-					logoUri: incompleteAddressBookEntry.logoUri,
-					decimals: undefined,
-					abi,
-				}
-			}
-			case 'ERC20': {
-				if (incompleteAddressBookEntry.symbol === undefined || incompleteAddressBookEntry.decimals === undefined) return undefined
-				return {
-					...base,
-					type: 'ERC20' as const,
-					symbol: incompleteAddressBookEntry.symbol,
-					decimals: incompleteAddressBookEntry.decimals,
-					logoUri: incompleteAddressBookEntry.logoUri,
-					abi,
-				}
-			}
-			case 'contact':
-			case 'contract': return {
+		switch (incompleteAddressBookEntry.type) {
+			case 'contact': return {
 				...base,
 				type: incompleteAddressBookEntry.type,
 				logoUri: incompleteAddressBookEntry.logoUri,
 				abi,
 			}
-			default: assertUnreachable(incompleteAddressBookEntry.type)
+			default: return undefined
 		}
 	}
 
@@ -365,7 +316,7 @@ export function AddNewAddress(param: AddAddressParam) {
 	function showOnChainVerificationErrorBox() {
 		if (param.modifyAddressWindowState.value === undefined) return false
 		const incompleteAddressBookEntry = param.modifyAddressWindowState.value.incompleteAddressBookEntry
-		return incompleteAddressBookEntry.entrySource === 'OnChain' && (incompleteAddressBookEntry.type === 'ERC20' || incompleteAddressBookEntry.type === 'ERC721')
+		return incompleteAddressBookEntry.entrySource === 'OnChain'
 	}
 
 	function isSubmitButtonDisabled() {

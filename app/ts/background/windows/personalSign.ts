@@ -97,8 +97,6 @@ export async function craftPersonalSignPopupMessage(ethereumClientService: Ether
 		case 'Permit': {
 			const token = await identifyAddress(ethereumClientService, requestAbortController, parsed.domain.verifyingContract)
 			const owner = await identifyAddress(ethereumClientService, requestAbortController, parsed.message.owner)
-			if (token.type === 'ERC721') throw 'Attempted to perform Permit to an ERC721'
-			if (token.type === 'ERC1155') throw 'Attempted to perform Permit to an ERC1155'
 			return {
 				method: originalParams.originalRequestParameters.method,
 				...basicParams,
@@ -117,8 +115,6 @@ export async function craftPersonalSignPopupMessage(ethereumClientService: Ether
 		}
 		case 'PermitSingle': {
 			const token = await identifyAddress(ethereumClientService, requestAbortController, parsed.message.details.token)
-			if (token.type === 'ERC721') throw 'Attempted to perform Permit to an ERC721'
-			if (token.type === 'ERC1155') throw 'Attempted to perform Permit to an ERC1155'
 			return {
 				method: originalParams.originalRequestParameters.method,
 				...basicParams,

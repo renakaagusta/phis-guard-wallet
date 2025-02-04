@@ -1,22 +1,20 @@
-import { addressString, addressStringWithout0x, bytesToUnsigned, checksummedAddress } from '../utils/bigint.js'
-import { AddressBookEntries, AddressBookEntry, Erc20TokenEntry } from '../types/addressBookTypes.js'
-import { NamedTokenId, SimulationState } from '../types/visualizer-types.js'
-import { tokenMetadata, contractMetadata, erc721Metadata, erc1155Metadata } from '@darkflorist/address-metadata'
-import { ethers } from 'ethers'
-import { ENS_ADDR_REVERSE_NODE, ENS_TOKEN_WRAPPER, ETHEREUM_COIN_ICON, ETHEREUM_LOGS_LOGGER_ADDRESS, MOCK_ADDRESS } from '../utils/constants.js'
-import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { IdentifiedAddress, itentifyAddressViaOnChainInformation } from '../utils/tokenIdentification.js'
-import { assertNever } from '../utils/typescript.js'
-import { addEnsLabelHash, addEnsNodeHash, addUserAddressBookEntryIfItDoesNotExist, getEnsLabelHashes, getEnsNodeHashes, getUserAddressBookEntries, getUserAddressBookEntriesForChainIdMorePreciseFirst } from './storageVariables.js'
-import { getUniqueItemsByProperties } from '../utils/typed-arrays.js'
-import { getEnsReverseNodeHash, getEthereumNameServiceNameFromTokenId } from '../utils/ethereumNameService.js'
-import { defaultActiveAddresses } from './settings.js'
-import { RpcNetwork } from '../types/rpc.js'
-import { EthereumBytes32 } from '../types/wire-types.js'
-import { ENSNameHashes } from '../types/ens.js'
 import { keccak_256 } from '@noble/hashes/sha3'
+import { ethers } from 'ethers'
+import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
+import { AddressBookEntries, AddressBookEntry } from '../types/addressBookTypes.js'
+import { EnrichedEthereumEvents, EnrichedEthereumInputData, SolidityVariable } from '../types/EnrichedEthereumData.js'
+import { ENSNameHashes } from '../types/ens.js'
+import { RpcNetwork } from '../types/rpc.js'
+import { NamedTokenId, SimulationState } from '../types/visualizer-types.js'
+import { EthereumBytes32 } from '../types/wire-types.js'
+import { addressString, addressStringWithout0x, bytesToUnsigned, checksummedAddress } from '../utils/bigint.js'
+import { ENS_ADDR_REVERSE_NODE, ENS_TOKEN_WRAPPER, ETHEREUM_LOGS_LOGGER_ADDRESS, MOCK_ADDRESS } from '../utils/constants.js'
+import { getEnsReverseNodeHash, getEthereumNameServiceNameFromTokenId } from '../utils/ethereumNameService.js'
+import { IdentifiedAddress, itentifyAddressViaOnChainInformation } from '../utils/tokenIdentification.js'
+import { getUniqueItemsByProperties } from '../utils/typed-arrays.js'
+import { defaultActiveAddresses } from './settings.js'
+import { addEnsLabelHash, addEnsNodeHash, addUserAddressBookEntryIfItDoesNotExist, getEnsLabelHashes, getEnsNodeHashes, getUserAddressBookEntries, getUserAddressBookEntriesForChainIdMorePreciseFirst } from './storageVariables.js'
 const LOGO_URI_PREFIX = '../vendor/@darkflorist/address-metadata'
-import { EnrichedEthereumEventWithMetadata, EnrichedEthereumEvents, EnrichedEthereumInputData, EnsEvent, SolidityVariable, TokenEvent, TokenVisualizerResultWithMetadata } from '../types/EnrichedEthereumData.js'
 
 const pathJoin = (parts: string[], sep = '/') => parts.join(sep).replace(new RegExp(sep + '{1,}', 'g'), sep)
 
@@ -40,66 +38,10 @@ export async function getActiveAddresses() : Promise<AddressBookEntries> {
 	return activeAddresses === undefined || activeAddresses.length === 0 ? defaultActiveAddresses : activeAddresses
 }
 
-export function getNativeTokenErc20(rpcEntry: RpcNetwork | undefined): Erc20TokenEntry {
-	return {
-		address: ETHEREUM_LOGS_LOGGER_ADDRESS,
-		name: rpcEntry?.currencyName ?? 'Ethereum',
-		type: 'ERC20',
-		entrySource: 'Interceptor',
-		symbol: rpcEntry?.currencyTicker ?? 'ETH',
-		decimals: 18n,
-		logoUri: rpcEntry !== undefined && 'currencyLogoUri' in rpcEntry ? rpcEntry.currencyLogoUri : ETHEREUM_COIN_ICON,
-		chainId: rpcEntry?.chainId,
-	}
-}
-
 async function identifyAddressWithoutNode(address: bigint, rpcEntry: RpcNetwork | undefined, useLocalStorage = true) : Promise<AddressBookEntry | undefined> {
-	if (address === ETHEREUM_LOGS_LOGGER_ADDRESS) return getNativeTokenErc20(rpcEntry)
-
 	if (useLocalStorage) {
 		const userEntry = (await getUserAddressBookEntriesForChainIdMorePreciseFirst(rpcEntry?.chainId || 1n)).find((entry) => entry.address === address)
 		if (userEntry !== undefined) return userEntry
-	}
-	const addrString = addressString(address)
-	const addressData = contractMetadata.get(addrString)
-	if (addressData) return {
-		...addressData,
-		address: address,
-		logoUri: addressData.logoUri ? `${ getFullLogoUri(addressData.logoUri) }` : undefined,
-		type: 'contract',
-		entrySource: 'DarkFloristMetadata',
-		chainId: rpcEntry?.chainId
-	}
-
-	const tokenData = tokenMetadata.get(addrString)
-	if (tokenData) return {
-		...tokenData,
-		address: address,
-		logoUri: tokenData.logoUri ? `${ getFullLogoUri(tokenData.logoUri) }` : undefined,
-		type: 'ERC20',
-		entrySource: 'DarkFloristMetadata',
-		chainId: rpcEntry?.chainId
-	}
-
-	const erc721TokenData = erc721Metadata.get(addrString)
-	if (erc721TokenData) return {
-		...erc721TokenData,
-		address: address,
-		logoUri: erc721TokenData.logoUri ? `${ getFullLogoUri(erc721TokenData.logoUri) }` : undefined,
-		type: 'ERC721',
-		entrySource: 'DarkFloristMetadata',
-		chainId: rpcEntry?.chainId
-	}
-
-	const erc1155TokenData = erc1155Metadata.get(addrString)
-	if (erc1155TokenData) return {
-		...erc1155TokenData,
-		address: address,
-		logoUri: erc1155TokenData.logoUri ? `${ getFullLogoUri(erc1155TokenData.logoUri) }` : undefined,
-		type: 'ERC1155',
-		entrySource: 'DarkFloristMetadata',
-		decimals: undefined,
-		chainId: rpcEntry?.chainId
 	}
 
 	if (address === MOCK_ADDRESS) return {
@@ -128,39 +70,7 @@ export async function identifyAddress(ethereumClientService: EthereumClientServi
 	const chainId = ethereumClientService.getChainId()
 	const getEntry = (tokenIdentification: IdentifiedAddress) => {
 		switch (tokenIdentification.type) {
-			case 'ERC20': return {
-				name: tokenIdentification.name,
-				address,
-				symbol: tokenIdentification.symbol,
-				decimals: tokenIdentification.decimals,
-				type: 'ERC20' as const,
-				entrySource: 'OnChain' as const,
-				chainId
-			}
-			case 'ERC1155': return {
-				name: ethers.getAddress(addrString),
-				address,
-				symbol: '???',
-				type: 'ERC1155' as const,
-				decimals: undefined,
-				entrySource: 'OnChain' as const,
-				chainId
-			}
-			case 'ERC721': return {
-				name: tokenIdentification.name,
-				address,
-				symbol: tokenIdentification.symbol,
-				type: 'ERC721' as const,
-				entrySource: 'OnChain' as const,
-				chainId
-			}
-			case 'contract': return {
-				address,
-				name: ethers.getAddress(addrString),
-				type: 'contract' as const,
-				entrySource: 'OnChain' as const,
-				chainId
-			}
+			default:
 			case 'EOA': return {
 				address,
 				name: ethers.getAddress(addrString),
@@ -168,7 +78,6 @@ export async function identifyAddress(ethereumClientService: EthereumClientServi
 				entrySource: 'OnChain' as const,
 				chainId
 			}
-			default: assertNever(tokenIdentification)
 		}
 	}
 	const entry = getEntry(tokenIdentification)
@@ -219,11 +128,11 @@ export async function nameTokenIds(ethereumClientService: EthereumClientService,
 	return namedPairs
 }
 
-export const extractTokenEvents = (events: readonly EnrichedEthereumEventWithMetadata[]): readonly TokenVisualizerResultWithMetadata[] => {
-	return events.filter((tokenEvent): tokenEvent is TokenEvent => tokenEvent.type === 'TokenEvent').map((token) => token.logInformation)
+export const extractTokenEvents = (events: readonly any[]): readonly any[] => {
+	return events.filter((tokenEvent): tokenEvent is any => tokenEvent.type === 'TokenEvent').map((token) => token.logInformation)
 }
-export const extractEnsEvents = (events: readonly EnrichedEthereumEventWithMetadata[]): readonly EnsEvent[] => {
-	return events.filter((tokenEvent): tokenEvent is EnsEvent => tokenEvent.type === 'ENS')
+export const extractEnsEvents = (events: readonly any[]): readonly any[] => {
+	return events.filter((tokenEvent): tokenEvent is any => tokenEvent.type === 'ENS')
 }
 
 export const retrieveEnsNodeAndLabelHashes = async (ethereumClientService: EthereumClientService, events: EnrichedEthereumEvents, addressBookEntriesToMatchReverseResolutions: readonly AddressBookEntry[]) => {

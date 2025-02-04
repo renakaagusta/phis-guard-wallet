@@ -9,7 +9,7 @@ import { MessageToPopup, Settings, UnexpectedErrorOccured, UpdateHomePage } from
 import { VisualizedPersonalSignRequest } from '../types/personal-message-definitions.js'
 import { RpcEntries, RpcEntry, RpcNetwork } from '../types/rpc.js'
 import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-interface-types.js'
-import { EditEnsNamedHashWindowState, ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState, TokenPriceEstimate } from '../types/visualizer-types.js'
+import { ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState } from '../types/visualizer-types.js'
 import { EthereumAddress } from '../types/wire-types.js'
 import { checksummedAddress } from '../utils/bigint.js'
 import { DEFAULT_TAB_CONNECTION, METAMASK_ERROR_ALREADY_PENDING, METAMASK_ERROR_USER_REJECTED_REQUEST, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
@@ -58,7 +58,6 @@ export function NetworkErrors({ rpcConnectionStatus } : NetworkErrorParams) {
 }
 
 type Page = { page: 'Home' | 'ChangeActiveAddress' | 'AccessList' | 'Settings' | 'Unknown' }
-	| { page: 'EditEnsNamedHash', state: EditEnsNamedHashWindowState }
 	| { page: 'ModifyAddress' | 'AddNewAddress', state: Signal<ModifyAddressWindowState> }
 	| { page: 'ChangeActiveAddress' }
 
@@ -117,7 +116,6 @@ export function App() {
 		const setSimulationState = (
 			simState: SimulationState | undefined,
 			addressBookEntries: AddressBookEntries,
-			tokenPriceEstimates: readonly TokenPriceEstimate[],
 			simulatedAndVisualizedTransactions: readonly SimulatedAndVisualizedTransaction[],
 			personalSignRequests: readonly VisualizedPersonalSignRequest[],
 			activeSimulationAddress: EthereumAddress | undefined,
@@ -132,7 +130,6 @@ export function App() {
 				simulatedAndVisualizedTransactions,
 				visualizedPersonalSignRequests: personalSignRequests,
 				rpcNetwork: simState.rpcNetwork,
-				tokenPriceEstimates,
 				activeAddress: activeSimulationAddress,
 				addressBookEntries: addressBookEntries,
 				namedTokenIds,
@@ -153,7 +150,6 @@ export function App() {
 					setSimulationState(
 						data.visualizedSimulatorState.simulationState,
 						data.visualizedSimulatorState.addressBookEntries,
-						data.visualizedSimulatorState.tokenPriceEstimates,
 						data.visualizedSimulatorState.simulatedAndVisualizedTransactions,
 						data.visualizedSimulatorState.visualizedPersonalSignRequests,
 						data.visualizedSimulatorState.activeAddress,
@@ -172,8 +168,6 @@ export function App() {
 			if (updateQuery && appPage.value.page === 'Unknown') {
 				if (settings.openedPage.page === 'AddNewAddress' || settings.openedPage.page === 'ModifyAddress') {
 					appPage.value = { ...settings.openedPage, state: new Signal(settings.openedPage.state) }
-				} else {
-					appPage.value = settings.openedPage
 				}
 			}
 			rpcNetwork.value = settings.activeRpcNetwork
