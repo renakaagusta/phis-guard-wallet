@@ -287,7 +287,6 @@ export function App() {
 						<nav class = 'navbar window-header' role = 'navigation' aria-label = 'main navigation'>
 							<div class = 'navbar-brand'>
 								<a class = 'navbar-item' style = 'cursor: unset'>
-									<img src = '../img/LOGOA.svg' alt = 'Logo' width = '32'/>
 									<p style = 'color: #000000; padding-left: 5px;'>PhisGuard</p>
 								</a>
 								<a class = 'navbar-item' style = 'margin-left: auto; margin-right: 0;'>

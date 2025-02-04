@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'preact/hooks'
-import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
-import { FirstCardParams, HomeParams, TabIcon, TabIconDetails, TabState } from '../../types/user-interface-types.js'
-import { DEFAULT_TAB_CONNECTION, ICON_NOT_ACTIVE, ICON_NOT_ACTIVE_WITH_SHIELD } from '../../utils/constants.js'
+import { FirstCardParams, HomeParams, TabIconDetails, TabState } from '../../types/user-interface-types.js'
+import { DEFAULT_TAB_CONNECTION } from '../../utils/constants.js'
 import { ActiveAddressComponent, getActiveAddressEntry } from '../subcomponents/address.js'
 import { RpcSelector } from '../subcomponents/ChainSelector.js'
 import { DinoSays } from '../subcomponents/DinoSays.js'
 import { ErrorComponent } from '../subcomponents/Error.js'
-import { getPrettySignerName, SignerLogoText } from '../subcomponents/signers.js'
+import { getPrettySignerName } from '../subcomponents/signers.js'
 
 type SignerExplanationParams = {
 	activeAddress: AddressBookEntry | undefined
 	tabState: TabState | undefined
 	useSignersAddressAsActiveAddress: boolean
-	tabIcon: TabIcon
 }
 
 function SignerExplanation(param: SignerExplanationParams) {
@@ -25,30 +23,15 @@ function SignerExplanation(param: SignerExplanationParams) {
 	return <ErrorComponent text={`No account connected (or wallet is locked) in ${param.tabState.signerName === 'NoSigner' ? 'signer' : getPrettySignerName(param.tabState.signerName)}.`} />
 }
 
-function FirstCardHeader(param: FirstCardParams) {
-	return <>
-		<header class='px-3 py-2' style={{ display: 'grid', gridTemplateColumns: 'max-content max-content minmax(0, 1fr)', columnGap: '1rem', alignItems: 'center' }}>
-			<div>
-				<div class='buttons has-addons' style='border-style: solid; border-color: var(--primary-color); border-radius: 6px; padding: 1px; border-width: 1px; display: inline-flex; margin-bottom: 0;' >
-					<button
-						class={`button is-primary }`}
-						style={`margin-bottom: 0px; opacity: 1;'}`}>
-						Signing
-					</button>
-				</div>
-			</div>
-			<div>
-				<RpcSelector rpcEntries={param.rpcEntries} rpcNetwork={param.rpcNetwork} changeRpc={param.changeActiveRpc} />
-			</div>
-		</header>
-	</>
-}
-
 function FirstCard(param: FirstCardParams) {
 	if (param.tabState?.signerName === 'NoSigner') {
 		return <>
 			<section class='card' style='margin: 10px;'>
-				<FirstCardHeader {...param} />
+				<header class='px-3 py-2' style={{ display: 'grid', gridTemplateColumns: 'max-content max-content minmax(0, 1fr)', columnGap: '1rem', alignItems: 'center' }}>
+					<div>
+						<RpcSelector rpcEntries={param.rpcEntries} rpcNetwork={param.rpcNetwork} changeRpc={param.changeActiveRpc} />
+					</div>
+				</header>
 				<div class='card-content'>
 					<DinoSays text={'No signer connnected. You can use Interceptor in simulation mode without a signer, but signing mode requires a browser wallet.'} />
 				</div>
@@ -58,7 +41,11 @@ function FirstCard(param: FirstCardParams) {
 
 	return <>
 		<section class='card' style='margin: 10px;'>
-			<FirstCardHeader {...param} />
+			<header class='px-3 py-2' style={{ display: 'grid', gridTemplateColumns: 'max-content max-content minmax(0, 1fr)', columnGap: '1rem', alignItems: 'center' }}>
+				<div>
+					<RpcSelector rpcEntries={param.rpcEntries} rpcNetwork={param.rpcNetwork} changeRpc={param.changeActiveRpc} />
+				</div>
+			</header>
 			<div class='card-content'>
 				{param.useSignersAddressAsActiveAddress ?
 					<p style='color: var(--text-color); text-align: left; padding-bottom: 10px'>
@@ -74,17 +61,6 @@ function FirstCard(param: FirstCardParams) {
 					renameAddressCallBack={param.renameAddressCallBack}
 				/>
 
-				{(param.tabState?.signerAccounts.length === 0 && param.tabIconDetails.icon !== ICON_NOT_ACTIVE && param.tabIconDetails.icon !== ICON_NOT_ACTIVE_WITH_SHIELD) ?
-					<div style='margin-top: 5px'>
-						<button className='button is-primary' onClick={() => sendPopupMessageToBackgroundPage({ method: 'popup_requestAccountsFromSigner', data: true })} >
-							<SignerLogoText
-								signerName={param.tabState.signerName}
-								text={`Connect to ${getPrettySignerName(param.tabState.signerName)}`}
-							/>
-						</button>
-					</div>
-					: <p style='color: var(--subtitle-text-color);' class='subtitle is-7'> {` You can change active address by changing it directly from ${getPrettySignerName(param.tabState?.signerName ?? 'NoSignerDetected')}`} </p>
-				}
 			</div>
 		</section>
 
@@ -92,7 +68,6 @@ function FirstCard(param: FirstCardParams) {
 			activeAddress={param.activeAddress}
 			tabState={param.tabState}
 			useSignersAddressAsActiveAddress={param.useSignersAddressAsActiveAddress}
-			tabIcon={param.tabIconDetails.icon}
 		/>
 	</>
 }

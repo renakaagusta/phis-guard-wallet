@@ -111,19 +111,6 @@ function AddressBookEntryCard({ removeEntry, renameAddressCallBack, ...entry }: 
 								/>
 							}
 						</div>
-
-						{ entry.category === 'My Active Addresses' ?
-							<label class = 'form-control' style = 'padding-top: 10px'>
-								<input type = 'checkbox' checked = { 'askForAddressAccess' in entry && !entry.askForAddressAccess } disabled = { true }/>
-								<p class = 'paragraph checkbox-text'>Don't request for an access (insecure) </p>
-							</label>
-							:
-							<div>
-								<p class = 'paragraph' style = 'display: inline-block; font-size: 13px; vertical-align: top; width: 420px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;'>
-									{ `ABI: ${ 'abi' in entry && entry.abi !== undefined ? entry.abi : 'No ABI available' } ` }
-								</p>
-							</div>
-						}
 						<div>
 							<p class = 'paragraph' style = 'display: inline-block; font-size: 13px; color: var(--subtitle-text-color);'>
 								{ `Source: ${ 'entrySource' in entry ? entry.entrySource : '' }` }

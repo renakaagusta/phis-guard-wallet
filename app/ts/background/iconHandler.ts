@@ -1,49 +1,24 @@
-import { getPrettySignerName } from '../components/subcomponents/signers.js'
-import { RpcConnectionStatus, TabIcon, TabState, WebsiteTabConnections } from '../types/user-interface-types.js'
-import { ICON_ACCESS_DENIED, ICON_INTERCEPTOR_DISABLED, ICON_NOT_ACTIVE, ICON_SIGNING, ICON_SIGNING_NOT_SUPPORTED, PRIMARY_COLOR, TIME_BETWEEN_BLOCKS, WARNING_COLOR } from '../utils/constants.js'
+import { RpcConnectionStatus, TabState } from '../types/user-interface-types.js'
+import { PRIMARY_COLOR, TIME_BETWEEN_BLOCKS, WARNING_COLOR } from '../utils/constants.js'
 import { Future } from '../utils/future.js'
 import { imageToUri } from '../utils/imageToUri.js'
 import { checkAndPrintRuntimeLastError, safeGetTab } from '../utils/requests.js'
 import { modifyObject } from '../utils/typescript.js'
-import { areWeBlocking, hasAccess, hasAddressAccess } from './accessManagement.js'
-import { getActiveAddress, sendPopupMessageToOpenWindows, setExtensionBadgeBackgroundColor, setExtensionBadgeText, setExtensionIcon, setExtensionTitle } from './backgroundUtils.js'
+import { sendPopupMessageToOpenWindows, setExtensionBadgeBackgroundColor, setExtensionBadgeText, setExtensionIcon, setExtensionTitle } from './backgroundUtils.js'
 import { getLastKnownCurrentTabId } from './popupMessageHandlers.js'
-import { getSettings } from './settings.js'
-import { getRpcConnectionStatus, getTabState, updateTabState } from './storageVariables.js'
+import { getRpcConnectionStatus, updateTabState } from './storageVariables.js'
 
-async function setInterceptorIcon(tabId: number, icon: TabIcon, iconReason: string) {
-	const tabIconDetails = { icon, iconReason }
+export async function setInterceptorIcon(tabId: number, iconReason: string) {
+	const tabIconDetails = { iconReason }
 	await updateTabState(tabId, (previousState: TabState) => modifyObject(previousState, { tabIconDetails }))
 	if (await getLastKnownCurrentTabId() === tabId) await sendPopupMessageToOpenWindows({ method: 'popup_websiteIconChanged', data: tabIconDetails })
 	try {
-		await setExtensionIcon({ path: { 128: icon }, tabId })
+		await setExtensionIcon({ path: { 128: '../img/head.png' }, tabId })
 		await setExtensionTitle({ title: iconReason, tabId })
 	} catch (error) {
 		console.warn('failed to set interceptor icon and reason')
 		console.warn(error)
 	}
-}
-
-export async function updateExtensionIcon(websiteTabConnections: WebsiteTabConnections, tabId: number, websiteOrigin: string) {
-	const blockingWebsitePromise = areWeBlocking(websiteTabConnections, tabId, websiteOrigin)
-	const addShieldIfNeeded = async (icon: TabIcon): Promise<TabIcon> => await blockingWebsitePromise && icon !== ICON_INTERCEPTOR_DISABLED ? TabIcon.parse(icon.replace('.png', '-shield.png')) : icon
-	const setIcon = async (icon: TabIcon, iconReason: string) => setInterceptorIcon(tabId, await addShieldIfNeeded(icon), await blockingWebsitePromise ? `${ iconReason } PhisGuard is blocking external requests made by the website.` : iconReason)
-
-	const settings = await getSettings()
-	if (hasAccess(settings.websiteAccess, websiteOrigin) === 'interceptorDisabled') return setIcon(ICON_INTERCEPTOR_DISABLED, `PhisGuard is disabled for ${ websiteOrigin } by user request.`)
-	const activeAddress = await getActiveAddress(settings, tabId)
-	if (activeAddress === undefined) return setIcon(ICON_NOT_ACTIVE, 'No active address selected.')
-	const addressAccess = hasAddressAccess(settings.websiteAccess, websiteOrigin, activeAddress)
-	if (addressAccess === 'notFound') return setIcon(ICON_NOT_ACTIVE, `${ websiteOrigin } has PENDING access request for ${ activeAddress.name }!`)
-	if (addressAccess !== 'hasAccess') {
-		if (hasAccess(settings.websiteAccess, websiteOrigin) === 'noAccess') {
-			return setIcon(ICON_ACCESS_DENIED, `The access for ${ websiteOrigin } has been DENIED!`)
-		}
-		return setIcon(ICON_ACCESS_DENIED, `The access to ${ activeAddress.name } for ${ websiteOrigin } has been DENIED!`)
-	}
-	if (settings.activeRpcNetwork.httpsRpc === undefined) return setIcon(ICON_SIGNING_NOT_SUPPORTED, `PhisGuard is disabled while it's on an unsupported network`)
-	const tabState = await getTabState(tabId)
-	return setIcon(ICON_SIGNING, `PhisGuard forwards your transactions to ${ getPrettySignerName(tabState.signerName) } once sent.`)
 }
 
 export function noNewBlockForOverTwoMins(connectionStatus: RpcConnectionStatus) {

@@ -127,23 +127,7 @@ export const FourByteExplanations = {
 	[get4Byte('castVoteWithReasonAndParamsBySig(uint256,uint8,address,string,bytes,bytes)')]: 'Cast Vote with Reason And Additional Info by Signature' as const,
 }
 
-export const ICON_ACTIVE = '../img/head.png' as const
-export const ICON_ACCESS_DENIED = '../img/head-access-denied.png' as const
-export const ICON_NOT_ACTIVE = '../img/head-not-active.png' as const
-export const ICON_SIMULATING = '../img/head-simulating.png' as const
-export const ICON_SIGNING = '../img/head-signing.png' as const
-export const ICON_SIGNING_NOT_SUPPORTED = '../img/head-signing-unsupported-network.png' as const
-export const ICON_INTERCEPTOR_DISABLED = '../img/head-interceptor-disabled.png' as const
-
-export const ICON_ACTIVE_WITH_SHIELD = '../img/head-shield.png' as const
-export const ICON_ACCESS_DENIED_WITH_SHIELD = '../img/head-access-denied-shield.png' as const
-export const ICON_NOT_ACTIVE_WITH_SHIELD = '../img/head-not-active-shield.png' as const
-export const ICON_SIMULATING_WITH_SHIELD = '../img/head-simulating-shield.png' as const
-export const ICON_SIGNING_WITH_SHIELD = '../img/head-signing-shield.png' as const
-export const ICON_SIGNING_NOT_SUPPORTED_WITH_SHIELD = '../img/head-signing-unsupported-network-shield.png' as const
-
-export const DEFAULT_TAB_CONNECTION = { icon: ICON_NOT_ACTIVE, iconReason: 'The website has not requested to connect to PhisGuard.' }
-// export const DEFAULT_TAB_CONNECTION_INTERCEPTOR_DISABLED = { icon: ICON_INTERCEPTOR_DISABLED, iconReason: 'PhisGuard is completely disabled by user request.' }
+export const DEFAULT_TAB_CONNECTION = {  iconReason: 'The website has not requested to connect to PhisGuard.' }
 
 export const ETHEREUM_COIN_ICON = '../../img/coins/ethereum.png'
 

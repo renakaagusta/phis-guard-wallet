@@ -104,7 +104,6 @@ export async function requestAccessFromUser(
 ) {
 	// check if we need to ask address access or not. If address is put to never need to have address specific permision, we don't need to ask for it
 	const activeAddressEntry = activeAddress !== undefined ? await getActiveAddressEntry(activeAddress) : activeAddress
-	// const askForAddressAccess = requestAccessToAddress !== undefined && false
 	const accessAddress = undefined
 	const closeWindowOrTabCallback = (popupOrTabId: PopupOrTabId) => onCloseWindowOrTab(simulator, popupOrTabId, websiteTabConnections)
 	const onCloseWindowCallback = async (id: number) => closeWindowOrTabCallback({ type: 'popup' as const, id })

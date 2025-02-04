@@ -5,7 +5,7 @@
 	"manifest_version": 3,
 	"action": {
 		"default_icon": {
-			"128": "img/head-not-active.png"
+			"128": "img/head.png"
 		},
 		"default_title": "PhisGuard"
 	},

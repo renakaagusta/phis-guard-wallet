@@ -8,7 +8,7 @@ import { SignerName } from '../types/signerTypes.js'
 import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabState } from '../types/user-interface-types.js'
 import { CompleteVisualizedSimulation, EthereumSubscriptionsAndFilters, TransactionStack } from '../types/visualizer-types.js'
 import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
-import { EthereumAddress, EthereumAddressOrMissing, LiteralConverterParserFactory, serialize } from '../types/wire-types.js'
+import { EthereumAddress, EthereumAddressOrMissing, serialize } from '../types/wire-types.js'
 
 type IdsOfOpenedTabs = funtypes.Static<typeof IdsOfOpenedTabs>
 const IdsOfOpenedTabs = funtypes.ReadonlyObject({
@@ -28,7 +28,6 @@ export const OldActiveAddressEntry = funtypes.ReadonlyObject({
 	type: funtypes.Literal('activeAddress'),
 	name: funtypes.String,
 	address: EthereumAddress,
-	askForAddressAccess: funtypes.Union(funtypes.Boolean, funtypes.Literal(undefined).withParser(LiteralConverterParserFactory(undefined, true))),
 	entrySource: EntrySource,
 })
 
