@@ -1,26 +1,15 @@
 import { EthereumClientService } from '../../simulation/services/EthereumClientService.js'
-import { stringifyJSONWithBigInts } from '../../utils/bigint.js'
-import { OpenSeaOrderMessage, PersonalSignRequestIdentifiedEIP712Message, VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
-import { assertNever } from '../../utils/typescript.js'
-import { extractEIP712Message, validateEIP712Types } from '../../utils/eip712Parsing.js'
-import { getRpcNetworkForChain, getTabState } from '../storageVariables.js'
-import { getAddressesForSolidityTypes, identifyAddress } from '../metadataUtils.js'
-import { AddressBookEntry } from '../../types/addressBookTypes.js'
-import { SignedMessageTransaction } from '../../types/visualizer-types.js'
-import { RpcNetwork } from '../../types/rpc.js'
-import { getChainName } from '../../utils/constants.js'
-import { parseInputData } from '../../simulation/simulator.js'
 import { isValidMessage } from '../../simulation/services/SimulationModeEthereumClientService.js'
-
-async function addMetadataToOpenSeaOrder(ethereumClientService: EthereumClientService, requestAbortController: AbortController | undefined, openSeaOrder: OpenSeaOrderMessage) {
-	return {
-		...openSeaOrder,
-		zone: await identifyAddress(ethereumClientService, requestAbortController, openSeaOrder.zone),
-		offerer: await identifyAddress(ethereumClientService, requestAbortController, openSeaOrder.offerer),
-		offer: await Promise.all(openSeaOrder.offer.map( async (offer) => ({ ...offer, token: await identifyAddress(ethereumClientService, requestAbortController, offer.token) }))),
-		consideration: await Promise.all(openSeaOrder.consideration.map(async (offer) => ({ ...offer, token: await identifyAddress(ethereumClientService, requestAbortController, offer.token), recipient: await identifyAddress(ethereumClientService, requestAbortController, offer.recipient) })))
-	 }
-}
+import { parseInputData } from '../../simulation/simulator.js'
+import { AddressBookEntry } from '../../types/addressBookTypes.js'
+import { PersonalSignRequestIdentifiedEIP712Message, VisualizedPersonalSignRequest } from '../../types/personal-message-definitions.js'
+import { RpcNetwork } from '../../types/rpc.js'
+import { SignedMessageTransaction } from '../../types/visualizer-types.js'
+import { stringifyJSONWithBigInts } from '../../utils/bigint.js'
+import { getChainName } from '../../utils/constants.js'
+import { extractEIP712Message, validateEIP712Types } from '../../utils/eip712Parsing.js'
+import { getAddressesForSolidityTypes, identifyAddress } from '../metadataUtils.js'
+import { getRpcNetworkForChain, getTabState } from '../storageVariables.js'
 
 export async function craftPersonalSignPopupMessage(ethereumClientService: EthereumClientService, requestAbortController: AbortController | undefined, signedMessageTransaction: SignedMessageTransaction, rpcNetwork: RpcNetwork): Promise<VisualizedPersonalSignRequest> {
 	const activeAddressWithMetadata = await identifyAddress(ethereumClientService, requestAbortController, signedMessageTransaction.fakeSignedFor)
@@ -157,18 +146,5 @@ export async function craftPersonalSignPopupMessage(ethereumClientService: Ether
 				isValidMessage: isValidMessage(signedMessageTransaction.originalRequestParameters, account.address)
 			}
 		}
-		case 'OrderComponents': return {
-			method: originalParams.originalRequestParameters.method,
-			...basicParams,
-			type: 'OrderComponents' as const,
-			rpcNetwork: rpcNetwork.chainId !== parsed.domain.chainId ? await getRpcNetworkForChain(parsed.domain.chainId) : rpcNetwork,
-			message: await addMetadataToOpenSeaOrder(ethereumClientService, requestAbortController, parsed.message),
-			account,
-			...await getQuarrantineCodes(parsed.domain.chainId, account, activeAddressWithMetadata, undefined),
-			stringifiedMessage: stringifyJSONWithBigInts(parsed, 4),
-			rawMessage: stringifyJSONWithBigInts(parsed),
-			isValidMessage: isValidMessage(signedMessageTransaction.originalRequestParameters, account.address)
-		}
-		default: assertNever(parsed)
 	}
 }

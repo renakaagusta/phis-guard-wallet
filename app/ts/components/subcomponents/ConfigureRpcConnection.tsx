@@ -1,19 +1,16 @@
-import { createContext, type ComponentChildren } from 'preact'
 import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { JsonRpcProvider, Network } from 'ethers'
+import { createContext, type ComponentChildren } from 'preact'
 import { useContext, useEffect, useRef } from 'preact/hooks'
-import { Network, JsonRpcProvider } from 'ethers'
-import { AsyncStates, useAsyncState } from '../../utils/preact-utilities.js'
-import { TextInput } from './TextField.js'
-import { RpcEntries, RpcEntry } from '../../types/rpc.js'
 import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { getSettings } from '../../background/settings.js'
-import { getChainName } from '../../utils/constants.js'
-import { EthereumJSONRpcRequestHandler } from '../../simulation/services/EthereumJSONRpcRequestHandler.js'
-import { EthSimulateV1Params, EthSimulateV1Result } from '../../types/ethSimulate-types.js'
-import { JsonRpcResponseError } from '../../utils/errors.js'
-import { XMarkIcon } from './icons.js'
-import { MessageToPopup } from '../../types/interceptor-messages.js'
 import { getRpcList } from '../../background/storageVariables.js'
+import { MessageToPopup } from '../../types/interceptor-messages.js'
+import { RpcEntries, RpcEntry } from '../../types/rpc.js'
+import { getChainName } from '../../utils/constants.js'
+import { AsyncStates, useAsyncState } from '../../utils/preact-utilities.js'
+import { XMarkIcon } from './icons.js'
+import { TextInput } from './TextField.js'
 
 export function useRpcConnectionsList() {
 	const entries = useSignal<RpcEntries>([])
@@ -55,58 +52,8 @@ const RpcQueryProvider = ({ children }: { children: ComponentChildren }) => {
 		}
 	}
 
-	const validateEthSimulateSupport = async (url: string) => {
-		// test eth_simulate request
-		const requestHandler = new EthereumJSONRpcRequestHandler(url)
-		const ethSimulateV1ParamObject: EthSimulateV1Params['params'][0] = {
-			blockStateCalls: [{
-				blockOverrides: {
-					baseFeePerGas: 0x9n
-				},
-				stateOverrides: {
-					'0xc000000000000000000000000000000000000000': {
-						balance: 0x1312d0000n,
-					}
-				},
-				calls: [
-					{
-						from: 0xc000000000000000000000000000000000000000n,
-						to: 0xc000000000000000000000000000000000000000n,
-						value: 0x1n,
-						maxFeePerGas: 0xfn,
-					}
-				]
-			}],
-			validation: true,
-			traceTransfers: true
-		}
-
-		try {
-			const serializedResult = await requestHandler.jsonRpcRequest({
-				method: 'eth_simulateV1',
-				params: [ethSimulateV1ParamObject, 'latest']
-			})
-
-			function resultContainsLog(result: ReturnType<typeof EthSimulateV1Result.safeParse>) {
-				return Boolean(result.success && result.value && result.value[0] && result.value[0].calls[0] && result.value[0].calls[0].status === 'success' && result.value[0].calls[0].logs.length === 1)
-			}
-
-			const parsedResult = EthSimulateV1Result.safeParse(serializedResult)
-
-			if (!resultContainsLog(parsedResult)) throw new Error(`The RPC server does not have a support for eth_simulateV1 (it doesn't return ETH logs). PhisGuard requires this feature to function.`)
-		} catch (error) {
-			let errorMessage = 'RPC eth_simulateV1 validation error'
-			console.warn(errorMessage, error)
-			if (error instanceof Error) errorMessage = `${ errorMessage } (${ error.message })`
-			if (error instanceof JsonRpcResponseError) errorMessage = error.message
-			throw new Error('The RPC server does not have a support for eth_simulateV1. PhisGuard requires this feature to function.')
-		}
-	}
-
 	const queryRpcInfo = (url: string) => waitFor(async () => {
-		const network = await checkServerAvailability(url)
-		await validateEthSimulateSupport(url)
-		return network
+		return await checkServerAvailability(url)
 	})
 
 	return <ConfigureRpcContext.Provider value = { { queryRpcInfo, rpcQuery, resetRpcQuery } }>{ children }</ConfigureRpcContext.Provider>

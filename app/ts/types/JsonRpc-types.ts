@@ -1,9 +1,8 @@
 import * as funtypes from 'funtypes'
-import { EthereumAddress, EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBlockTag, EthereumBytes256, EthereumBytes32, EthereumData, EthereumInput, EthereumQuantity, LiteralConverterParserFactory } from './wire-types.js'
 import { areEqualUint8Arrays } from '../utils/typed-arrays.js'
-import { EthSimulateV1Params } from './ethSimulate-types.js'
 import { OldSignTypedDataParams, PersonalSignParams, SignTypedDataParams } from './jsonRpc-signing-types.js'
 import { CodeMessageError } from './rpc.js'
+import { EthereumAddress, EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBlockTag, EthereumBytes256, EthereumBytes32, EthereumData, EthereumInput, EthereumQuantity, LiteralConverterParserFactory } from './wire-types.js'
 
 export type EthGetStorageAtResponse = funtypes.Static<typeof EthGetStorageAtResponse>
 export const EthGetStorageAtResponse = funtypes.Union(
@@ -363,7 +362,7 @@ export const EthereumJsonRpcRequest = funtypes.Union(
 	EthGetStorageAtParams,
 	EthGetLogsParams,
 	EthSign,
-	EthSimulateV1Params,
+	// EthSimulateV1Params,
 	WalletAddEthereumChain,
 	Web3ClientVersion,
 	FeeHistory,

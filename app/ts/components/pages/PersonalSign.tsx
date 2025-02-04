@@ -31,12 +31,6 @@ type SignatureHeaderParams = {
 
 export function identifySignature(data: VisualizedPersonalSignRequest) {
 	switch (data.type) {
-		case 'OrderComponents': return {
-			title: 'Opensea order',
-			rejectAction: 'Reject Opensea order',
-			simulationAction: 'Simulate Opensea order',
-			signingAction: 'Sign Opensea order',
-		}
 		case 'SafeTx': return {
 			title: 'Gnosis Safe message',
 			rejectAction: 'Reject Gnosis Safe message',
@@ -290,7 +284,6 @@ function ExtraDetails({ visualizedPersonalSignRequest, renameAddressCallBack }: 
 	const [showSummary, setShowSummary] = useState<boolean>(false)
 	if (visualizedPersonalSignRequest.type !== 'Permit2'
 		&& visualizedPersonalSignRequest.type !== 'Permit'
-		&& visualizedPersonalSignRequest.type !== 'OrderComponents'
 		&& visualizedPersonalSignRequest.type !== 'SafeTx') {
 		return <></>
 	}

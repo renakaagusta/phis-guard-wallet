@@ -1,15 +1,12 @@
-import { EthereumSignedTransactionWithBlockData, EthereumQuantity, EthereumBlockTag, EthereumData, EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBytes32, OptionalEthereumUnsignedTransaction } from '../../types/wire-types.js'
-import { IUnsignedTransaction1559 } from '../../utils/ethereum.js'
-import { MAX_BLOCK_CACHE, TIME_BETWEEN_BLOCKS } from '../../utils/constants.js'
-import { IEthereumJSONRpcRequestHandler } from './EthereumJSONRpcRequestHandler.js'
-import { AbiCoder, Signature, ethers } from 'ethers'
-import { addressString, bytes32String } from '../../utils/bigint.js'
-import { BlockCalls, EthSimulateV1Result, StateOverrides } from '../../types/ethSimulate-types.js'
-import { EthGetStorageAtResponse, EthTransactionReceiptResponse, EthGetLogsRequest, EthGetLogsResponse, DappRequestTransaction } from '../../types/JsonRpc-types.js'
-import { MessageHashAndSignature, SignatureWithFakeSignerAddress, simulatePersonalSign } from './SimulationModeEthereumClientService.js'
-import { getEcRecoverOverride } from '../../utils/ethereumByteCodes.js'
 import * as funtypes from 'funtypes'
+import { EthSimulateV1Result, StateOverrides } from '../../types/ethSimulate-types.js'
+import { DappRequestTransaction, EthGetLogsRequest, EthGetLogsResponse, EthGetStorageAtResponse, EthTransactionReceiptResponse } from '../../types/JsonRpc-types.js'
 import { RpcEntry } from '../../types/rpc.js'
+import { EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBlockTag, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSignedTransactionWithBlockData, OptionalEthereumUnsignedTransaction } from '../../types/wire-types.js'
+import { MAX_BLOCK_CACHE, TIME_BETWEEN_BLOCKS } from '../../utils/constants.js'
+import { IUnsignedTransaction1559 } from '../../utils/ethereum.js'
+import { IEthereumJSONRpcRequestHandler } from './EthereumJSONRpcRequestHandler.js'
+import { SignatureWithFakeSignerAddress } from './SimulationModeEthereumClientService.js'
 
 export type IEthereumClientService = Pick<EthereumClientService, keyof EthereumClientService>
 export class EthereumClientService {
@@ -183,87 +180,22 @@ export class EthereumClientService {
 		return response as string
 	}
 
-	public readonly ethSimulateV1 = async (blockStateCalls: readonly BlockCalls[], blockTag: EthereumBlockTag, requestAbortController: AbortController | undefined) => {
-		const parentBlock = await this.getBlock(requestAbortController)
-		if (parentBlock === null) throw new Error('The latest block is null')
-		const call = {
-			method: 'eth_simulateV1',
-			params: [{
-				blockStateCalls: blockStateCalls,
-				traceTransfers: true,
-				validation: false,
-			},
-			blockTag === parentBlock.number + 1n ? blockTag - 1n : blockTag
-		] } as const
-		const unvalidatedResult = await this.requestHandler.jsonRpcRequest(call)
-		/*
-		console.log('ethSimulateV1')
-		console.log(call)
-		console.log(unvalidatedResult)
-		console.log(stringifyJSONWithBigInts(EthSimulateV1Params.serialize(call)))
-		console.log(stringifyJSONWithBigInts(unvalidatedResult))
-		console.log('end')
-		*/
-		return EthSimulateV1Result.parse(unvalidatedResult)
-	}
+	public readonly simulateTransactionsAndSignatures = async (_: readonly OptionalEthereumUnsignedTransaction[][], __: readonly SignatureWithFakeSignerAddress[], ___: bigint, ____: AbortController | undefined, _____: StateOverrides = {}) => {
+		// const transactionsWithRemoveZeroPricedOnes = transactionsInBlocks.map((block) => block.map((transaction) => {
+		// 	if (transaction.type !== '1559') return transaction
+		// 	const { maxFeePerGas, ...transactionWithoutMaxFee } = transaction
+		// 	return { ...transactionWithoutMaxFee, ...maxFeePerGas === 0n ? {} : { maxFeePerGas } }
+		// }))
+		// const parentBlock = await this.getBlock(requestAbortController, blockNumber)
+		// if (parentBlock === null) throw new Error(`The block ${ blockNumber } is null`)
 
-	public readonly simulateTransactionsAndSignatures = async (transactionsInBlocks: readonly OptionalEthereumUnsignedTransaction[][], signatures: readonly SignatureWithFakeSignerAddress[], blockNumber: bigint, requestAbortController: AbortController | undefined, extraAccountOverrides: StateOverrides = {}) => {
-		const transactionsWithRemoveZeroPricedOnes = transactionsInBlocks.map((block) => block.map((transaction) => {
-			if (transaction.type !== '1559') return transaction
-			const { maxFeePerGas, ...transactionWithoutMaxFee } = transaction
-			return { ...transactionWithoutMaxFee, ...maxFeePerGas === 0n ? {} : { maxFeePerGas } }
-		}))
-		const ecRecoverMovedToAddress = 0x123456n
-		const ecRecoverAddress = 1n
-		const parentBlock = await this.getBlock(requestAbortController, blockNumber)
-		if (parentBlock === null) throw new Error(`The block ${ blockNumber } is null`)
-		const coder = AbiCoder.defaultAbiCoder()
+		// const [firstBlocksTransactions] = transactionsWithRemoveZeroPricedOnes
+		// if (firstBlocksTransactions === undefined) throw new Error('No blocks specified for simulateTransactionsAndSignatures')
 
-		const encodePackedHash = (messageHashAndSignature: MessageHashAndSignature) => {
-			const sig = Signature.from(messageHashAndSignature.signature)
-			const packed = BigInt(ethers.keccak256(coder.encode(['bytes32', 'uint8', 'bytes32', 'bytes32'], [messageHashAndSignature.messageHash, sig.v, sig.r, sig.s])))
-			return packed
-		}
-
-		// set mapping storage mapping() (instructed here: https://docs.soliditylang.org/en/latest/internals/layout_in_storage.html)
-		const getMappingsMemorySlot = (hash: EthereumBytes32) => ethers.keccak256(coder.encode(['bytes32', 'uint256'], [bytes32String(hash), 0n]))
-		const signatureStructs = signatures.map((sign) => ({ key: getMappingsMemorySlot(encodePackedHash(simulatePersonalSign(sign.originalRequestParameters, sign.fakeSignedFor))), value: sign.fakeSignedFor }))
-		const stateSets = signatureStructs.reduce((acc, current) => {
-			acc[current.key] = current.value
-			return acc
-		}, {} as { [key: string]: bigint } )
-
-		const getBlockOverrides = (index: number) => ({
-			number: parentBlock.number + 1n + BigInt(index),
-			prevRandao: 0x1n,
-			time: new Date(parentBlock.timestamp.getTime() + (index + 1) * 12 * 1000),
-			gasLimit: parentBlock.gasLimit,
-			feeRecipient: parentBlock.miner,
-			baseFeePerGas: parentBlock.baseFeePerGas === undefined ? 15000000n : parentBlock.baseFeePerGas
-		})
-
-		const [firstBlocksTransactions, ...restofTheBlocks] = transactionsWithRemoveZeroPricedOnes
-		if (firstBlocksTransactions === undefined) throw new Error('No blocks specified for simulateTransactionsAndSignatures')
-
-		// add stateOverrides only to the first block (ecrecover overrides, make me rich and such)
-		const firstBlocksCalls = {
-			calls: firstBlocksTransactions,
-			blockOverrides: getBlockOverrides(0),
-			stateOverrides: {
-				...signatures.length > 0 ? {
-					[addressString(ecRecoverAddress)]: {
-						movePrecompileToAddress: ecRecoverMovedToAddress,
-						code: getEcRecoverOverride(),
-						state: stateSets,
-					}
-				} : {},
-				...extraAccountOverrides,
-			}
-		}
-		const blockStateCalls = [firstBlocksCalls, ...restofTheBlocks.map((calls, index) => ({ calls, blockOverrides: getBlockOverrides(index + 1) }))]
-		const ethSimulateResults = await this.ethSimulateV1(blockStateCalls, parentBlock.number, requestAbortController)
-		if (ethSimulateResults.length !== transactionsWithRemoveZeroPricedOnes.length) throw new Error(`Ran Eth Simulate for ${ transactionsWithRemoveZeroPricedOnes.length } blocks but got ${ ethSimulateResults.length } blocks`)
-		return ethSimulateResults
+	
+		// if (EthSimulateV1Result.parse([]).length !== transactionsWithRemoveZeroPricedOnes.length) throw new Error(`Ran Eth Simulate for ${ transactionsWithRemoveZeroPricedOnes.length } blocks but got ${ EthSimulateV1Result.parse([]).length } blocks`)
+		// return EthSimulateV1Result.parse([])
+		return EthSimulateV1Result.parse([])
 	}
 
 	public readonly web3ClientVersion = async (requestAbortController: AbortController | undefined) => {
