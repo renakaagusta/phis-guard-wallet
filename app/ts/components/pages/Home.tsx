@@ -63,7 +63,6 @@ function FirstCard(param: FirstCardParams) {
 			<div class='card-content'>
 				{param.useSignersAddressAsActiveAddress ?
 					<p style='color: var(--text-color); text-align: left; padding-bottom: 10px'>
-						{param.tabState === undefined || param.tabState?.signerName === 'NoSigner' as SignerName ? <></> : <><SignersLogoName signerName={param.tabState.signerName} /></>}
 						{param.tabState?.signerConnected ? <span style='float: right; color: var(--primary-color);'>CONNECTED</span> : <span style='float: right; color: var(--negative-color);'>NOT CONNECTED</span>}
 					</p>
 					: <></>

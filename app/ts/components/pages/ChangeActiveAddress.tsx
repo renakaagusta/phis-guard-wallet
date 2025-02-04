@@ -2,7 +2,7 @@
 import { ChangeActiveAddressParam } from '../../types/user-interface-types.js'
 import { BigAddress } from '../subcomponents/address.js'
 import { XMarkIcon } from '../subcomponents/icons.js'
-import { getSignerLogo, getPrettySignerName, SignerLogoText } from '../subcomponents/signers.js'
+import { getPrettySignerName, SignerLogoText } from '../subcomponents/signers.js'
 
 export function ChangeActiveAddress(param: ChangeActiveAddressParam) {
 	function changeAndStoreActiveAddress(activeAddress: bigint | 'signer') {
@@ -25,8 +25,6 @@ export function ChangeActiveAddress(param: ChangeActiveAddressParam) {
 		param.addNewAddress()
 	}
 
-	const signerAddressName = param.activeAddresses.find((x) => x.address === getSignerAccount() )?.name
-
 	return ( <>
 		<div class = 'modal-background'> </div>
 		<div class = 'modal-card' style = 'height: 100%;'>
@@ -47,30 +45,6 @@ export function ChangeActiveAddress(param: ChangeActiveAddressParam) {
 			</header>
 			<section class = 'modal-card-body'>
 				<ul>
-					<li>
-						<div class = 'card hoverable' onClick = { () => { changeAndStoreActiveAddress('signer') } }>
-							<div class = 'card-content hoverable' style = 'cursor: pointer;'>
-								<div class = 'media'>
-									<div class = 'media-left'>
-										<figure class = 'image'>
-											{ getSignerLogo(param.signerName) === undefined ?
-												<div style = 'border: 1px solid white; width: 40px; height: 40px;'>
-													<p class = 'title' style = 'text-align: center'> S </p>
-												</div>
-												: <img src = { getSignerLogo(param.signerName) } style = 'max-width: 40px; max-height: 40px'/>
-											}
-										</figure>
-									</div>
-
-									<div class = 'media-content' style = 'overflow-y: hidden;'>
-										<p class = 'title is-5 is-spaced'>{ `Use address from ${ getPrettySignerName(param.signerName) }` }</p>
-										<p class = 'subtitle is-7'> { signerAddressName === undefined ? '' : signerAddressName }</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</li>
-
 					{ param.activeAddresses === undefined
 						? <></>
 						: param.activeAddresses.map((activeAddress) => (
