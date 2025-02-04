@@ -11,29 +11,10 @@ import { bytes32String } from '../utils/bigint.js'
 import { ENS_ADDRESS_CHANGED, ENS_ADDR_CHANGED, ENS_BASE_REGISTRAR_NAME_REGISTERED, ENS_BASE_REGISTRAR_NAME_RENEWED, ENS_CONTENT_HASH_CHANGED, ENS_CONTROLLER_NAME_REGISTERED, ENS_CONTROLLER_NAME_RENEWED, ENS_ETHEREUM_NAME_SERVICE, ENS_ETH_REGISTRAR_CONTROLLER, ENS_EXPIRY_EXTENDED, ENS_FUSES_SET, ENS_NAME_CHANGED, ENS_NAME_UNWRAPPED, ENS_NAME_WRAPPED, ENS_NEW_OWNER, ENS_NEW_RESOLVER, ENS_NEW_TTL, ENS_PUBLIC_RESOLVER, ENS_PUBLIC_RESOLVER_2, ENS_REGISTRY_WITH_FALLBACK, ENS_REVERSE_CLAIMED, ENS_REVERSE_REGISTRAR, ENS_TEXT_CHANGED, ENS_TEXT_CHANGED_KEY_VALUE, ENS_TOKEN_WRAPPER, ENS_TRANSFER } from '../utils/constants.js'
 import { parseSolidityValueByTypePure } from '../utils/solidityTypes.js'
 import { handleBaseRegistrarNameRegistered, handleBaseRegistrarNameRenewed, handleControllerNameRegistered, handleEnsAddrChanged, handleEnsAddressChanged, handleEnsContentHashChanged, handleEnsControllerNameRenewed, handleEnsExpiryExtended, handleEnsFusesSet, handleEnsNameChanged, handleEnsNameUnWrapped, handleEnsNewOwner, handleEnsNewResolver, handleEnsNewTtl, handleEnsReverseClaimed, handleEnsTextChanged, handleEnsTextChangedKeyValue, handleEnsTransfer, handleNameWrapped } from './logHandlers.js'
-import { chainIdMismatch } from './protectors/chainIdMismatch.js'
-import { commonTokenOops } from './protectors/commonTokenOops.js'
-import { eoaApproval } from './protectors/eoaApproval.js'
-import { eoaCalldata } from './protectors/eoaCalldata.js'
-import { feeOops } from './protectors/feeOops.js'
-import { selfTokenOops } from './protectors/selfTokenOops.js'
-import { sendToNonContact } from './protectors/sendToNonContactAddress.js'
-import { tokenToContract } from './protectors/tokenToContract.js'
 import { EthereumClientService } from './services/EthereumClientService.js'
 import { EthereumJSONRpcRequestHandler } from './services/EthereumJSONRpcRequestHandler.js'
 import { TokenPriceService } from './services/priceEstimator.js'
 import { parseEventIfPossible, parseTransactionInputIfPossible } from './services/SimulationModeEthereumClientService.js'
-
-const PROTECTORS = [
-	selfTokenOops,
-	commonTokenOops,
-	feeOops,
-	eoaApproval,
-	eoaCalldata,
-	tokenToContract,
-	sendToNonContact,
-	chainIdMismatch,
-]
 
 const ensEventHandler = (parsedEvent: ParsedEvent) => {
 	if (parsedEvent.topics[0] !== undefined) {
@@ -164,9 +145,8 @@ export const parseEvents = async (events: readonly EthereumEvent[], ethereumClie
 	return maybeParsedEvents.flat()
 }
 
-export const runProtectorsForTransaction = async (simulationState: SimulationState, transaction: WebsiteCreatedEthereumUnsignedTransaction, ethereum: EthereumClientService, requestAbortController: AbortController | undefined) => {
-	const reasonPromises = PROTECTORS.map(async (protectorMethod) => await protectorMethod(transaction.transaction, ethereum, requestAbortController, simulationState))
-	const reasons: (string | undefined)[] = await Promise.all(reasonPromises)
+export const runProtectorsForTransaction = async (_: SimulationState, __: WebsiteCreatedEthereumUnsignedTransaction, ___: EthereumClientService, requestAbortController: AbortController | undefined) => {
+	const reasons: (string | undefined)[] = []
 	const filteredReasons = reasons.filter((reason): reason is string => reason !== undefined)
 	return {
 		quarantine: filteredReasons.length > 0,
