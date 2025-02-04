@@ -6,7 +6,7 @@ import { PendingAccessRequests, PendingTransactionOrSignableMessage } from './ac
 import { AddressBookEntries, AddressBookEntry, ChainIdWithUniversal } from './addressBookTypes.js'
 import { Page } from './exportedSettingsTypes.js'
 import { OldSignTypedDataParams, PersonalSignParams, SignTypedDataParams } from './jsonRpc-signing-types.js'
-import { VisualizedPersonalSignRequest, VisualizedPersonalSignRequestSafeTx } from './personal-message-definitions.js'
+import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
 import { CodeMessageError, RpcEntries, RpcEntry, RpcNetwork } from './rpc.js'
 import { SignerName } from './signerTypes.js'
 import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabIconDetails, TabState } from './user-interface-types.js'
@@ -331,15 +331,6 @@ export const AllowOrPreventAddressAccessForWebsite = funtypes.ReadonlyObject({
 		website: Website,
 		address: EthereumAddress,
 		allowAccess: funtypes.Boolean
-	})
-}).asReadonly()
-
-export type RemoveWebsiteAddressAccess = funtypes.Static<typeof RemoveWebsiteAddressAccess>
-export const RemoveWebsiteAddressAccess = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_removeWebsiteAddressAccess'),
-	data: funtypes.Object({
-		websiteOrigin: funtypes.String,
-		address: EthereumAddress
 	})
 }).asReadonly()
 
@@ -668,31 +659,6 @@ export const SimulateExecutionReply = funtypes.ReadonlyObject({
 	data: SimulateExecutionReplyData
 }).asReadonly()
 
-export type SimulateGovernanceContractExecution = funtypes.Static<typeof SimulateGovernanceContractExecution>
-export const SimulateGovernanceContractExecution = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_simulateGovernanceContractExecution'),
-	data: funtypes.ReadonlyObject({ transactionIdentifier: EthereumQuantity })
-})
-
-type SimulateGnosisSafeTransaction = funtypes.Static<typeof SimulateGnosisSafeTransaction>
-const SimulateGnosisSafeTransaction = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_simulateGnosisSafeTransaction'),
-	data: funtypes.ReadonlyObject({
-		gnosisSafeMessage: VisualizedPersonalSignRequestSafeTx,
-	})
-})
-
-type SettingsOpenedReply = funtypes.Static<typeof SettingsOpenedReply>
-const SettingsOpenedReply = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_requestSettingsReply'),
-	data: funtypes.ReadonlyObject({
-		useTabsInsteadOfPopup: funtypes.Boolean,
-		metamaskCompatibilityMode: funtypes.Boolean,
-		activeRpcNetwork: RpcNetwork,
-		rpcEntries: RpcEntries,
-	})
-}).asReadonly()
-
 export type ChangeAddOrModifyAddressWindowState = funtypes.Static<typeof ChangeAddOrModifyAddressWindowState>
 export const ChangeAddOrModifyAddressWindowState = funtypes.ReadonlyObject({
 	method: funtypes.Literal('popup_changeAddOrModifyAddressWindowState'),
@@ -741,34 +707,6 @@ export const OpenWebPage = funtypes.ReadonlyObject({
 	})
 }).asReadonly()
 
-export type DisableInterceptor = funtypes.Static<typeof DisableInterceptor>
-export const DisableInterceptor = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_setDisableInterceptor'),
-	data: funtypes.ReadonlyObject({
-		interceptorDisabled: funtypes.Boolean,
-		website: Website,
-	})
-}).asReadonly()
-
-type DisableInterceptorReply = funtypes.Static<typeof DisableInterceptorReply>
-const DisableInterceptorReply = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_setDisableInterceptorReply'),
-	data: funtypes.ReadonlyObject({
-		interceptorDisabled: funtypes.Boolean,
-		website: Website,
-	})
-}).asReadonly()
-
-export type SetEnsNameForHash = funtypes.Static<typeof SetEnsNameForHash>
-export const SetEnsNameForHash = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_setEnsNameForHash'),
-	data: funtypes.ReadonlyObject({
-		type: funtypes.Union(funtypes.Literal('nameHash'), funtypes.Literal('labelHash')),
-		nameHash: EthereumBytes32,
-		name: funtypes.String
-	})
-}).asReadonly()
-
 export type ForceSetGasLimitForTransaction = funtypes.Static<typeof ForceSetGasLimitForTransaction>
 export const ForceSetGasLimitForTransaction = funtypes.ReadonlyObject({
 	method: funtypes.Literal('popup_forceSetGasLimitForTransaction'),
@@ -811,20 +749,15 @@ export const PopupMessage = funtypes.Union(
 	funtypes.ReadonlyObject({ method: funtypes.Literal('popup_clearUnexpectedError') }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('popup_import_settings'), data: funtypes.ReadonlyObject({ fileContents: funtypes.String }) }),
 	funtypes.ReadonlyObject({ method: funtypes.Literal('popup_get_export_settings') }),
-	SimulateGovernanceContractExecution,
-	SimulateGnosisSafeTransaction,
 	funtypes.ReadonlyObject({ method: funtypes.Literal('popup_requestSettings') }),
 	ChangeSettings,
 	SetRpcList,
 	ChangeAddOrModifyAddressWindowState,
 	OpenWebPage,
-	DisableInterceptor,
-	SetEnsNameForHash,
 	funtypes.ReadonlyObject({ method: funtypes.Literal('popup_openWebsiteAccess') }),
 	RetrieveWebsiteAccess,
 	BlockOrAllowExternalRequests,
 	AllowOrPreventAddressAccessForWebsite,
-	RemoveWebsiteAddressAccess,
 	RemoveWebsiteAccess,
 	ForceSetGasLimitForTransaction,
 )
@@ -846,9 +779,7 @@ export const MessageToPopup = funtypes.Union(
 	SimulationUpdateStartedOrEnded,
 	PartialUpdateHomePage,
 	PartiallyParsedSimulateExecutionReply,
-	SettingsOpenedReply,
 	PopupAddOrModifyAddressWindowStateInfomation,
-	DisableInterceptorReply,
 	UnexpectedErrorOccured,
 	RetrieveWebsiteAccessReply,
 )

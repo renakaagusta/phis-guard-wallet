@@ -1,20 +1,17 @@
-import { DEFAULT_TAB_CONNECTION, getChainName } from '../utils/constants.js'
-import { Semaphore } from '../utils/semaphore.js'
-import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabState } from '../types/user-interface-types.js'
-import { PartialIdsOfOpenedTabs, TabStateItems, browserStorageLocalGet, browserStorageLocalGet2, browserStorageLocalRemove, browserStorageLocalSet, browserStorageLocalSet2, getTabStateFromStorage, removeTabStateFromStorage, setTabStateToStorage } from '../utils/storageUtils.js'
-import { CompleteVisualizedSimulation, EthereumSubscriptionsAndFilters, TransactionStack } from '../types/visualizer-types.js'
-import { defaultActiveAddresses, defaultRpcs } from './settings.js'
-import { UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch } from '../utils/requests.js'
-import { AddressBookEntries, AddressBookEntry, ChainIdWithUniversal } from '../types/addressBookTypes.js'
-import { SignerName } from '../types/signerTypes.js'
 import { PendingAccessRequests, PendingTransactionOrSignableMessage } from '../types/accessRequest.js'
-import { RpcEntries, RpcNetwork } from '../types/rpc.js'
-import { replaceElementInReadonlyArray } from '../utils/typed-arrays.js'
+import { AddressBookEntries, AddressBookEntry, ChainIdWithUniversal } from '../types/addressBookTypes.js'
 import { UnexpectedErrorOccured } from '../types/interceptor-messages.js'
-import { isValidName, namehash } from 'ethers'
-import { bytesToUnsigned } from '../utils/bigint.js'
-import { keccak_256 } from '@noble/hashes/sha3'
+import { RpcEntries, RpcNetwork } from '../types/rpc.js'
+import { SignerName } from '../types/signerTypes.js'
+import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabState } from '../types/user-interface-types.js'
+import { CompleteVisualizedSimulation, EthereumSubscriptionsAndFilters, TransactionStack } from '../types/visualizer-types.js'
+import { DEFAULT_TAB_CONNECTION, getChainName } from '../utils/constants.js'
+import { UniqueRequestIdentifier, doesUniqueRequestIdentifiersMatch } from '../utils/requests.js'
+import { Semaphore } from '../utils/semaphore.js'
+import { PartialIdsOfOpenedTabs, TabStateItems, browserStorageLocalGet, browserStorageLocalGet2, browserStorageLocalRemove, browserStorageLocalSet, browserStorageLocalSet2, getTabStateFromStorage, removeTabStateFromStorage, setTabStateToStorage } from '../utils/storageUtils.js'
+import { replaceElementInReadonlyArray } from '../utils/typed-arrays.js'
 import { modifyObject } from '../utils/typescript.js'
+import { defaultActiveAddresses, defaultRpcs } from './settings.js'
 
 export const getIdsOfOpenedTabs = async () => (await browserStorageLocalGet('idsOfOpenedTabs'))?.idsOfOpenedTabs ?? { settingsView: undefined, addressBook: undefined, websiteAccess: undefined }
 export const setIdsOfOpenedTabs = async (ids: PartialIdsOfOpenedTabs) => await browserStorageLocalSet({ idsOfOpenedTabs: { ...await getIdsOfOpenedTabs(), ...ids } })
@@ -289,31 +286,6 @@ export async function setLatestUnexpectedError(latestUnexpectedError: Unexpected
 }
 
 export const getLatestUnexpectedError = async () => (await browserStorageLocalGet('latestUnexpectedError'))?.latestUnexpectedError
-
-export const getEnsNodeHashes = async () => (await browserStorageLocalGet('ensNameHashes'))?.ensNameHashes ?? []
-
-const ensNodeHashesSemaphore = new Semaphore(1)
-export async function addEnsNodeHash(name: string) {
-	if (!isValidName(name)) return
-	const entry = { name, nameHash: BigInt(namehash(name)) }
-	await ensNodeHashesSemaphore.execute(async () => {
-		const oldEntries = await getEnsNodeHashes() || []
-		if (oldEntries.find((old) => old.nameHash === entry.nameHash)) return
-		return await browserStorageLocalSet({ ensNameHashes: [...oldEntries, entry] })
-	})
-}
-
-export const getEnsLabelHashes = async () => (await browserStorageLocalGet('ensLabelHashes'))?.ensLabelHashes ?? []
-
-const ensLabelHashesSemaphore = new Semaphore(1)
-export async function addEnsLabelHash(label: string) {
-	const entry = { label, labelHash: bytesToUnsigned(keccak_256(label)) }
-	await ensLabelHashesSemaphore.execute(async () => {
-		const oldEntries = await getEnsLabelHashes() || []
-		if (oldEntries.find((old) => old.labelHash === entry.labelHash)) return
-		return await browserStorageLocalSet({ ensLabelHashes: [...oldEntries, entry] })
-	})
-}
 
 const transactionStackSemaphore = new Semaphore(1)
 export const getTransactionStack = async () => (await browserStorageLocalGet('transactionStack'))?.transactionStack ?? { transactions: [], signedMessages: [] }

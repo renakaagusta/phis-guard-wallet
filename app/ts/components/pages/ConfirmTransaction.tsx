@@ -179,10 +179,6 @@ export function ConfirmTransaction() {
 				sendPopupMessageToBackgroundPage({ method: 'popup_requestSettings' })
 				return
 			}
-			if (parsed.method === 'popup_requestSettingsReply') {
-				rpcEntries.value = parsed.data.rpcEntries
-				return
-			}
 			if (parsed.method === 'popup_UnexpectedErrorOccured') {
 				unexpectedError.value = parsed
 				return
@@ -233,13 +229,10 @@ export function ConfirmTransaction() {
 		try {
 			await sendPopupMessageToBackgroundPage({ method: 'popup_confirmDialog', data: { uniqueRequestIdentifier: currentPendingTransactionOrSignableMessage.value.uniqueRequestIdentifier, action: 'accept' } })
 			console.log('Line 6: Sent popup confirmation message')
-			alert('Line 6: Sent popup confirmation message')
-			alert('Transaction approved successfully')
 		} catch (error) {
 			console.warn('Failed to confirm transaction')
 			// biome-ignore lint/suspicious/noConsoleLog: <Used for support debugging>
 			console.log({ error })
-			alert('Failed to approve transaction')
 		}
 	}
 	

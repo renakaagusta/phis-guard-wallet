@@ -1,15 +1,14 @@
 import * as funtypes from 'funtypes'
-import { EthereumAddress, EthereumAddressOrMissing, LiteralConverterParserFactory, serialize } from '../types/wire-types.js'
-import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabState } from '../types/user-interface-types.js'
-import { CompleteVisualizedSimulation, EthereumSubscriptionsAndFilters, TransactionStack } from '../types/visualizer-types.js'
+import { PendingAccessRequests, PendingTransactionOrSignableMessage } from '../types/accessRequest.js'
 import { AddressBookEntries, AddressBookEntry, EntrySource } from '../types/addressBookTypes.js'
 import { Page } from '../types/exportedSettingsTypes.js'
-import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
-import { SignerName } from '../types/signerTypes.js'
-import { PendingAccessRequests, PendingTransactionOrSignableMessage } from '../types/accessRequest.js'
-import { RpcEntries, RpcNetwork } from '../types/rpc.js'
 import { UnexpectedErrorOccured } from '../types/interceptor-messages.js'
-import { ENSLabelHashes, ENSNameHashes } from '../types/ens.js'
+import { RpcEntries, RpcNetwork } from '../types/rpc.js'
+import { SignerName } from '../types/signerTypes.js'
+import { PendingChainChangeConfirmationPromise, RpcConnectionStatus, TabState } from '../types/user-interface-types.js'
+import { CompleteVisualizedSimulation, EthereumSubscriptionsAndFilters, TransactionStack } from '../types/visualizer-types.js'
+import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
+import { EthereumAddress, EthereumAddressOrMissing, LiteralConverterParserFactory, serialize } from '../types/wire-types.js'
 
 type IdsOfOpenedTabs = funtypes.Static<typeof IdsOfOpenedTabs>
 const IdsOfOpenedTabs = funtypes.ReadonlyObject({
@@ -61,8 +60,6 @@ const LocalStorageItems = funtypes.ReadonlyPartial({
 	interceptorDisabled: funtypes.Boolean,
 	interceptorStartSleepingTimestamp: funtypes.Number,
 	latestUnexpectedError: UnexpectedErrorOccured,
-	ensNameHashes: ENSNameHashes,
-	ensLabelHashes: ENSLabelHashes,
 })
 
 type LocalStorageKey = funtypes.Static<typeof LocalStorageKey>

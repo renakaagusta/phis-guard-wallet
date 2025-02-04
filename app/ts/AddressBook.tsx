@@ -184,16 +184,6 @@ export function AddressBook() {
 				return
 			}
 			if (parsed.method === 'popup_settingsUpdated') return sendPopupMessageToBackgroundPage({ method: 'popup_requestSettings' })
-			if (parsed.method === 'popup_requestSettingsReply') {
-				rpcEntries.value = parsed.data.rpcEntries
-				const prevActiveNetwork = activeChain.peek()
-				if (prevActiveNetwork === undefined || prevActiveNetwork.chainId === parsed.data.activeRpcNetwork.chainId) {
-					activeChain.value = parsed.data.activeRpcNetwork
-					if (prevActiveNetwork === undefined || viewFilter.value.chain === undefined) {
-						viewFilter.value = { ...viewFilter.value, chain: activeChain.value === undefined ? undefined : { name: activeChain.value.name, chainId: activeChain.value.chainId } }
-					}
-				}
-			}
 			if (parsed.method !== 'popup_getAddressBookDataReply') return
 			const reply = GetAddressBookDataReply.parse(msg)
 			if (activeChain.peek()?.chainId === reply.data.data.chainId) {

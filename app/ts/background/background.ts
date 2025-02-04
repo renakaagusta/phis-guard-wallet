@@ -16,7 +16,7 @@ import { sendActiveAccountChangeToApprovedWebsitePorts, sendMessageToApprovedWeb
 import { getActiveAddress, sendPopupMessageToOpenWindows } from './backgroundUtils.js'
 import { replyToInterceptedRequest } from './messageSending.js'
 import { getActiveAddressEntry } from './metadataUtils.js'
-import { addOrModifyAddressBookEntry, allowOrPreventAddressAccessForWebsite, blockOrAllowExternalRequests, changeActiveAddress, changeAddOrModifyAddressWindowState, changeChainDialog, changeInterceptorAccess, changePage, confirmDialog, confirmRequestAccess, disableInterceptor, forceSetGasLimitForTransaction, getAddressBookData, interceptorAccessChangeAddressOrRefresh, openNewTab, openWebPage, popupChangeActiveRpc, refreshHomeData, refreshPopupConfirmTransactionMetadata, removeAddressBookEntry, removeTransactionOrSignedMessage, requestAccountsFromSigner, setNewRpcList } from './popupMessageHandlers.js'
+import { addOrModifyAddressBookEntry, allowOrPreventAddressAccessForWebsite, blockOrAllowExternalRequests, changeActiveAddress, changeAddOrModifyAddressWindowState, changeChainDialog, changeInterceptorAccess, changePage, confirmDialog, confirmRequestAccess, forceSetGasLimitForTransaction, getAddressBookData, interceptorAccessChangeAddressOrRefresh, openNewTab, openWebPage, popupChangeActiveRpc, refreshHomeData, refreshPopupConfirmTransactionMetadata, removeAddressBookEntry, removeTransactionOrSignedMessage, requestAccountsFromSigner, setNewRpcList } from './popupMessageHandlers.js'
 import { connectedToSigner, ethAccountsReply, signerChainChanged, signerReply, walletSwitchEthereumChainReply } from './providerMessageHandlers.js'
 import { changeSimulationMode, getSettings } from './settings.js'
 import { blockNumber, call, chainId, estimateGas, gasPrice, getAccounts, getBalance, getBlockByHash, getBlockByNumber, getTransactionByHash, getTransactionCount, getTransactionReceipt, handleIterceptorError, netVersion, personalSign, sendTransaction, web3ClientVersion } from './simulationModeHanders.js'
@@ -297,7 +297,6 @@ export async function popupMessageHandler(
 			case 'popup_set_rpc_list': return await setNewRpcList(simulator, parsedRequest, settings)
 			case 'popup_changeAddOrModifyAddressWindowState': return await changeAddOrModifyAddressWindowState(simulator.ethereum, parsedRequest)
 			case 'popup_openWebPage': return await openWebPage(parsedRequest)
-			case 'popup_setDisableInterceptor': return await disableInterceptor(simulator, websiteTabConnections, parsedRequest)
 			case 'popup_clearUnexpectedError': return await setLatestUnexpectedError(undefined)
 			case 'popup_blockOrAllowExternalRequests': return await blockOrAllowExternalRequests(simulator, websiteTabConnections, parsedRequest)
 			case 'popup_allowOrPreventAddressAccessForWebsite': return await allowOrPreventAddressAccessForWebsite(websiteTabConnections, parsedRequest)
