@@ -1,8 +1,6 @@
 import { JSX } from 'preact/jsx-runtime'
-import { useSignal } from '@preact/signals'
 import { clipboardCopy } from './clipboardcopy.js'
 import { CopyIcon, EditIcon } from './icons.js'
-import { Tooltip, TooltipConfig } from './Tooltip.js'
 
 type InlineCardProps = {
 	icon: () => JSX.Element
@@ -17,12 +15,9 @@ type InlineCardProps = {
 }
 
 export const InlineCard = (props: InlineCardProps) => {
-	const tooltip = useSignal<TooltipConfig | undefined>(undefined)
-
 	const copyTextToClipboard = async (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
 		event.currentTarget.blur()
 		await clipboardCopy(event.currentTarget.value || props.label)
-		tooltip.value = { message: 'Copied!', x: event.clientX, y: event.clientY, duration: props.statusMessageDuration || 1500 }
 	}
 
 	const Icon = props.icon
@@ -59,7 +54,6 @@ export const InlineCard = (props: InlineCardProps) => {
 				) : <></> }
 			</span>
 			{ props.warningMessage ? <WarningSign /> : <></> }
-			<Tooltip config = { tooltip } />
 		</span>
 	)
 }

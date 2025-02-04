@@ -11,20 +11,16 @@ const timerAttribute = 'data-hint-clickable-hide-timer-ms'
 
 export default function Container(props: Props) {
 	const copyAttribute = props.attribute || 'data-hint'
-	const toolTipAttribute = props.attribute || 'data-tooltip'
 	const [content, setContent] = useState<string>('')
 	const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(null)
 	const [clickPosition, setClickPosition] = useState<{ x: number, y: number } | null>(null)
 
 	let copyMessageTimeoutId: ReturnType<typeof setTimeout> | undefined = undefined
-	let toolTipTimeoutId: ReturnType<typeof setTimeout> | undefined = undefined
 
 	const onRefChange = useCallback( (containerElement: HTMLDivElement | null) => {
 		setContainerElement(containerElement)
 		if (containerElement) {
-			const hide = (e: Event) => {
-				if (!(e.target instanceof Element) || !e.target.hasAttribute(toolTipAttribute)) return
-				clearTimeout(toolTipTimeoutId)
+			const hide = (_: Event) => {
 				if (copyMessageTimeoutId !== undefined) return
 				setContent('')
 				setClickPosition(null)
@@ -32,7 +28,6 @@ export default function Container(props: Props) {
 
 			const click = (e: MouseEvent) => {
 				if (!(e.target instanceof Element) || !e.target.hasAttribute(copyAttribute) || !e.target.hasAttribute(timerAttribute)) return
-				clearTimeout(toolTipTimeoutId)
 				const delay = e.target.getAttribute(timerAttribute)
 				if (delay === null) return
 				clearTimeout(copyMessageTimeoutId)
@@ -51,16 +46,7 @@ export default function Container(props: Props) {
 			}
 
 			const mouseover = (e: MouseEvent) => {
-				if (!(e.target instanceof Element) || (!e.target.hasAttribute(toolTipAttribute) && !e.target.hasAttribute(timerAttribute))) return
-				clearTimeout(toolTipTimeoutId)
-
-				// show on tooltip on mouseover
-				const content = e.target.getAttribute(toolTipAttribute) || ''
-
-				toolTipTimeoutId = setTimeout( () => {
-					setContent(content)
-					setClickPosition({ x: e.clientX, y: e.clientY })
-				}, 250)
+				if (!(e.target instanceof Element) || (!e.target.hasAttribute(timerAttribute))) return
 			}
 
 			containerElement.addEventListener('click', click)

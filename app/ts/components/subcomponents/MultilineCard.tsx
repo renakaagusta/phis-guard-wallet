@@ -1,6 +1,4 @@
 import { JSX } from 'preact/jsx-runtime'
-import { useSignal } from '@preact/signals'
-import { Tooltip, TooltipConfig } from './Tooltip.js'
 import { clipboardCopy } from './clipboardcopy.js'
 import { CopyIcon } from './icons.js'
 
@@ -37,13 +35,9 @@ export type ActionableIconProps = {
 }
 
 const ActionableIcon = (props: ActionableIconProps) => {
-	const tooltipConfig = useSignal<TooltipConfig | undefined>(undefined)
-
 	const copyTextToClipboard = async (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
 		event.currentTarget.blur()
 		await clipboardCopy(event.currentTarget.value)
-		const copySuccessMessage = props.onClick === 'clipboard-copy' && props.copySuccessMessage ? props.copySuccessMessage : 'Copied!'
-		tooltipConfig.value = { message: copySuccessMessage, x: event.clientX, y: event.clientY }
 	}
 
 	const CardIcon = props.icon
@@ -55,7 +49,6 @@ const ActionableIcon = (props: ActionableIconProps) => {
 		<span role = 'img'>
 			<button type = 'button' onClick = { handleClick } tabIndex = { -1 } value = { copyValue } title = { hintText } disabled = { !props.onClick }>
 				<CardIcon />
-				<Tooltip config = { tooltipConfig } />
 			</button>
 		</span>
 	)
@@ -84,16 +77,10 @@ export type ActionableTextProps = {
 }
 
 const ActionableText = (props: ActionableTextProps) => {
-	const tooltipConfig = useSignal<TooltipConfig | undefined>(undefined)
 
 	const copyTextToClipboard = async (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
 		event.currentTarget.blur()
 		await clipboardCopy(event.currentTarget.value)
-		tooltipConfig.value = {
-			message: props.onClick === 'clipboard-copy' && props.copySuccessMessage ? props.copySuccessMessage : 'Copied!',
-			x: event.clientX,
-			y: event.clientY
-		}
 	}
 
 	const copyValue = props.onClick === 'clipboard-copy' && props.copyValue ? props.copyValue : props.displayText
@@ -107,7 +94,6 @@ const ActionableText = (props: ActionableTextProps) => {
 		<span>
 			<DisplayText />
 			<TextAction buttonLabel = { actionButtonLabel } textNode = { DisplayText } buttonIcon = { actionIcon } onClick = { actionHandler } copyValue = { copyValue } />
-			<Tooltip config = { tooltipConfig } />
 		</span>
 	)
 }
