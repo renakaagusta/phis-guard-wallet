@@ -10,7 +10,6 @@ import { EthereumBytes32 } from '../types/wire-types.js'
 import { addressString, addressStringWithout0x, bytesToUnsigned, checksummedAddress } from '../utils/bigint.js'
 import { ENS_ADDR_REVERSE_NODE, ENS_TOKEN_WRAPPER, ETHEREUM_LOGS_LOGGER_ADDRESS, MOCK_ADDRESS } from '../utils/constants.js'
 import { getEnsReverseNodeHash, getEthereumNameServiceNameFromTokenId } from '../utils/ethereumNameService.js'
-import { IdentifiedAddress, itentifyAddressViaOnChainInformation } from '../utils/tokenIdentification.js'
 import { getUniqueItemsByProperties } from '../utils/typed-arrays.js'
 import { defaultActiveAddresses } from './settings.js'
 import { addEnsLabelHash, addEnsNodeHash, addUserAddressBookEntryIfItDoesNotExist, getEnsLabelHashes, getEnsNodeHashes, getUserAddressBookEntries, getUserAddressBookEntriesForChainIdMorePreciseFirst } from './storageVariables.js'
@@ -62,25 +61,19 @@ async function identifyAddressWithoutNode(address: bigint, rpcEntry: RpcNetwork 
 	return undefined
 }
 
-export async function identifyAddress(ethereumClientService: EthereumClientService, requestAbortController: AbortController | undefined, address: bigint, useLocalStorage = true) : Promise<AddressBookEntry> {
+export async function identifyAddress(ethereumClientService: EthereumClientService, _: AbortController | undefined, address: bigint, useLocalStorage = true) : Promise<AddressBookEntry> {
 	const identifiedAddress = await identifyAddressWithoutNode(address, ethereumClientService.getRpcEntry(), useLocalStorage)
 	if (identifiedAddress !== undefined) return identifiedAddress
 	const addrString = addressString(address)
-	const tokenIdentification = await itentifyAddressViaOnChainInformation(ethereumClientService, requestAbortController, address)
 	const chainId = ethereumClientService.getChainId()
-	const getEntry = (tokenIdentification: IdentifiedAddress) => {
-		switch (tokenIdentification.type) {
-			default:
-			case 'EOA': return {
-				address,
-				name: ethers.getAddress(addrString),
-				type: 'contact' as const,
-				entrySource: 'OnChain' as const,
-				chainId
-			}
-		}
+	
+	const entry = {
+		address,
+		name: ethers.getAddress(addrString),
+		type: 'contact' as const,
+		entrySource: 'OnChain' as const,
+		chainId
 	}
-	const entry = getEntry(tokenIdentification)
 	if (useLocalStorage) await addUserAddressBookEntryIfItDoesNotExist(entry)
 	return entry
 }
