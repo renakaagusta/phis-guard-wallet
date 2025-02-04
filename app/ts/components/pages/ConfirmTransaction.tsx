@@ -7,15 +7,12 @@ import { MessageToPopup, UnexpectedErrorOccured, UpdateConfirmTransactionDialog 
 import { RpcEntries } from '../../types/rpc.js'
 import { RenameAddressCallBack, RpcConnectionStatus } from '../../types/user-interface-types.js'
 import { CompleteVisualizedSimulation, ModifyAddressWindowState, SimulatedAndVisualizedTransaction } from '../../types/visualizer-types.js'
-import { Website } from '../../types/websiteAccessTypes.js'
 import { addressString, checksummedAddress, stringifyJSONWithBigInts } from '../../utils/bigint.js'
-import { WebsiteSocket, checkAndThrowRuntimeLastError } from '../../utils/requests.js'
-import { getWebsiteWarningMessage } from '../../utils/websiteData.js'
+import { checkAndThrowRuntimeLastError } from '../../utils/requests.js'
 import { NetworkErrors } from '../App.js'
 import { DinoSaysNotification } from '../subcomponents/DinoSays.js'
 import { ErrorCheckBox, ErrorComponent, UnexpectedError } from '../subcomponents/Error.js'
 import Hint from '../subcomponents/Hint.js'
-import { Link } from '../subcomponents/link.js'
 import { SignerLogoText, SignersLogoName } from '../subcomponents/signers.js'
 import { tryFocusingTabOrWindow } from '../ui-utils.js'
 import { AddNewAddress } from './AddNewAddress.js'
@@ -89,19 +86,6 @@ const CheckBoxes = (params: CheckBoxesParams) => {
 		</div>
 	</div>
 	return <></>
-}
-
-type NetworkErrorParams = {
-	websiteSocket: WebsiteSocket
-	website: Website
-	simulationMode: boolean
-}
-
-const WebsiteErrors = ({ website, websiteSocket, simulationMode }: NetworkErrorParams) => {
-	const message = getWebsiteWarningMessage(website.websiteOrigin, simulationMode)
-	if (message === undefined) return <></>
-	if (message.suggestedAlternative === undefined) return <ErrorComponent warning={true} text={message.message} />
-	return <ErrorComponent warning={true} text={<> {message.message} <Link url={message.suggestedAlternative} text={'Suggested alternative'} websiteSocket={websiteSocket} /> </>} />
 }
 
 type ModalState =
@@ -342,7 +326,6 @@ export function ConfirmTransaction() {
 					<div style='position: sticky; top: 0; z-index: 1;'>
 						<UnexpectedError close={clearUnexpectedError} unexpectedError={unexpectedError.value} />
 						<NetworkErrors rpcConnectionStatus={rpcConnectionStatus} />
-						<WebsiteErrors website={currentPendingTransactionOrSignableMessage.value.website} websiteSocket={currentPendingTransactionOrSignableMessage.value.uniqueRequestIdentifier.requestSocket} simulationMode={false} />
 						<InvalidMessage pendingTransactionOrSignableMessage={currentPendingTransactionOrSignableMessage.value} />
 					</div>
 					<div class='popup-contents'>

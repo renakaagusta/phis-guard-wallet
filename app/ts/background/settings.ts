@@ -101,9 +101,6 @@ export function getInterceptorDisabledSites(settings: Settings): string[] {
 export const setPage = async (openedPageV2: Page) => await browserStorageLocalSet({ openedPageV2 })
 export const getPage = async() => (await browserStorageLocalGet('openedPageV2'))?.openedPageV2 ?? { page: 'Home' }
 
-export const setMakeMeRich = async (makeMeRich: boolean) => await browserStorageLocalSet({ makeMeRich })
-export const getMakeMeRich = async() => (await browserStorageLocalGet('makeMeRich'))?.makeMeRich ?? false
-
 export async function setUseSignersAddressAsActiveAddress(useSignersAddressAsActiveAddress: boolean, currentSignerAddress: bigint | undefined = undefined) {
 	return await browserStorageLocalSet({
 		useSignersAddressAsActiveAddress,

@@ -235,12 +235,6 @@ export const ChangeActiveAddress = funtypes.ReadonlyObject({
 	})
 }).asReadonly()
 
-export type ChangeMakeMeRich = funtypes.Static<typeof ChangeMakeMeRich>
-export const ChangeMakeMeRich = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_changeMakeMeRich'),
-	data: funtypes.Boolean
-}).asReadonly()
-
 export type AddressBookCategory = funtypes.Static<typeof AddressBookCategory>
 export const AddressBookCategory = funtypes.Union(
 	funtypes.Literal('My Active Addresses'),
@@ -527,7 +521,6 @@ export const UpdateHomePage = funtypes.ReadonlyObject({
 		tabState: TabState,
 		currentBlockNumber: funtypes.Union(EthereumQuantity, funtypes.Undefined),
 		settings: Settings,
-		makeMeRich: funtypes.Boolean,
 		rpcConnectionStatus: funtypes.Union(RpcConnectionStatus, funtypes.Undefined),
 		activeSigningAddressInThisTab: OptionalEthereumAddress,
 		tabId: funtypes.Union(funtypes.Number, funtypes.Undefined),
@@ -722,7 +715,6 @@ export const PopupMessage = funtypes.Union(
 	RemoveTransaction,
 	ResetSimulation,
 	RefreshSimulation,
-	ChangeMakeMeRich,
 	ChangeActiveAddress,
 	ChangePage,
 	RequestAccountsFromSigner,

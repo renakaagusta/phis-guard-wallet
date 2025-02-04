@@ -1,8 +1,8 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedCode, getSimulatedFeeHistory, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
+import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedCode, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
 import { Simulator } from '../simulation/simulator.js'
 import { SignMessageParams } from '../types/jsonRpc-signing-types.js'
-import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, FeeHistory, GetCode, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams } from '../types/JsonRpc-types.js'
+import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, GetCode, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams } from '../types/JsonRpc-types.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { SimulationState } from '../types/visualizer-types.js'
 import { Website } from '../types/websiteAccessTypes.js'
@@ -136,10 +136,6 @@ export async function getTransactionCount(ethereumClientService: EthereumClientS
 
 export async function web3ClientVersion(ethereumClientService: EthereumClientService) {
 	return { type: 'result' as const, method: 'web3_clientVersion' as const, result: await ethereumClientService.web3ClientVersion(undefined) }
-}
-
-export async function feeHistory(ethereumClientService: EthereumClientService, request: FeeHistory) {
-	return { type: 'result' as const, method: 'eth_feeHistory' as const, result: await getSimulatedFeeHistory(ethereumClientService, undefined, request) }
 }
 
 export async function handleIterceptorError(request: InterceptorError) {

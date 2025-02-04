@@ -12,7 +12,7 @@ import { changeActiveAddressAndChainAndResetSimulation, changeActiveRpc } from '
 import { sendPopupMessageToOpenWindows } from './backgroundUtils.js'
 import { getMetadataForAddressBookData } from './medataSearch.js'
 import { getActiveAddresses, getAddressBookEntriesForVisualiser, identifyAddress } from './metadataUtils.js'
-import { getMakeMeRich, getPage, getSettings, setPage, setUseSignersAddressAsActiveAddress, updateWebsiteAccess } from './settings.js'
+import { getPage, getSettings, setPage, setUseSignersAddressAsActiveAddress, updateWebsiteAccess } from './settings.js'
 import { makeSureInterceptorIsNotSleeping } from './sleeping.js'
 import { getCurrentTabId, getIdsOfOpenedTabs, getLatestUnexpectedError, getPendingTransactionsAndMessages, getPrimaryRpcForChain, getRpcConnectionStatus, getRpcList, getSimulationResults, getTabState, saveCurrentTabId, setIdsOfOpenedTabs, setRpcList, updateTransactionStack, updateUserAddressBookEntries } from './storageVariables.js'
 import { searchWebsiteAccess } from './websiteAccessSearch.js'
@@ -270,7 +270,6 @@ export async function requestNewHomeData(simulator: Simulator, _: AbortControlle
 
 export async function refreshHomeData(simulator: Simulator) {
 	const settingsPromise = getSettings()
-	const makeMeRichPromise = getMakeMeRich()
 	const rpcConnectionStatusPromise = getRpcConnectionStatus()
 	const rpcEntriesPromise = getRpcList()
 	const activeAddressesPromise = getActiveAddresses()
@@ -293,7 +292,6 @@ export async function refreshHomeData(simulator: Simulator) {
 			activeSigningAddressInThisTab: tabState?.activeSigningAddress,
 			currentBlockNumber: simulator.ethereum.getCachedBlock()?.number,
 			settings: settings,
-			makeMeRich: await makeMeRichPromise,
 			rpcConnectionStatus: await rpcConnectionStatusPromise,
 			tabId,
 			rpcEntries: await rpcEntriesPromise,

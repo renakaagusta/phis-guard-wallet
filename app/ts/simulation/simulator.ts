@@ -4,7 +4,6 @@ import { EnrichedEthereumEvent, EnrichedEthereumInputData } from '../types/Enric
 import { EthereumEvent } from '../types/ethSimulate-types.js'
 import { RpcEntry } from '../types/rpc.js'
 import { SolidityType } from '../types/solidityType.js'
-import { SimulationState, WebsiteCreatedEthereumUnsignedTransaction } from '../types/visualizer-types.js'
 import { EthereumAddress, EthereumBlockHeader, EthereumData, EthereumQuantity } from '../types/wire-types.js'
 import { extractFunctionArgumentTypes, getAbi, removeTextBetweenBrackets } from '../utils/abi.js'
 import { parseSolidityValueByTypePure } from '../utils/solidityTypes.js'
@@ -97,14 +96,6 @@ export const parseEvents = async (events: readonly EthereumEvent[], ethereumClie
 	return maybeParsedEvents.flat()
 }
 
-export const runProtectorsForTransaction = async (_: SimulationState, __: WebsiteCreatedEthereumUnsignedTransaction, ___: EthereumClientService, ____: AbortController | undefined) => {
-	const reasons: (string | undefined)[] = []
-	const filteredReasons = reasons.filter((reason): reason is string => reason !== undefined)
-	return {
-		quarantine: filteredReasons.length > 0,
-		quarantineReasons: Array.from(new Set<string>(filteredReasons)),
-	}
-}
 
 type NewBlockCallBack = (blockHeader: EthereumBlockHeader, ethereumClientService: EthereumClientService, isNewBlock: boolean, simulator: Simulator) => Promise<void>
 export class Simulator {
