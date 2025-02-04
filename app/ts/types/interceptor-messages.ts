@@ -236,8 +236,7 @@ export const ChangeActiveAddress = funtypes.ReadonlyObject({
 
 export type AddressBookCategory = funtypes.Static<typeof AddressBookCategory>
 export const AddressBookCategory = funtypes.Union(
-	funtypes.Literal('My Active Addresses'),
-	funtypes.Literal('My Contacts'),
+	funtypes.Literal('My Active Addresses')
 )
 
 export type RemoveAddressBookEntry = funtypes.Static<typeof RemoveAddressBookEntry>

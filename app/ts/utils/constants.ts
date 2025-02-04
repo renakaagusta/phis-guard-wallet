@@ -1,68 +1,19 @@
-import { ethers, namehash } from 'ethers'
+import { ethers } from 'ethers'
 import { CHAIN_NAMES } from './chainNames.js'
 
 // common contract addresses
-export const UNISWAP_V2_ROUTER_ADDRESS = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488Dn
-export const SUSHISWAP_V2_ROUTER_ADDRESS = 0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9Fn
-export const UNISWAP_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564n
 export const MULTICALL3 = 0xcA11bde05977b3631167028862bE2a173976CA11n // Contract for bundling bulk call transactions, deployed on every chain. https://github.com/mds1/multicall
 export const ETHEREUM_LOGS_LOGGER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeEn
-// export const UNISWAP_V3_NFT_ROUTER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88n
-// export const SUSHISWAP_FACTORY_ADDRESS = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Acn
 
-export const Multicall3ABI = [
-	'function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) payable returns (tuple(bool success, bytes returnData)[] returnData)',
-	'function getEthBalance(address) returns (uint256)',
-]
-
-// common 4-byte function sigs
-// export const ERC20_TRANSFER_FROM_4BYTES = 0x23b872dd
-// export const ERC20_TRANSFER_4BYTES = 0xa9059cbb
-// export const ERC20_APPROVAL_4BYTES = 0x095ea7b3
-// export const ERC721_APPROVAL_FOR_ALL_4BYTES = 0xa22cb465
 
 // common event log signatures
 export const TRANSFER_LOG = ethers.keccak256(ethers.toUtf8Bytes('Transfer(address,address,uint256)'))
 export const APPROVAL_LOG = ethers.keccak256(ethers.toUtf8Bytes('Approval(address,address,uint256)'))
-export const ERC721_APPROVAL_FOR_ALL_LOG = ethers.keccak256(ethers.toUtf8Bytes('ApprovalForAll(address,address,bool)'))
 export const DEPOSIT_LOG = ethers.keccak256(ethers.toUtf8Bytes('Deposit(address,uint256)'))
 export const WITHDRAWAL_LOG = ethers.keccak256(ethers.toUtf8Bytes('Withdrawal(address,uint256)'))
-export const ERC1155_TRANSFERBATCH_LOG = ethers.keccak256(ethers.toUtf8Bytes('TransferBatch(address,address,address,uint256[],uint256[])'))
-export const ERC1155_TRANSFERSINGLE_LOG = ethers.keccak256(ethers.toUtf8Bytes('TransferSingle(address,address,address,uint256,uint256)'))
-
-// ENS event signatures
-export const ENS_ADDR_CHANGED = ethers.keccak256(ethers.toUtf8Bytes('AddrChanged(bytes32,address)'))
-export const ENS_ADDRESS_CHANGED = ethers.keccak256(ethers.toUtf8Bytes('AddressChanged(bytes32,uint256,bytes)'))
-export const ENS_CONTROLLER_NAME_RENEWED = ethers.keccak256(ethers.toUtf8Bytes('NameRenewed(string,bytes32,uint256,uint256)'))
-export const ENS_BASE_REGISTRAR_NAME_RENEWED = ethers.keccak256(ethers.toUtf8Bytes('NameRenewed(uint256,uint256)'))
-export const ENS_BASE_REGISTRAR_NAME_REGISTERED = ethers.keccak256(ethers.toUtf8Bytes('NameRegistered(uint256,address,uint256)'))
-export const ENS_TRANSFER = ethers.keccak256(ethers.toUtf8Bytes('Transfer(bytes32,address)'))
-export const ENS_NEW_OWNER = ethers.keccak256(ethers.toUtf8Bytes('NewOwner(bytes32,bytes32,address)'))
-export const ENS_NEW_RESOLVER = ethers.keccak256(ethers.toUtf8Bytes('NewResolver(bytes32,address)'))
-export const ENS_TEXT_CHANGED = ethers.keccak256(ethers.toUtf8Bytes('TextChanged(bytes32,string,string)'))
-export const ENS_TEXT_CHANGED_KEY_VALUE = ethers.keccak256(ethers.toUtf8Bytes('TextChanged(bytes32,string,string,string)'))
-export const ENS_CONTENT_HASH_CHANGED = ethers.keccak256(ethers.toUtf8Bytes('ContenthashChanged(bytes32,bytes)'))
-export const ENS_FUSES_SET = ethers.keccak256(ethers.toUtf8Bytes('FusesSet(bytes32,uint32)'))
-export const ENS_NAME_UNWRAPPED = ethers.keccak256(ethers.toUtf8Bytes('NameUnwrapped(bytes32,address)'))
-export const ENS_NAME_WRAPPED = ethers.keccak256(ethers.toUtf8Bytes('NameWrapped(bytes32,bytes,address,uint32,uint64)'))
-export const ENS_NAME_CHANGED = ethers.keccak256(ethers.toUtf8Bytes('NameChanged(bytes32,string)'))
-export const ENS_REVERSE_CLAIMED = ethers.keccak256(ethers.toUtf8Bytes('ReverseClaimed(address,bytes32)'))
-export const ENS_CONTROLLER_NAME_REGISTERED = ethers.keccak256(ethers.toUtf8Bytes('NameRegistered(string,bytes32,address,uint256,uint256)'))
-export const ENS_NEW_TTL = ethers.keccak256(ethers.toUtf8Bytes('NewTTL(bytes32,uint64)'))
-export const ENS_EXPIRY_EXTENDED = ethers.keccak256(ethers.toUtf8Bytes('ExpiryExtended(bytes32,uint64)'))
 
 // Other
 export const MOCK_ADDRESS = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefn
-export const ENS_PUBLIC_RESOLVER = 0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63n
-export const ENS_TOKEN_WRAPPER = 0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401n //mainnet only
-export const ENS_ETH_REGISTRAR_CONTROLLER = 0x253553366Da8546fC250F225fe3d25d0C782303bn
-export const ENS_ETHEREUM_NAME_SERVICE = 0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85n
-export const ENS_PUBLIC_RESOLVER_2 = 0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41n
-export const ENS_REGISTRY_WITH_FALLBACK = 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1en
-export const ENS_REVERSE_REGISTRAR = 0xa58E81fe9b61B5c3fE2AFD33CF304c454AbFc7Cbn
-
-// ENS Nodes
-export const ENS_ADDR_REVERSE_NODE = { name: 'addr.reverse', nameHash: BigInt(namehash('addr.reverse')) }
 
 // ENS Fuses
 export const CANNOT_UNWRAP = 1n
@@ -82,15 +33,6 @@ export const METAMASK_ERROR_USER_REJECTED_REQUEST = 4001
 export const METAMASK_ERROR_NOT_AUTHORIZED = 4100
 export const METAMASK_ERROR_FAILED_TO_PARSE_REQUEST = -32700
 export const METAMASK_ERROR_BLANKET_ERROR = -32603
-// const METAMASK_ERROR_METHOD_NOT_SUPPORTED_BY_PROVIDER = 4200
-// const METAMASK_ERROR_CHAIN_NOT_ADDED_TO_METAMASK = 4902
-// const METAMASK_ERROR_NOT_CONNECTED_TO_APPROPRIATE_CHAIN = 4901
-// const METAMASK_ERROR_REQUEST_STRUCTURE_INCORRECT = -32600
-// const METAMASK_ERROR_METHOD_DOES_NOT_EXIST = -32601
-// const METAMASK_ERROR_INVALID_ARGUMENT = -32602
-// const METAMASK_ERROR_TRANSACTION_REJECTD = -32003
-// const METAMASK_ERROR_METHOD_NOT_SUPPORTED = -32004
-// const METAMASK_ERROR_RATE_LIMITED = -32005
 
 export const ERROR_INTERCEPTOR_DISABLED = { error: { code: METAMASK_ERROR_USER_REJECTED_REQUEST, message: 'PhisGuard is disabled' } }
 export const METAMASK_ERROR_ALREADY_PENDING = { error: { code: -32002, message: 'Access request pending already.' } }
@@ -110,8 +52,6 @@ export const FourByteExplanations = {
 	[get4Byte('transfer(address,uint256)')]: 'ERC20 Transfer' as const,
 	[get4Byte('approve(address,uint256)')]:'ERC20 Approval' as const,
 	[get4Byte('setApprovalForAll(address,bool)')]: 'ERC721 Approval For All' as const,
-	[get4Byte('swapExactTokensForTokens(uint256,uint256,address[],address,uint256)')]: 'Swap Exact Tokens For Tokens' as const,
-	[get4Byte('swapExactETHForTokens(uint256,address[],address,uint256)')]: 'Swap Exact ETH For Tokens' as const,
 	[get4Byte('multicall((address,uint256,bytes)[])')]: 'Multicall' as const,
 	[get4Byte('exactInput((bytes,address,uint256,uint256,uint256))')]: 'Exact Input Swap' as const,
 	[get4Byte('multicall(uint256,bytes[])')]: 'Multicall' as const,
@@ -154,21 +94,3 @@ export const PRIMARY_COLOR = '#58a5b3'
 export const CANNOT_SIMULATE_OFF_LEGACY_BLOCK = 'Cannot simulate off a legacy block'
 
 export const NEW_BLOCK_ABORT = 'New Block Abort'
-
-export const MAKE_YOU_RICH_TRANSACTION = {
-	transaction: {
-		type: '1559' as const,
-		maxFeePerGas: 0n,
-		maxPriorityFeePerGas: 0n,
-		gas: 21000n,
-		value: 200000000000000000000000n,
-		input: new Uint8Array(0),
-		accessList: [],
-	},
-	website: {
-		websiteOrigin: 'PhisGuard',
-		title: 'PhisGuard',
-		icon: undefined,
-	},
-	transactionSendingFormat: 'eth_sendTransaction' as const,
-}

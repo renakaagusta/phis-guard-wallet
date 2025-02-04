@@ -20,17 +20,8 @@ type Modals =  { page: 'noModal' }
 
 const filterDefs = {
 	'My Active Addresses': 'Active Address',
-	'My Contacts': 'Contact',
 }
 type FilterKey = keyof typeof filterDefs
-
-function FilterLink(param: { name: FilterKey, currentFilter: FilterKey, setActiveFilter: (activeFilter: FilterKey) => void }) {
-	return <a
-		class = { param.currentFilter === param.name ? 'is-active' : '' }
-		onClick = { () => param.setActiveFilter(param.name) }>
-		{ param.name }
-	</a>
-}
 
 type ConfirmaddressBookEntryToBeRemovedParams = {
 	category: FilterKey,
@@ -186,10 +177,6 @@ export function AddressBook() {
 		return () => { browser.runtime.onMessage.removeListener(popupMessageListener) }
 	}, [])
 
-	function changeFilter(activeFilter: FilterKey) {
-		viewFilter.value = { ...viewFilter.peek(), activeFilter }
-	}
-
 	function search(searchString: string) {
 		viewFilter.value = { ...viewFilter.peek(), searchString }
 	}
@@ -203,7 +190,7 @@ export function AddressBook() {
 	function GetNoResultsError() {
 		const errorMessage = (viewFilter.value.searchString && viewFilter.value.searchString.trim().length > 0 )
 			? `No entries found for "${ viewFilter.value.searchString }" in ${ viewFilter.value.activeFilter } on ${ viewFilter.value.chain?.name }`
-			: `No cute dinosaurs in ${ viewFilter.value.activeFilter } on ${ viewFilter.value.chain?.name }`
+			: `No entries found in ${ viewFilter.value.activeFilter } on ${ viewFilter.value.chain?.name }`
 		return <div style = { { width: 500, padding: '0 1rem', margin: '0 1rem' } }>{ errorMessage }</div>
 	}
 
@@ -267,14 +254,6 @@ export function AddressBook() {
 						<div style = 'padding: 10px;'>
 							<ChainSelector rpcEntries = { rpcEntries } chainId = { activeChainId } changeChain = { changeActiveChain }/>
 						</div>
-						<aside class = 'menu'>
-							<ul class = 'menu-list'>
-								<ul>
-									<li> <FilterLink name = 'My Active Addresses' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
-									<li> <FilterLink name = 'My Contacts' currentFilter = { viewFilter.value.activeFilter } setActiveFilter = { changeFilter }/> </li>
-								</ul>
-							</ul>
-						</aside>
 					</div>
 					<div style = { { display: 'grid', gridTemplateRows: 'min-content 1fr', rowGap: '1rem', height: '100vh', paddingTop: '1rem' } }>
 						<div style = { { display: 'grid', gridTemplateColumns: '1fr max-content', columnGap: '1rem', padding: '0 1rem', alignItems: 'center' } }>

@@ -27,10 +27,10 @@ type IncompleteAddressIconParams = {
 
 function IncompleteAddressIcon({ addressInput, logoUri }: IncompleteAddressIconParams) {
 	return <AddressIcon
-		address = { stringToAddress(addressInput) }
-		logoUri = { logoUri }
-		isBig = { true }
-		backgroundColor = { 'var(--text-color)' }
+		address={stringToAddress(addressInput)}
+		logoUri={logoUri}
+		isBig={true}
+		backgroundColor={'var(--text-color)'}
 	/>
 }
 
@@ -42,17 +42,17 @@ type NameInputParams = {
 
 function NameInput({ nameInput, setNameInput, disabled }: NameInputParams) {
 	const ref = createRef<HTMLInputElement>()
-    useEffect(() => { ref.current?.focus() }, [])
+	useEffect(() => { ref.current?.focus() }, [])
 	return <input
-		className = 'input title is-5 is-spaced'
-		type = 'text'
-		value = { nameInput }
-		placeholder = { 'What should we call this address?' }
-		onInput = { e => setNameInput((e.target as HTMLInputElement).value) }
-		maxLength = { 42 }
-		ref = { ref }
-		style = { 'width: 100%' }
-		disabled = { disabled }
+		className='input title is-5 is-spaced'
+		type='text'
+		value={nameInput}
+		placeholder={'What should we call this address?'}
+		onInput={e => setNameInput((e.target as HTMLInputElement).value)}
+		maxLength={42}
+		ref={ref}
+		style={'width: 100%'}
+		disabled={disabled}
 	/>
 }
 
@@ -64,13 +64,13 @@ type AddressInputParams = {
 
 function AddressInput({ disabled, addressInput, setAddress }: AddressInputParams) {
 	return <input
-		disabled = { disabled }
-		className = 'input subtitle is-7 is-spaced'
-		type = 'text'
-		value = { addressInput }
-		placeholder = { '0x0...' }
-		onInput = { e => setAddress((e.target as HTMLInputElement).value) }
-		style = { `width: 100%;${ addressInput === undefined || ethers.isAddress(addressInput.trim()) ? '' : 'color: var(--negative-color);' }` }
+		disabled={disabled}
+		className='input subtitle is-7 is-spaced'
+		type='text'
+		value={addressInput}
+		placeholder={'0x0...'}
+		onInput={e => setAddress((e.target as HTMLInputElement).value)}
+		style={`width: 100%;${addressInput === undefined || ethers.isAddress(addressInput.trim()) ? '' : 'color: var(--negative-color);'}`}
 	/>
 }
 
@@ -88,46 +88,42 @@ type RenderinCompleteAddressBookParams = {
 }
 
 const CellElement = (param: { element: ComponentChildren }) => {
-	return <div class = 'log-cell' style = 'justify-content: right;'>
-		{ param.element }
+	return <div class='log-cell' style='justify-content: right;'>
+		{param.element}
 	</div>
 }
 
 function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
 	const Text = (param: { text: ComponentChildren }) => {
-		return <p class = 'paragraph' style = 'color: var(--subtitle-text-color); text-overflow: ellipsis; overflow: hidden; width: 100%'>
-			{ param.text }
+		return <p class='paragraph' style='color: var(--subtitle-text-color); text-overflow: ellipsis; overflow: hidden; width: 100%'>
+			{param.text}
 		</p>
 	}
 	if (incompleteAddressBookEntry.value === undefined) return <></>
 	const disableDueToSource = incompleteAddressBookEntry.value.entrySource === 'DarkFloristMetadata' || incompleteAddressBookEntry.value.entrySource === 'Interceptor'
 	const logoUri = incompleteAddressBookEntry.value.addingAddress === false && 'logoUri' in incompleteAddressBookEntry ? incompleteAddressBookEntry.value.logoUri : undefined
 	const selectedChainId = useComputed(() => incompleteAddressBookEntry.value?.chainId || 1n)
-	return <div class = 'media'>
-		<div class = 'media-left'>
-			<figure class = 'image'>
-				<IncompleteAddressIcon addressInput = { incompleteAddressBookEntry.value.address } logoUri = { logoUri }/>
+	return <div class='media'>
+		<div class='media-left'>
+			<figure class='image'>
+				<IncompleteAddressIcon addressInput={incompleteAddressBookEntry.value.address} logoUri={logoUri} />
 			</figure>
 		</div>
-		<div class = 'media-content' style = 'overflow-y: unset; overflow-x: unset;'>
-			<div class = 'container' style = 'margin-bottom: 10px;'>
-				<span class = 'log-table' style = 'column-gap: 5px; row-gap: 5px; grid-template-columns: max-content auto;'>
-					<CellElement element = { <Text text = { 'Chain: ' }/> }/>
-					<CellElement element = { <ChainSelector rpcEntries = { rpcEntries } chainId = { selectedChainId } changeChain = { setChain }/> } />
-					<CellElement element = { <Text text = { 'Name: ' }/> }/>
-					<CellElement element = { <NameInput nameInput = { incompleteAddressBookEntry.value.name } setNameInput = { setName } disabled = { disableDueToSource }/> } />
-					<CellElement element = { <Text text = { 'Address: ' }/> }/>
-					<CellElement element = { <AddressInput disabled = { incompleteAddressBookEntry.value.addingAddress === false || disableDueToSource } addressInput = { incompleteAddressBookEntry.value.address } setAddress = { setAddress } /> } />
-					<CellElement element = { <Text text = { 'Abi: ' }/> }/>
+		<div class='media-content' style='overflow-y: unset; overflow-x: unset;'>
+			<div class='container' style='margin-bottom: 10px;'>
+				<span class='log-table' style='column-gap: 5px; row-gap: 5px; grid-template-columns: max-content auto;'>
+					<CellElement element={<Text text={'Chain: '} />} />
+					<CellElement element={<ChainSelector rpcEntries={rpcEntries} chainId={selectedChainId} changeChain={setChain} />} />
+					<CellElement element={<Text text={'Name: '} />} />
+					<CellElement element={<NameInput nameInput={incompleteAddressBookEntry.value.name} setNameInput={setName} disabled={disableDueToSource} />} />
+					<CellElement element={<Text text={'Address: '} />} />
+					<CellElement element={<AddressInput disabled={incompleteAddressBookEntry.value.addingAddress === false || disableDueToSource} addressInput={incompleteAddressBookEntry.value.address} setAddress={setAddress} />} />
+					<CellElement element={<Text text={'Abi: '} />} />
 				</span>
 			</div>
-			<label class = 'form-control'>
-				<input type = 'checkbox' checked = { incompleteAddressBookEntry.value.useAsActiveAddress } onInput = { e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setUseAsActiveAddress(e.target.checked) } } } />
-				<p class = 'paragraph checkbox-text'>Use as active address</p>
-			</label>
-			<label class = 'form-control'>
-				<input type = 'checkbox' checked = { 'declarativeNetRequestBlockMode' in incompleteAddressBookEntry && incompleteAddressBookEntry.value.declarativeNetRequestBlockMode === 'block-all' } onInput = { e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setDeclarativeNetRequestBlockMode(e.target.checked ? 'block-all' : 'disabled') } } } />
-				<p class = 'paragraph checkbox-text'>Block all external requests on site when this address is active (not recommended).</p>
+			<label class='form-control'>
+				<input type='checkbox' checked={incompleteAddressBookEntry.value.useAsActiveAddress} onInput={e => { if (e.target instanceof HTMLInputElement && e.target !== null) { setUseAsActiveAddress(e.target.checked) } }} />
+				<p class='paragraph checkbox-text'>Use as active address</p>
 			</label>
 		</div>
 	</div>
@@ -190,7 +186,7 @@ export function AddNewAddress(param: AddAddressParam) {
 		const entryToAdd = getCompleteAddressBookEntry()
 		param.close()
 		if (entryToAdd === undefined) return
-		await sendPopupMessageToBackgroundPage({ method: 'popup_addOrModifyAddressBookEntry', data: entryToAdd } )
+		await sendPopupMessageToBackgroundPage({ method: 'popup_addOrModifyAddressBookEntry', data: entryToAdd })
 	}
 
 	async function createAndSwitch() {
@@ -209,7 +205,7 @@ export function AddNewAddress(param: AddAddressParam) {
 		param.modifyAddressWindowState.value = newState
 		try {
 			await sendPopupMessageToBackgroundPage({ method: 'popup_changeAddOrModifyAddressWindowState', data: { windowStateId: newState.windowStateId, newState } })
-		} catch(e) {
+		} catch (e) {
 			console.error(e)
 		}
 	}
@@ -268,63 +264,63 @@ export function AddNewAddress(param: AddAddressParam) {
 		if (param.modifyAddressWindowState.value === undefined) return '...'
 		const incompleteAddressBookEntry = param.modifyAddressWindowState.value.incompleteAddressBookEntry
 		if (incompleteAddressBookEntry.addingAddress) {
-			return `Add New ${ readableAddressType[incompleteAddressBookEntry.type] }`
+			return `Add New ${readableAddressType[incompleteAddressBookEntry.type]}`
 		}
 		const alleged = showOnChainVerificationErrorBox() ? 'alleged ' : ''
-		const name = incompleteAddressBookEntry.name !== undefined ? `${ alleged }${ incompleteAddressBookEntry.name }` : readableAddressType[incompleteAddressBookEntry.type]
-		return `Modify ${ name }`
+		const name = incompleteAddressBookEntry.name !== undefined ? `${alleged}${incompleteAddressBookEntry.name}` : readableAddressType[incompleteAddressBookEntry.type]
+		return `Modify ${name}`
 	}
-	const incompleteAddressBookEntry = useComputed(() => param.modifyAddressWindowState.value?.incompleteAddressBookEntry )
+	const incompleteAddressBookEntry = useComputed(() => param.modifyAddressWindowState.value?.incompleteAddressBookEntry)
 	if (incompleteAddressBookEntry.value === undefined) return <></>
-	return ( <>
-		<div class = 'modal-background'> </div>
-		<div class = 'modal-card'>
-			<header class = 'modal-card-head card-header interceptor-modal-head window-header'>
-				<div class = 'card-header-icon unset-cursor'>
-					<span class = 'icon'>
-						<img src = '../img/address-book.svg'/>
+	return (<>
+		<div class='modal-background'> </div>
+		<div class='modal-card'>
+			<header class='modal-card-head card-header interceptor-modal-head window-header'>
+				<div class='card-header-icon unset-cursor'>
+					<span class='icon'>
+						<img src='../img/address-book.svg' />
 					</span>
 				</div>
-				<div class = 'card-header-title'>
-					<p className = 'paragraph'> { getCardTitle() } </p>
+				<div class='card-header-title'>
+					<p className='paragraph'> {getCardTitle()} </p>
 				</div>
-				<button class = 'card-header-icon' aria-label = 'close' onClick = { param.close }>
+				<button class='card-header-icon' aria-label='close' onClick={param.close}>
 					<XMarkIcon />
 				</button>
 			</header>
-			<section class = 'modal-card-body' style = 'overflow: visible;'>
-				<div class = 'card' style = 'margin: 10px;'>
-					<div class = 'card-content'>
+			<section class='modal-card-body' style='overflow: visible;'>
+				<div class='card' style='margin: 10px;'>
+					<div class='card-content'>
 						<RenderIncompleteAddressBookEntry
-							incompleteAddressBookEntry = { incompleteAddressBookEntry }
-							setAddress = { setAddress }
-							setName = { setName }
-							setSymbol = { setSymbol }
-							setAbi = { setAbi }
-							setChain = { setChain }
-							rpcEntries = { param.rpcEntries }
-							setUseAsActiveAddress = { setUseAsActiveAddress }
-							setDeclarativeNetRequestBlockMode = { setDeclarativeNetRequestBlockMode }
-							canFetchFromEtherScan = { canFetchFromEtherScan }
+							incompleteAddressBookEntry={incompleteAddressBookEntry}
+							setAddress={setAddress}
+							setName={setName}
+							setSymbol={setSymbol}
+							setAbi={setAbi}
+							setChain={setChain}
+							rpcEntries={param.rpcEntries}
+							setUseAsActiveAddress={setUseAsActiveAddress}
+							setDeclarativeNetRequestBlockMode={setDeclarativeNetRequestBlockMode}
+							canFetchFromEtherScan={canFetchFromEtherScan}
 						/>
 					</div>
 				</div>
-				<div style = 'padding-left: 10px; padding-right: 10px; margin-bottom: 10px; min-height: 80px'>
-					{ param.modifyAddressWindowState.value?.errorState === undefined ? <></> : <Notice text = { param.modifyAddressWindowState.value.errorState.message } /> }
-					{ !showOnChainVerificationErrorBox() ? <></> :
+				<div style='padding-left: 10px; padding-right: 10px; margin-bottom: 10px; min-height: 80px'>
+					{param.modifyAddressWindowState.value?.errorState === undefined ? <></> : <Notice text={param.modifyAddressWindowState.value.errorState.message} />}
+					{!showOnChainVerificationErrorBox() ? <></> :
 						<ErrorCheckBox
-							text = { `The name and symbol for this token was provided by the token itself and we have not validated its legitimacy. A token may claim to have a name/symbol that is the same as another popular token (e.g., USDC or DAI) in an attempt to trick you. If you recognize this token's name, please verify elsewhere that this is the correct address for it.` }
-							checked = { onChainInformationVerifiedByUser }
-							onInput = { setOnChainInformationVerifiedByUser }
+							text={`The name and symbol for this token was provided by the token itself and we have not validated its legitimacy. A token may claim to have a name/symbol that is the same as another popular token (e.g., USDC or DAI) in an attempt to trick you. If you recognize this token's name, please verify elsewhere that this is the correct address for it.`}
+							checked={onChainInformationVerifiedByUser}
+							onInput={setOnChainInformationVerifiedByUser}
 						/>
 					}
 				</div>
 			</section>
-			<footer class = 'modal-card-foot window-footer' style = 'border-bottom-left-radius: unset; border-bottom-right-radius: unset; border-top: unset; padding: 10px;'>
-				{ param.setActiveAddressAndInformAboutIt === undefined || param.modifyAddressWindowState.value?.incompleteAddressBookEntry === undefined || activeAddress === stringToAddress(param.modifyAddressWindowState.value.incompleteAddressBookEntry.address) ? <></> : <button class = 'button is-success is-primary' onClick = { createAndSwitch } disabled = { !areInputsValid() }> { param.modifyAddressWindowState.value.incompleteAddressBookEntry.addingAddress ? 'Create and switch' : 'Modify and switch' } </button> }
-				<button class = 'button is-success is-primary' onClick = { modifyOrAddEntry } disabled = { isSubmitButtonDisabled() }> { param.modifyAddressWindowState.value?.incompleteAddressBookEntry.addingAddress ? 'Create' : 'Modify' } </button>
-				<button class = 'button is-primary' style = 'background-color: var(--negative-color)' onClick = { param.close }>Cancel</button>
+			<footer class='modal-card-foot window-footer' style='border-bottom-left-radius: unset; border-bottom-right-radius: unset; border-top: unset; padding: 10px;'>
+				{param.setActiveAddressAndInformAboutIt === undefined || param.modifyAddressWindowState.value?.incompleteAddressBookEntry === undefined || activeAddress === stringToAddress(param.modifyAddressWindowState.value.incompleteAddressBookEntry.address) ? <></> : <button class='button is-success is-primary' onClick={createAndSwitch} disabled={!areInputsValid()}> {param.modifyAddressWindowState.value.incompleteAddressBookEntry.addingAddress ? 'Create and switch' : 'Modify and switch'} </button>}
+				<button class='button is-success is-primary' onClick={modifyOrAddEntry} disabled={isSubmitButtonDisabled()}> {param.modifyAddressWindowState.value?.incompleteAddressBookEntry.addingAddress ? 'Create' : 'Modify'} </button>
+				<button class='button is-primary' style='background-color: var(--negative-color)' onClick={param.close}>Cancel</button>
 			</footer>
 		</div>
-	</> )
+	</>)
 }
