@@ -145,7 +145,7 @@ export const parseEvents = async (events: readonly EthereumEvent[], ethereumClie
 	return maybeParsedEvents.flat()
 }
 
-export const runProtectorsForTransaction = async (_: SimulationState, __: WebsiteCreatedEthereumUnsignedTransaction, ___: EthereumClientService, requestAbortController: AbortController | undefined) => {
+export const runProtectorsForTransaction = async (_: SimulationState, __: WebsiteCreatedEthereumUnsignedTransaction, ___: EthereumClientService, ____: AbortController | undefined) => {
 	const reasons: (string | undefined)[] = []
 	const filteredReasons = reasons.filter((reason): reason is string => reason !== undefined)
 	return {
