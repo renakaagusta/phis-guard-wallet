@@ -3,7 +3,6 @@ import { ethers } from 'ethers'
 import { ComponentChildren, createRef } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
-import { isBlockExplorerAvailableForChain, isValidAbi } from '../../simulation/services/EtherScanAbiFetcher.js'
 import { AddressBookEntry, DeclarativeNetRequestBlockMode, IncompleteAddressBookEntry } from '../../types/addressBookTypes.js'
 import { MessageToPopup } from '../../types/interceptor-messages.js'
 import { ChainEntry, RpcEntries } from '../../types/rpc.js'
@@ -96,28 +95,7 @@ const CellElement = (param: { element: ComponentChildren }) => {
 	</div>
 }
 
-type AbiInputParams = {
-	abiInput: string | undefined
-	setAbiInput: (input: string) => void
-	disabled: boolean,
-}
-
-function AbiInput({ abiInput, setAbiInput, disabled }: AbiInputParams) {
-	const ref = createRef<HTMLInputElement>()
-    useEffect(() => { ref.current?.focus() }, [])
-	return <input
-		className = 'input is-spaced'
-		type = 'text'
-		value = { abiInput }
-		placeholder = { 'not available / not retrieved' }
-		onInput = { e => setAbiInput(e.currentTarget.value) }
-		ref = { ref }
-		disabled = { disabled }
-		style = { `width: 100%;${ abiInput === undefined || isValidAbi(abiInput.trim()) ? '' : 'color: var(--negative-color);' }` }
-	/>
-}
-
-function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setAskForAddressAccess, setAbi, canFetchFromEtherScan, fetchAbiAndNameFromBlockExplorer, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
+function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEntry, setName, setAddress, setAskForAddressAccess, setUseAsActiveAddress, setDeclarativeNetRequestBlockMode, setChain }: RenderinCompleteAddressBookParams) {
 	const Text = (param: { text: ComponentChildren }) => {
 		return <p class = 'paragraph' style = 'color: var(--subtitle-text-color); text-overflow: ellipsis; overflow: hidden; width: 100%'>
 			{ param.text }
@@ -127,7 +105,6 @@ function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEnt
 	const disableDueToSource = incompleteAddressBookEntry.value.entrySource === 'DarkFloristMetadata' || incompleteAddressBookEntry.value.entrySource === 'Interceptor'
 	const logoUri = incompleteAddressBookEntry.value.addingAddress === false && 'logoUri' in incompleteAddressBookEntry ? incompleteAddressBookEntry.value.logoUri : undefined
 	const selectedChainId = useComputed(() => incompleteAddressBookEntry.value?.chainId || 1n)
-	const blockExplorerAvailable = useComputed(() => isBlockExplorerAvailableForChain(selectedChainId.value, rpcEntries.value))
 	return <div class = 'media'>
 		<div class = 'media-left'>
 			<figure class = 'image'>
@@ -144,11 +121,6 @@ function RenderIncompleteAddressBookEntry({ rpcEntries, incompleteAddressBookEnt
 					<CellElement element = { <Text text = { 'Address: ' }/> }/>
 					<CellElement element = { <AddressInput disabled = { incompleteAddressBookEntry.value.addingAddress === false || disableDueToSource } addressInput = { incompleteAddressBookEntry.value.address } setAddress = { setAddress } /> } />
 					<CellElement element = { <Text text = { 'Abi: ' }/> }/>
-					<CellElement element = { <>
-						<AbiInput abiInput = { incompleteAddressBookEntry.value.abi } setAbiInput = { setAbi } disabled = { false }/>
-						<div style = 'padding-left: 5px'/>
-						<button class = 'button is-primary is-small' disabled = { stringToAddress(incompleteAddressBookEntry.value.address) === undefined || !canFetchFromEtherScan || !blockExplorerAvailable.value } onClick = { async  () => { fetchAbiAndNameFromBlockExplorer() } }> Fetch from Block Explorer</button>
-					</> }/>
 				</span>
 			</div>
 			<label class = 'form-control'>
@@ -177,17 +149,6 @@ export function AddNewAddress(param: AddAddressParam) {
 			const maybeParsed = MessageToPopup.safeParse(msg)
 			if (!maybeParsed.success) return // not a message we are interested in
 			const parsed = maybeParsed.value
-			if (parsed.method === 'popup_fetchAbiAndNameFromBlockExplorerReply') {
-				if (param.modifyAddressWindowState.value === undefined || parsed.data.windowStateId !== param.modifyAddressWindowState.value.windowStateId) return
-				setCanFetchFromEtherScan(true)
-				if (!parsed.data.success) {
-					param.modifyAddressWindowState.value = modifyObject(param.modifyAddressWindowState.value, { errorState: { blockEditing: false, message: parsed.data.error } })
-					return
-				}
-				if (param.modifyAddressWindowState.value.errorState !== undefined) return
-				param.modifyAddressWindowState.value = modifyObject(param.modifyAddressWindowState.value, { incompleteAddressBookEntry: modifyObject(param.modifyAddressWindowState.value.incompleteAddressBookEntry, { abi: parsed.data.abi, name: param.modifyAddressWindowState.value.incompleteAddressBookEntry.name === undefined ? parsed.data.contractName : param.modifyAddressWindowState.value.incompleteAddressBookEntry.name }) } )
-				return
-			}
 			if (parsed.method === 'popup_addOrModifyAddressWindowStateInformation') {
 				if (param.modifyAddressWindowState.value === undefined) return
 				if (parsed.data.windowStateId !== param.modifyAddressWindowState.value.windowStateId) return
@@ -306,11 +267,6 @@ export function AddNewAddress(param: AddAddressParam) {
 		const address = stringToAddress(param.modifyAddressWindowState.value?.incompleteAddressBookEntry.address)
 		if (address === undefined || param.modifyAddressWindowState.value === undefined) return
 		setCanFetchFromEtherScan(false)
-		await sendPopupMessageToBackgroundPage({ method: 'popup_fetchAbiAndNameFromBlockExplorer', data: {
-			address,
-			windowStateId: param.modifyAddressWindowState.value.windowStateId,
-			chainId: param.modifyAddressWindowState.value.incompleteAddressBookEntry.chainId
-		} })
 	}
 
 	function showOnChainVerificationErrorBox() {

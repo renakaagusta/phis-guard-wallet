@@ -1,7 +1,6 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { fetchAbiFromBlockExplorer } from '../simulation/services/EtherScanAbiFetcher.js'
 import { Simulator, parseEvents, parseInputData } from '../simulation/simulator.js'
-import { AddOrEditAddressBookEntry, AllowOrPreventAddressAccessForWebsite, BlockOrAllowExternalRequests, ChainChangeConfirmation, ChangeActiveAddress, ChangeActiveChain, ChangeAddOrModifyAddressWindowState, ChangeInterceptorAccess, ChangePage, ChangeSettings, DisableInterceptor, FetchAbiAndNameFromBlockExplorer, ForceSetGasLimitForTransaction, GetAddressBookData, InterceptorAccess, InterceptorAccessChangeAddress, InterceptorAccessRefresh, OpenWebPage, RemoveAddressBookEntry, RemoveTransaction, RemoveWebsiteAddressAccess, RequestAccountsFromSigner, RetrieveWebsiteAccess, SetEnsNameForHash, SetRpcList, Settings, TransactionConfirmation, UpdateConfirmTransactionDialog, UpdateConfirmTransactionDialogPendingTransactions, UpdateHomePage } from '../types/interceptor-messages.js'
+import { AddOrEditAddressBookEntry, AllowOrPreventAddressAccessForWebsite, BlockOrAllowExternalRequests, ChainChangeConfirmation, ChangeActiveAddress, ChangeActiveChain, ChangeAddOrModifyAddressWindowState, ChangeInterceptorAccess, ChangePage, ChangeSettings, DisableInterceptor, ForceSetGasLimitForTransaction, GetAddressBookData, InterceptorAccess, InterceptorAccessChangeAddress, InterceptorAccessRefresh, OpenWebPage, RemoveAddressBookEntry, RemoveTransaction, RemoveWebsiteAddressAccess, RequestAccountsFromSigner, RetrieveWebsiteAccess, SetEnsNameForHash, SetRpcList, Settings, TransactionConfirmation, UpdateConfirmTransactionDialog, UpdateConfirmTransactionDialogPendingTransactions, UpdateHomePage } from '../types/interceptor-messages.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { CompleteVisualizedSimulation, ModifyAddressWindowState, PreSimulationTransaction, TransactionStack } from '../types/visualizer-types.js'
 import { Website } from '../types/websiteAccessTypes.js'
@@ -352,31 +351,6 @@ export async function changeAddOrModifyAddressWindowState(ethereum: EthereumClie
 	return await sendPopupMessageToOpenWindows({
 		method: 'popup_addOrModifyAddressWindowStateInformation',
 		data: { windowStateId: parsedRequest.data.windowStateId, errorState: { message: '', blockEditing: false }, identifiedAddress: await identifyPromise }
-	})
-}
-
-export async function popupfetchAbiAndNameFromBlockExplorer(parsedRequest: FetchAbiAndNameFromBlockExplorer) {
-	const etherscanReply = await fetchAbiFromBlockExplorer(parsedRequest.data.address, parsedRequest.data.chainId)
-	if (etherscanReply.success) {
-		return await sendPopupMessageToOpenWindows({
-			method: 'popup_fetchAbiAndNameFromBlockExplorerReply' as const,
-			data: {
-				windowStateId: parsedRequest.data.windowStateId,
-				success: true,
-				address: parsedRequest.data.address,
-				abi: etherscanReply.abi,
-				contractName: etherscanReply.contractName,
-			}
-		})
-	}
-	return await sendPopupMessageToOpenWindows({
-		method: 'popup_fetchAbiAndNameFromBlockExplorerReply' as const,
-		data: {
-			windowStateId: parsedRequest.data.windowStateId,
-			success: false,
-			address: parsedRequest.data.address,
-			error: etherscanReply.error
-		}
 	})
 }
 

@@ -15,7 +15,6 @@ import { NetworkErrors } from '../App.js'
 import { DinoSaysNotification } from '../subcomponents/DinoSays.js'
 import { ErrorCheckBox, ErrorComponent, UnexpectedError } from '../subcomponents/Error.js'
 import Hint from '../subcomponents/Hint.js'
-import { Spinner } from '../subcomponents/Spinner.js'
 import { Link } from '../subcomponents/link.js'
 import { SignerLogoText, SignersLogoName } from '../subcomponents/signers.js'
 import { tryFocusingTabOrWindow } from '../ui-utils.js'
@@ -140,7 +139,7 @@ function Buttons({ currentPendingTransactionOrSignableMessage, reject, approve }
 		</button>
 		<button className='button is-primary button-overflow dialog-button-right' onClick={approve}>
 			{currentPendingTransactionOrSignableMessage.approvalStatus.status === 'WaitingForSigner' ? <>
-				<span> <Spinner height='1em' color='var(--text-color)' /> Waiting for <SignersLogoName signerName={'NoSigner'} /> </span>
+				<span>Waiting for <SignersLogoName signerName={'NoSigner'} /> </span>
 			</> : <>
 				{<SignerLogoText signerName={'NoSigner'} text={"Approve"} />
 				}
