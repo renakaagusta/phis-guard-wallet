@@ -2,7 +2,6 @@ import { Signal, useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../background/backgroundUtils.js'
-import { noNewBlockForOverTwoMins } from '../background/iconHandler.js'
 import { defaultActiveAddresses } from '../background/settings.js'
 import { AddressBookEntries, AddressBookEntry } from '../types/addressBookTypes.js'
 import { MessageToPopup, Settings, UnexpectedErrorOccured, UpdateHomePage } from '../types/interceptor-messages.js'
@@ -12,7 +11,7 @@ import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-int
 import { ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState } from '../types/visualizer-types.js'
 import { EthereumAddress } from '../types/wire-types.js'
 import { checksummedAddress } from '../utils/bigint.js'
-import { DEFAULT_TAB_CONNECTION, METAMASK_ERROR_ALREADY_PENDING, METAMASK_ERROR_USER_REJECTED_REQUEST, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
+import { DEFAULT_TAB_CONNECTION, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
 import { truncateAddr } from '../utils/ethereum.js'
 import { AddNewAddress } from './pages/AddNewAddress.js'
 import { ChangeActiveAddress } from './pages/ChangeActiveAddress.js'
@@ -20,20 +19,7 @@ import { Home } from './pages/Home.js'
 import { ErrorComponent, UnexpectedError } from './subcomponents/Error.js'
 import Hint from './subcomponents/Hint.js'
 import { PasteCatcher } from './subcomponents/PasteCatcher.js'
-import { SignersLogoName } from './subcomponents/signers.js'
 import { SomeTimeAgo } from './subcomponents/SomeTimeAgo.js'
-import { humanReadableDate } from './ui-utils.js'
-
-type ProviderErrorsParam = {
-	tabState: TabState | undefined
-}
-
-function ProviderErrors({ tabState } : ProviderErrorsParam) {
-	if (tabState === undefined || tabState.signerAccountError === undefined) return <></>
-	if (tabState.signerAccountError.code === METAMASK_ERROR_USER_REJECTED_REQUEST) return <ErrorComponent warning = { true } text = { <>Could not get an account from <SignersLogoName signerName = { tabState.signerName } /> as user denied the request.</> }/>
-	if (tabState.signerAccountError.code === METAMASK_ERROR_ALREADY_PENDING.error.code) return <ErrorComponent warning = { true } text = { <>There's a connection request pending on <SignersLogoName signerName = { tabState.signerName } />. Please review the request.</> }/>
-	return <ErrorComponent warning = { true } text = { <><SignersLogoName signerName = { tabState.signerName } /> returned error: "{ tabState.signerAccountError.message }".</> }/>
-}
 
 type NetworkErrorParams = {
 	rpcConnectionStatus: Signal<RpcConnectionStatus>
@@ -47,11 +33,6 @@ export function NetworkErrors({ rpcConnectionStatus } : NetworkErrorParams) {
 		{ rpcConnectionStatus.value.isConnected === false ?
 			<ErrorComponent warning = { true } text = {
 				<>Unable to connect to { rpcConnectionStatus.value.rpcNetwork.name }. Retrying in <SomeTimeAgo priorTimestamp = { nextConnectionAttempt } countBackwards = { true }/> .</>
-			}/>
-		: <></> }
-		{ rpcConnectionStatus.value.latestBlock !== undefined && noNewBlockForOverTwoMins(rpcConnectionStatus.value) && rpcConnectionStatus.value.latestBlock !== null ?
-			<ErrorComponent warning = { true } text = {
-				<>The connected RPC ({ rpcConnectionStatus.value.rpcNetwork.name }) seem to be stuck at block { rpcConnectionStatus.value.latestBlock.number } (occured on: { humanReadableDate(rpcConnectionStatus.value.latestBlock.timestamp) }). Retrying in <SomeTimeAgo priorTimestamp = { nextConnectionAttempt } countBackwards = { true }/>.</>
 			}/>
 		: <></> }
 	</>
@@ -332,8 +313,6 @@ export function App() {
 						</nav>
 
 						<UnexpectedError close = { clearUnexpectedError } unexpectedError = { unexpectedError }/>
-						<NetworkErrors rpcConnectionStatus = { rpcConnectionStatus }/>
-						<ProviderErrors tabState = { tabState }/>
 						<Home
 							setActiveRpcAndInformAboutIt = { setActiveRpcAndInformAboutIt }
 							rpcNetwork = { rpcNetwork }

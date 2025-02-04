@@ -85,7 +85,6 @@ type RenderinCompleteAddressBookParams = {
 	setUseAsActiveAddress: (useAsActiveAddress: boolean) => void
 	setDeclarativeNetRequestBlockMode: (declarativeNetRequestBlockMode: DeclarativeNetRequestBlockMode) => void
 	setAbi: (abi: string) => void
-	fetchAbiAndNameFromBlockExplorer: () => Promise<void>
 	setChain: (chainEntry: ChainEntry) => void
 }
 
@@ -263,12 +262,6 @@ export function AddNewAddress(param: AddAddressParam) {
 		if (previous === undefined) return
 		modifyState(modifyObject(previous, { incompleteAddressBookEntry: modifyObject(previous.incompleteAddressBookEntry, { askForAddressAccess }) }))
 	}
-	async function fetchAbiAndNameFromBlockExplorer() {
-		const address = stringToAddress(param.modifyAddressWindowState.value?.incompleteAddressBookEntry.address)
-		if (address === undefined || param.modifyAddressWindowState.value === undefined) return
-		setCanFetchFromEtherScan(false)
-	}
-
 	function showOnChainVerificationErrorBox() {
 		if (param.modifyAddressWindowState.value === undefined) return false
 		const incompleteAddressBookEntry = param.modifyAddressWindowState.value.incompleteAddressBookEntry
@@ -325,7 +318,6 @@ export function AddNewAddress(param: AddAddressParam) {
 							setDeclarativeNetRequestBlockMode = { setDeclarativeNetRequestBlockMode }
 							setAskForAddressAccess = { setAskForAddressAccess }
 							canFetchFromEtherScan = { canFetchFromEtherScan }
-							fetchAbiAndNameFromBlockExplorer = { fetchAbiAndNameFromBlockExplorer }
 						/>
 					</div>
 				</div>
