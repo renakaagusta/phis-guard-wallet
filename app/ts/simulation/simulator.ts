@@ -13,7 +13,6 @@ import { parseSolidityValueByTypePure } from '../utils/solidityTypes.js'
 import { handleBaseRegistrarNameRegistered, handleBaseRegistrarNameRenewed, handleControllerNameRegistered, handleEnsAddrChanged, handleEnsAddressChanged, handleEnsContentHashChanged, handleEnsControllerNameRenewed, handleEnsExpiryExtended, handleEnsFusesSet, handleEnsNameChanged, handleEnsNameUnWrapped, handleEnsNewOwner, handleEnsNewResolver, handleEnsNewTtl, handleEnsReverseClaimed, handleEnsTextChanged, handleEnsTextChangedKeyValue, handleEnsTransfer, handleNameWrapped } from './logHandlers.js'
 import { EthereumClientService } from './services/EthereumClientService.js'
 import { EthereumJSONRpcRequestHandler } from './services/EthereumJSONRpcRequestHandler.js'
-import { TokenPriceService } from './services/priceEstimator.js'
 import { parseEventIfPossible, parseTransactionInputIfPossible } from './services/SimulationModeEthereumClientService.js'
 
 const ensEventHandler = (parsedEvent: ParsedEvent) => {
@@ -157,9 +156,8 @@ export const runProtectorsForTransaction = async (_: SimulationState, __: Websit
 type NewBlockCallBack = (blockHeader: EthereumBlockHeader, ethereumClientService: EthereumClientService, isNewBlock: boolean, simulator: Simulator) => Promise<void>
 export class Simulator {
 	public ethereum: EthereumClientService
-	public tokenPriceService: TokenPriceService
 	private newBlockAttemptCallback: NewBlockCallBack
-	public constructor(rpcNetwork: RpcEntry, newBlockAttemptCallback: NewBlockCallBack, onErrorBlockCallback: (ethereumClientService: EthereumClientService, error: unknown) => Promise<void>, tokenPriceCacheAge = 60000) {
+	public constructor(rpcNetwork: RpcEntry, newBlockAttemptCallback: NewBlockCallBack, onErrorBlockCallback: (ethereumClientService: EthereumClientService, error: unknown) => Promise<void>) {
 		this.newBlockAttemptCallback = newBlockAttemptCallback
 		this.ethereum = new EthereumClientService(
 			new EthereumJSONRpcRequestHandler(rpcNetwork.httpsRpc, true),
@@ -167,7 +165,6 @@ export class Simulator {
 			onErrorBlockCallback,
 			rpcNetwork
 		)
-		this.tokenPriceService = new TokenPriceService(this.ethereum, tokenPriceCacheAge)
 	}
 
 	public cleanup = () => this.ethereum.cleanup()
@@ -180,6 +177,5 @@ export class Simulator {
 			this.ethereum.getOnErrorBlockCallback(),
 			rpcNetwork
 		)
-		this.tokenPriceService = new TokenPriceService(this.ethereum, this.tokenPriceService.cacheAge)
 	}
 }
