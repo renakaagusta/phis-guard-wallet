@@ -16,13 +16,10 @@ const WebsiteMetadataInfo = funtypes.Intersect(
 type WebsiteMetaData  = funtypes.Static<typeof WebsiteMetaData>
 const WebsiteMetaData = funtypes.ReadonlyRecord(funtypes.String, WebsiteMetadataInfo)
 
-export const getWebsiteWarningMessage = (websiteOrigin: string, simulationMode: boolean): { message: string, suggestedAlternative: string | undefined } | undefined => {
+export const getWebsiteWarningMessage = (websiteOrigin: string): { message: string, suggestedAlternative: string | undefined } | undefined => {
 	const data = websiteMetaData[websiteOrigin]
 	if (data === undefined) return undefined
 	if (data.message !== undefined) return { message: data.message, suggestedAlternative: data.suggestedAlternative }
-	if (simulationMode === false) return undefined
-	if (data.externalRpc) return { message: `${ data.name } relies on a centralized RPC connection which causes PhisGuard's Simulation Mode to not work properly with this site.`, suggestedAlternative: data.suggestedAlternative }
-	if (data.usesSubGraph) return { message: `${ data.name } relies on the centralized The Graph Protocol which causes PhisGuard's Simulation Mode to not work properly with this site.`, suggestedAlternative: data.suggestedAlternative }
 	return undefined
 }
 

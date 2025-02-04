@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
+import { SignerName } from '../../types/signerTypes.js'
 import { FirstCardParams, HomeParams, TabIcon, TabIconDetails, TabState } from '../../types/user-interface-types.js'
 import { DEFAULT_TAB_CONNECTION, ICON_NOT_ACTIVE, ICON_NOT_ACTIVE_WITH_SHIELD } from '../../utils/constants.js'
 import { ActiveAddressComponent, getActiveAddressEntry } from '../subcomponents/address.js'
@@ -11,7 +12,6 @@ import { getPrettySignerName, SignerLogoText, SignersLogoName } from '../subcomp
 
 type SignerExplanationParams = {
 	activeAddress: AddressBookEntry | undefined
-	simulationMode: boolean
 	tabState: TabState | undefined
 	useSignersAddressAsActiveAddress: boolean
 	tabIcon: TabIcon
@@ -32,10 +32,8 @@ function FirstCardHeader(param: FirstCardParams) {
 			<div>
 				<div class='buttons has-addons' style='border-style: solid; border-color: var(--primary-color); border-radius: 6px; padding: 1px; border-width: 1px; display: inline-flex; margin-bottom: 0;' >
 					<button
-						class={`button is-primary ${param.simulationMode ? 'is-outlined' : ''}`}
-						style={`margin-bottom: 0px; ${param.simulationMode ? 'border-style: none;' : 'opacity: 1;'}`}
-						disabled={!param.simulationMode}
-						onClick={() => param.enableSimulationMode(false)}>
+						class={`button is-primary }`}
+						style={`margin-bottom: 0px; opacity: 1;'}`}>
 						Signing
 					</button>
 				</div>
@@ -48,7 +46,7 @@ function FirstCardHeader(param: FirstCardParams) {
 }
 
 function FirstCard(param: FirstCardParams) {
-	if (param.tabState?.signerName === 'NoSigner' && param.simulationMode === false) {
+	if (param.tabState?.signerName === 'NoSigner') {
 		return <>
 			<section class='card' style='margin: 10px;'>
 				<FirstCardHeader {...param} />
@@ -63,9 +61,9 @@ function FirstCard(param: FirstCardParams) {
 		<section class='card' style='margin: 10px;'>
 			<FirstCardHeader {...param} />
 			<div class='card-content'>
-				{param.useSignersAddressAsActiveAddress || !param.simulationMode ?
+				{param.useSignersAddressAsActiveAddress ?
 					<p style='color: var(--text-color); text-align: left; padding-bottom: 10px'>
-						{param.tabState === undefined || param.tabState?.signerName === 'NoSigner' ? <></> : <><SignersLogoName signerName={param.tabState.signerName} /></>}
+						{param.tabState === undefined || param.tabState?.signerName === 'NoSigner' as SignerName ? <></> : <><SignersLogoName signerName={param.tabState.signerName} /></>}
 						{param.tabState?.signerConnected ? <span style='float: right; color: var(--primary-color);'>CONNECTED</span> : <span style='float: right; color: var(--negative-color);'>NOT CONNECTED</span>}
 					</p>
 					: <></>
@@ -74,7 +72,6 @@ function FirstCard(param: FirstCardParams) {
 				<ActiveAddressComponent
 					activeAddress={param.activeAddress}
 					buttonText={'Change'}
-					disableButton={!param.simulationMode}
 					changeActiveAddress={param.changeActiveAddress}
 					renameAddressCallBack={param.renameAddressCallBack}
 				/>
@@ -95,7 +92,6 @@ function FirstCard(param: FirstCardParams) {
 
 		<SignerExplanation
 			activeAddress={param.activeAddress}
-			simulationMode={param.simulationMode}
 			tabState={param.tabState}
 			useSignersAddressAsActiveAddress={param.useSignersAddressAsActiveAddress}
 			tabIcon={param.tabIconDetails.icon}
@@ -104,10 +100,8 @@ function FirstCard(param: FirstCardParams) {
 }
 
 export function Home(param: HomeParams) {
-	const [activeSimulationAddress, setActiveSimulationAddress] = useState<AddressBookEntry | undefined>(undefined)
 	const [activeSigningAddress, setActiveSigningAddress] = useState<AddressBookEntry | undefined>(undefined)
 	const [useSignersAddressAsActiveAddress, setUseSignersAddressAsActiveAddress] = useState(false)
-	const [simulationMode, setSimulationMode] = useState<boolean>(true)
 	const [tabIconDetails, setTabConnection] = useState<TabIconDetails>(DEFAULT_TAB_CONNECTION)
 	const [tabState, setTabState] = useState<TabState | undefined>(undefined)
 	const [isLoaded, setLoaded] = useState<boolean>(false)
@@ -115,20 +109,16 @@ export function Home(param: HomeParams) {
 
 	useEffect(() => {
 		setUseSignersAddressAsActiveAddress(param.useSignersAddressAsActiveAddress)
-		setActiveSimulationAddress(param.activeSimulationAddress !== undefined ? getActiveAddressEntry(param.activeSimulationAddress, param.activeAddresses) : undefined)
 		setActiveSigningAddress(param.activeSigningAddress !== undefined ? getActiveAddressEntry(param.activeSigningAddress, param.activeAddresses) : undefined)
-		setSimulationMode(param.simulationMode)
 		setTabConnection(param.tabIconDetails)
 		setTabState(param.tabState)
 		setActiveAddresses(param.activeAddresses)
 		setLoaded(true)
 	}, [param.activeSigningAddress,
-	param.activeSimulationAddress,
 	param.tabState,
 	param.activeAddresses,
 	param.useSignersAddressAsActiveAddress,
 	param.rpcNetwork.value,
-	param.simulationMode,
 	param.tabIconDetails,
 	param.currentBlockNumber,
 	param.simVisResults,
@@ -136,10 +126,6 @@ export function Home(param: HomeParams) {
 	param.simulationUpdatingState,
 	param.simulationResultState,
 	])
-
-	function enableSimulationMode(enabled: boolean) {
-		sendPopupMessageToBackgroundPage({ method: 'popup_enableSimulationMode', data: enabled })
-	}
 
 	if (!isLoaded || param.rpcNetwork.value === undefined) return <> </>
 
@@ -151,11 +137,9 @@ export function Home(param: HomeParams) {
 		<FirstCard
 			activeAddresses={activeAddresses}
 			useSignersAddressAsActiveAddress={useSignersAddressAsActiveAddress}
-			enableSimulationMode={enableSimulationMode}
-			activeAddress={simulationMode ? activeSimulationAddress : activeSigningAddress}
+			activeAddress={activeSigningAddress}
 			rpcNetwork={param.rpcNetwork}
 			changeActiveRpc={param.setActiveRpcAndInformAboutIt}
-			simulationMode={simulationMode}
 			changeActiveAddress={param.changeActiveAddress}
 			tabState={tabState}
 			tabIconDetails={tabIconDetails}

@@ -55,13 +55,11 @@ export async function changeActiveAddress(simulator: Simulator, websiteTabConnec
 		sendMessageToApprovedWebsitePorts(websiteTabConnections, { method: 'request_signer_chainId', result: [] })
 
 		await changeActiveAddressAndChainAndResetSimulation(simulator, websiteTabConnections, {
-			simulationMode: addressChange.data.simulationMode,
 			activeAddress: signerAccount,
 		})
 	} else {
 		await setUseSignersAddressAsActiveAddress(false)
 		await changeActiveAddressAndChainAndResetSimulation(simulator, websiteTabConnections, {
-			simulationMode: addressChange.data.simulationMode,
 			activeAddress: addressChange.data.activeAddress,
 		})
 	}
@@ -228,8 +226,8 @@ export async function refreshPopupConfirmTransactionMetadata(ethereumClientServi
 	}
 }
 
-export async function popupChangeActiveRpc(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, params: ChangeActiveChain, settings: Settings) {
-	return await changeActiveRpc(simulator, websiteTabConnections, params.data, settings.simulationMode)
+export async function popupChangeActiveRpc(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, params: ChangeActiveChain) {
+	return await changeActiveRpc(simulator, websiteTabConnections, params.data)
 }
 
 export async function changeChainDialog(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, chainChange: ChainChangeConfirmation) {

@@ -6,7 +6,7 @@ import { getActiveAddressEntry } from './metadataUtils.js'
 import { handleUnexpectedError } from '../utils/errors.js'
 
 export async function getActiveAddress(settings: Settings, tabId: number) {
-	if (settings.simulationMode && !settings.useSignersAddressAsActiveAddress) {
+	if (!settings.useSignersAddressAsActiveAddress) {
 		return settings.activeSimulationAddress !== undefined ? await getActiveAddressEntry(settings.activeSimulationAddress) : undefined
 	}
 	const signingAddr = (await getTabState(tabId)).activeSigningAddress
@@ -16,7 +16,7 @@ export async function getActiveAddress(settings: Settings, tabId: number) {
 
 export async function getActiveAddressesForAllTabs(settings: Settings) {
 	const tabStates = await getAllTabStates()
-	if (settings.simulationMode && !settings.useSignersAddressAsActiveAddress) {
+	if (!settings.useSignersAddressAsActiveAddress) {
 		const addressEntry = settings.activeSimulationAddress !== undefined ? await getActiveAddressEntry(settings.activeSimulationAddress) : undefined
 		return tabStates.map((state) => ({ tabId: state.tabId, activeAddress: addressEntry }))
 	}

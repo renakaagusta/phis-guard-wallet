@@ -36,10 +36,9 @@ export async function sendTransaction(
 	transactionParams: SendTransactionParams | SendRawTransactionParams,
 	request: InterceptedRequest,
 	website: Website,
-	websiteTabConnections: WebsiteTabConnections,
-	simulationMode = true,
+	websiteTabConnections: WebsiteTabConnections
 ) {
-	const action = await openConfirmTransactionDialogForTransaction(simulator, request, transactionParams, simulationMode, activeAddress, website, websiteTabConnections)
+	const action = await openConfirmTransactionDialogForTransaction(simulator, request, transactionParams, activeAddress, website, websiteTabConnections)
 	if (action.type === 'doNotReply') return action
 	return { method: transactionParams.method, ...action }
 }
@@ -107,20 +106,19 @@ export async function personalSign(
 	transactionParams: SignMessageParams,
 	request: InterceptedRequest,
 	website: Website,
-	websiteTabConnections: WebsiteTabConnections,
-	simulationMode = true,
+	websiteTabConnections: WebsiteTabConnections
 ) {
-	const action = await openConfirmTransactionDialogForMessage(simulator, ethereumClientService, request, transactionParams, simulationMode, activeAddress, website, websiteTabConnections)
+	const action = await openConfirmTransactionDialogForMessage(simulator, ethereumClientService, request, transactionParams, activeAddress, website, websiteTabConnections)
 	if (action.type === 'doNotReply') return action
 	return { method: transactionParams.method, ...action }
 }
 
-export async function switchEthereumChain(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, ethereumClientService: EthereumClientService, params: SwitchEthereumChainParams, request: InterceptedRequest, simulationMode: boolean, website: Website) {
+export async function switchEthereumChain(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, ethereumClientService: EthereumClientService, params: SwitchEthereumChainParams, request: InterceptedRequest, website: Website) {
 	if (ethereumClientService.getChainId() === params.params[0].chainId) {
 		// we are already on the right chain
 		return { type: 'result' as const, method: params.method, result: null }
 	}
-	const change = await openChangeChainDialog(simulator, websiteTabConnections, request, simulationMode, website, params)
+	const change = await openChangeChainDialog(simulator, websiteTabConnections, request, website, params)
 	return { type: 'result' as const, method: params.method, ...change }
 }
 

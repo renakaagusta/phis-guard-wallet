@@ -1,14 +1,14 @@
 import * as funtypes from 'funtypes'
-import { PopupOrTabId, Website } from './websiteAccessTypes.js'
-import { AddressBookEntry } from './addressBookTypes.js'
-import { EthereumAddress, EthereumQuantity, EthereumTimestamp, OptionalEthereumAddress } from './wire-types.js'
-import { SignerName } from './signerTypes.js'
 import { InterceptedRequest, UniqueRequestIdentifier, WebsiteSocket } from '../utils/requests.js'
-import { FailedToCreateWebsiteCreatedEthereumUnsignedTransaction, NamedTokenId, ProtectorResults, SignedMessageTransaction, SimulatedAndVisualizedTransaction, SimulationState, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from './visualizer-types.js'
-import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
-import { OriginalSendRequestParameters } from './JsonRpc-types.js'
-import { SignMessageParams } from './jsonRpc-signing-types.js'
 import { EnrichedEthereumEvent } from './EnrichedEthereumData.js'
+import { OriginalSendRequestParameters } from './JsonRpc-types.js'
+import { AddressBookEntry } from './addressBookTypes.js'
+import { SignMessageParams } from './jsonRpc-signing-types.js'
+import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
+import { SignerName } from './signerTypes.js'
+import { FailedToCreateWebsiteCreatedEthereumUnsignedTransaction, NamedTokenId, ProtectorResults, SignedMessageTransaction, SimulatedAndVisualizedTransaction, SimulationState, WebsiteCreatedEthereumUnsignedTransaction, WebsiteCreatedEthereumUnsignedTransactionOrFailed } from './visualizer-types.js'
+import { PopupOrTabId, Website } from './websiteAccessTypes.js'
+import { EthereumAddress, EthereumQuantity, EthereumTimestamp, OptionalEthereumAddress } from './wire-types.js'
 
 export type PendingAccessRequest = funtypes.Static<typeof PendingAccessRequest>
 export const PendingAccessRequest = funtypes.ReadonlyObject({
@@ -18,7 +18,6 @@ export const PendingAccessRequest = funtypes.ReadonlyObject({
 	associatedAddresses: funtypes.ReadonlyArray(AddressBookEntry),
 	signerAccounts: funtypes.ReadonlyArray(EthereumAddress),
 	signerName: SignerName,
-	simulationMode: funtypes.Boolean,
 	popupOrTabId: PopupOrTabId,
 	socket: WebsiteSocket,
 	request: funtypes.Union(InterceptedRequest, funtypes.Undefined),
@@ -32,7 +31,6 @@ export const PendingAccessRequests = funtypes.ReadonlyArray(PendingAccessRequest
 type ConfirmTransactionSimulationBaseData = funtypes.Static<typeof ConfirmTransactionSimulationBaseData>
 const ConfirmTransactionSimulationBaseData = funtypes.ReadonlyObject({
 	activeAddress: EthereumAddress,
-	simulationMode: funtypes.Boolean,
 	uniqueRequestIdentifier: UniqueRequestIdentifier,
 	transactionToSimulate: WebsiteCreatedEthereumUnsignedTransactionOrFailed,
 	signerName: SignerName,
@@ -98,7 +96,6 @@ const SimulatedPendingTransactionBase = funtypes.ReadonlyObject({
 	popupOrTabId: PopupOrTabId,
 	originalRequestParameters: OriginalSendRequestParameters,
 	uniqueRequestIdentifier: UniqueRequestIdentifier,
-	simulationMode: funtypes.Boolean,
 	activeAddress: EthereumAddress,
 	created: EthereumTimestamp,
 	transactionIdentifier: EthereumQuantity,
@@ -146,7 +143,6 @@ const PendingSignableMessage = funtypes.Intersect(
 		type: funtypes.Literal('SignableMessage'),
 		popupOrTabId: PopupOrTabId,
 		originalRequestParameters: SignMessageParams,
-		simulationMode: funtypes.Boolean,
 		uniqueRequestIdentifier: UniqueRequestIdentifier,
 		signedMessageTransaction: SignedMessageTransaction,
 		created: EthereumTimestamp,

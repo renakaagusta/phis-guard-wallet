@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'preact/hooks'
-import { ErrorComponent, ErrorCheckBox } from '../subcomponents/Error.js'
-import { MessageToPopup } from '../../types/interceptor-messages.js'
+import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
-import { tryFocusingTabOrWindow } from '../ui-utils.js'
+import { MessageToPopup } from '../../types/interceptor-messages.js'
 import { PendingChainChangeConfirmationPromise } from '../../types/user-interface-types.js'
+import { ErrorCheckBox, ErrorComponent } from '../subcomponents/Error.js'
+import { tryFocusingTabOrWindow } from '../ui-utils.js'
 
 
 export function ChangeChain() {
@@ -71,10 +71,10 @@ export function ChangeChain() {
 								would like to switch to
 								<b> { chainChangeData.rpcNetwork.name } </b>
 							</p>
-							{ chainChangeData.rpcNetwork.httpsRpc === undefined && chainChangeData.simulationMode ?
+							{ chainChangeData.rpcNetwork.httpsRpc === undefined ?
 								<ErrorComponent text = { 'This chain is not supported by PhisGuard. If you want to use this chain anyway. Select Signing mode instead of Simulation mode and attempt to change the chain again. You will then be able to disable PhisGuard and send transactions without its protection.' }/>
 							: <></> }
-							{ chainChangeData.rpcNetwork.httpsRpc === undefined && !chainChangeData.simulationMode ?
+							{ chainChangeData.rpcNetwork.httpsRpc === undefined ?
 								<ErrorCheckBox
 									text = { 'This chain is not supported by PhisGuard. Would you like to disable PhisGuard and attempt to connect anyway?' }
 									checked = { connectAnyway }
@@ -92,7 +92,7 @@ export function ChangeChain() {
 						</button>
 						<button
 							className = { 'button is-primary' }
-							disabled = { chainChangeData.rpcNetwork.httpsRpc === undefined && ( (!connectAnyway && !chainChangeData.simulationMode ) || chainChangeData.simulationMode ) }
+							disabled = { chainChangeData.rpcNetwork.httpsRpc === undefined && (!connectAnyway) }
 							style = 'flex-grow: 1; margin-left: 5px; margin-right: 5px;'
 							onClick = { approve }>
 							{ chainChangeData.rpcNetwork.httpsRpc !== undefined? 'Change chain' : 'Disable PhisGuard and change' }

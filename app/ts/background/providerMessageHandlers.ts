@@ -1,20 +1,20 @@
-import { ConnectedToSigner, SignerReply, WalletSwitchEthereumChainReply } from '../types/interceptor-messages.js'
-import { TabState, WebsiteTabConnections } from '../types/user-interface-types.js'
-import { EthereumAccountsReply, EthereumChainReply } from '../types/JsonRpc-types.js'
-import { changeActiveAddressAndChainAndResetSimulation } from './background.js'
-import { getSocketFromPort, sendInternalWindowMessage, sendPopupMessageToOpenWindows } from './backgroundUtils.js'
-import { getRpcNetworkForChain, getTabState, setDefaultSignerName, updatePendingTransactionOrMessage, updateTabState } from './storageVariables.js'
-import { getMetamaskCompatibilityMode, getSettings } from './settings.js'
-import { resolveSignerChainChange } from './windows/changeChain.js'
-import { ApprovalState } from './accessManagement.js'
-import { ProviderMessage } from '../utils/requests.js'
-import { sendSubscriptionReplyOrCallBackToPort } from './messageSending.js'
 import { Simulator } from '../simulation/simulator.js'
+import { ConnectedToSigner, SignerReply, WalletSwitchEthereumChainReply } from '../types/interceptor-messages.js'
+import { EthereumAccountsReply, EthereumChainReply } from '../types/JsonRpc-types.js'
+import { TabState, WebsiteTabConnections } from '../types/user-interface-types.js'
+import { addressString } from '../utils/bigint.js'
 import { METAMASK_ERROR_USER_REJECTED_REQUEST } from '../utils/constants.js'
 import { handleUnexpectedError } from '../utils/errors.js'
-import { resolvePendingTransactionOrMessage, updateConfirmTransactionView } from './windows/confirmTransaction.js'
-import { addressString } from '../utils/bigint.js'
+import { ProviderMessage } from '../utils/requests.js'
 import { modifyObject } from '../utils/typescript.js'
+import { ApprovalState } from './accessManagement.js'
+import { changeActiveAddressAndChainAndResetSimulation } from './background.js'
+import { getSocketFromPort, sendInternalWindowMessage, sendPopupMessageToOpenWindows } from './backgroundUtils.js'
+import { sendSubscriptionReplyOrCallBackToPort } from './messageSending.js'
+import { getMetamaskCompatibilityMode, getSettings } from './settings.js'
+import { getRpcNetworkForChain, getTabState, setDefaultSignerName, updatePendingTransactionOrMessage, updateTabState } from './storageVariables.js'
+import { resolveSignerChainChange } from './windows/changeChain.js'
+import { resolvePendingTransactionOrMessage, updateConfirmTransactionView } from './windows/confirmTransaction.js'
 
 export async function ethAccountsReply(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, port: browser.runtime.Port, request: ProviderMessage, _connectInfoapproval: ApprovalState, _activeAddress: bigint | undefined) {
 	const returnValue = { type: 'result' as const, method: 'eth_accounts_reply' as const, result: '0x' as const }
@@ -36,9 +36,8 @@ export async function ethAccountsReply(simulator: Simulator, websiteTabConnectio
 	// update active address if we are using signers address
 	const settings = await getSettings()
 	if ((settings.useSignersAddressAsActiveAddress && settings.activeSimulationAddress !== signerAccounts[0])
-	|| (settings.simulationMode === false && tabStateChange.previousState.activeSigningAddress !== tabStateChange.newState.activeSigningAddress)) {
+	|| (tabStateChange.previousState.activeSigningAddress !== tabStateChange.newState.activeSigningAddress)) {
 		await changeActiveAddressAndChainAndResetSimulation(simulator, websiteTabConnections, {
-			simulationMode: settings.simulationMode,
 			activeAddress: tabStateChange.newState.activeSigningAddress,
 		})
 		await sendPopupMessageToOpenWindows({ method: 'popup_accounts_update' })
@@ -53,9 +52,8 @@ async function changeSignerChain(simulator: Simulator, websiteTabConnections: We
 	if (oldSignerChain !== signerChain) await updateTabState(port.sender.tab.id, (previousState: TabState) => modifyObject(previousState, { signerChain }))
 	// update active address if we are using signers address
 	const settings = await getSettings()
-	if ((settings.useSignersAddressAsActiveAddress || !settings.simulationMode) && settings.activeRpcNetwork.chainId !== signerChain) {
+	if ((settings.useSignersAddressAsActiveAddress) && settings.activeRpcNetwork.chainId !== signerChain) {
 		return changeActiveAddressAndChainAndResetSimulation(simulator, websiteTabConnections, {
-			simulationMode: settings.simulationMode,
 			rpcNetwork: await getRpcNetworkForChain(signerChain),
 		})
 	}
@@ -89,7 +87,7 @@ export async function connectedToSigner(_simulator: Simulator, _websiteTabConnec
 	await updateTabState(request.uniqueRequestIdentifier.requestSocket.tabId, (previousState: TabState) => modifyObject(previousState, { signerName, signerConnected }))
 	await sendPopupMessageToOpenWindows({ method: 'popup_signer_name_changed' })
 	const settings = await getSettings()
-	if (!settings.simulationMode || settings.useSignersAddressAsActiveAddress) {
+	if (settings.useSignersAddressAsActiveAddress) {
 		if (approval === 'hasAccess') {
 			sendSubscriptionReplyOrCallBackToPort(port, { type: 'result' as const, method: 'request_signer_to_eth_requestAccounts' as const, result: [] })
 		} else {

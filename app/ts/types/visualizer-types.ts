@@ -102,7 +102,6 @@ export const SignedMessageTransaction = funtypes.ReadonlyObject({
 	fakeSignedFor: EthereumAddress,
 	originalRequestParameters: SignMessageParams,
 	request: InterceptedRequest,
-	simulationMode: funtypes.Boolean,
 	messageIdentifier: EthereumQuantity,
 })
 

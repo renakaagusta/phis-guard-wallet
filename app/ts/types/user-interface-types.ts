@@ -30,13 +30,11 @@ export type HomeParams = {
 	changeActiveAddress: () => void,
 	activeAddresses: AddressBookEntries,
 	tabState: TabState | undefined,
-	activeSimulationAddress: bigint | undefined,
 	activeSigningAddress: bigint | undefined,
 	useSignersAddressAsActiveAddress: boolean,
 	simVisResults: SimulationAndVisualisationResults | undefined,
 	rpcNetwork: Signal<RpcNetwork | undefined>,
 	setActiveRpcAndInformAboutIt: (entry: RpcEntry) => void,
-	simulationMode: boolean,
 	tabIconDetails: TabIconDetails,
 	currentBlockNumber: bigint | undefined,
 	renameAddressCallBack: RenameAddressCallBack,
@@ -58,12 +56,10 @@ export type ChangeActiveAddressParam = {
 
 export type FirstCardParams = {
 	activeAddress: AddressBookEntry | undefined,
-	enableSimulationMode: (x: boolean) => void,
 	useSignersAddressAsActiveAddress: boolean,
 	activeAddresses: AddressBookEntries | undefined,
 	changeActiveRpc: (rpcEntry: RpcEntry) => void,
 	rpcNetwork: Signal<RpcNetwork | undefined>,
-	simulationMode: boolean,
 	changeActiveAddress: () => void,
 	tabIconDetails: TabIconDetails,
 	tabState: TabState | undefined,
@@ -148,6 +144,5 @@ export const PendingChainChangeConfirmationPromise = funtypes.ReadonlyObject({
 	website: Website,
 	popupOrTabId: PopupOrTabId,
 	request: InterceptedRequest,
-	rpcNetwork: RpcNetwork,
-	simulationMode: funtypes.Boolean,
+	rpcNetwork: RpcNetwork
 })

@@ -1,13 +1,13 @@
 import { ComponentChildren } from 'preact'
 import { JSX } from 'preact/jsx-runtime'
-import { checksummedAddress } from '../../utils/bigint.js'
-import { RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
+import { RenameAddressCallBack } from '../../types/user-interface-types.js'
 import { Website } from '../../types/websiteAccessTypes.js'
-import { Blockie } from './SVGBlockie.js'
-import { InlineCard } from './InlineCard.js'
+import { checksummedAddress } from '../../utils/bigint.js'
 import { EditIcon } from './icons.js'
+import { InlineCard } from './InlineCard.js'
 import { ActionableIconProps, ActionableTextProps, MultilineCard } from './MultilineCard.js'
+import { Blockie } from './SVGBlockie.js'
 
 export function getActiveAddressEntry(addressToFind: bigint, activeAddresses: AddressBookEntries): AddressBookEntry {
 	for (const info of activeAddresses) {
@@ -94,7 +94,6 @@ export function BigAddress(params: BigAddressParams) {
 
 type ActiveAddressParams = {
 	readonly activeAddress: AddressBookEntry | undefined
-	readonly disableButton: boolean
 	readonly changeActiveAddress: () => void
 	readonly renameAddressCallBack: RenameAddressCallBack
 	readonly buttonText: string
@@ -110,7 +109,7 @@ export function ActiveAddressComponent(params: ActiveAddressParams) {
 		</div>
 		<div class = 'log-cell'>
 			<div class = 'media-right'>
-				<button className = 'button is-primary' disabled = { params.disableButton } onClick = { params.changeActiveAddress } >
+				<button className = 'button is-primary' onClick = { params.changeActiveAddress } >
 					{ params.buttonText }
 				</button>
 			</div>

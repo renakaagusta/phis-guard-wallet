@@ -230,7 +230,6 @@ export type ChangeActiveAddress = funtypes.Static<typeof ChangeActiveAddress>
 export const ChangeActiveAddress = funtypes.ReadonlyObject({
 	method: funtypes.Literal('popup_changeActiveAddress'),
 	data: funtypes.ReadonlyObject({
-		simulationMode: funtypes.Boolean,
 		activeAddress: funtypes.Union(EthereumAddress, funtypes.Literal('signer'))
 	})
 }).asReadonly()
@@ -266,12 +265,6 @@ export const ChangePage = funtypes.ReadonlyObject({
 export type RequestAccountsFromSigner = funtypes.Static<typeof RequestAccountsFromSigner>
 export const RequestAccountsFromSigner = funtypes.ReadonlyObject({
 	method: funtypes.Literal('popup_requestAccountsFromSigner'),
-	data: funtypes.Boolean
-}).asReadonly()
-
-export type EnableSimulationMode = funtypes.Static<typeof EnableSimulationMode>
-export const EnableSimulationMode = funtypes.ReadonlyObject({
-	method: funtypes.Literal('popup_enableSimulationMode'),
 	data: funtypes.Boolean
 }).asReadonly()
 
@@ -495,8 +488,7 @@ export const Settings = funtypes.ReadonlyObject({
 	activeRpcNetwork: RpcNetwork,
 	openedPage: Page,
 	useSignersAddressAsActiveAddress: funtypes.Boolean,
-	websiteAccess: WebsiteAccessArray,
-	simulationMode: funtypes.Boolean,
+	websiteAccess: WebsiteAccessArray
 })
 
 type PartialUpdateHomePage = funtypes.Static<typeof PartialUpdateHomePage>
@@ -727,7 +719,6 @@ export const PopupMessage = funtypes.Union(
 	ChangeInterceptorAccess,
 	ChangeActiveChain,
 	ChainChangeConfirmation,
-	EnableSimulationMode,
 	AddOrEditAddressBookEntry,
 	GetAddressBookData,
 	RemoveAddressBookEntry,

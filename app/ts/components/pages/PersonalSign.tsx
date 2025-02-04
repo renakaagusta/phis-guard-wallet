@@ -87,7 +87,7 @@ export function SignatureHeader(params: SignatureHeaderParams) {
 	return <header class = 'card-header'>
 		<div class = 'card-header-icon unset-cursor'>
 			<span class = 'icon'>
-				<img src = { params.visualizedPersonalSignRequest.simulationMode ? '../img/head-simulating.png' : '../img/head-signing.png' } />
+				<img src = { '../img/head-signing.png' } />
 			</span>
 		</div>
 		<p class = 'card-header-title' style = 'white-space: nowrap;'>
@@ -389,7 +389,7 @@ export function SignatureCard(params: SignatureCardParams) {
 }
 
 export function isPossibleToSignMessage(visualizedPersonalSignRequest: VisualizedPersonalSignRequest, activeAddress: bigint) {
-	return !(visualizedPersonalSignRequest.simulationMode && (activeAddress !== MOCK_PRIVATE_KEYS_ADDRESS || visualizedPersonalSignRequest.method !== 'personal_sign'))
+	return !((activeAddress !== MOCK_PRIVATE_KEYS_ADDRESS || visualizedPersonalSignRequest.method !== 'personal_sign'))
 }
 
 export function InvalidMessage({ pendingTransactionOrSignableMessage } : { pendingTransactionOrSignableMessage: PendingTransactionOrSignableMessage }) {

@@ -357,7 +357,6 @@ const PersonalSignRequestBase = funtypes.Intersect(
 		activeAddress: AddressBookEntry,
 		rpcNetwork: RpcNetwork,
 		request: InterceptedRequest,
-		simulationMode: funtypes.Boolean,
 		signerName: SignerName,
 		quarantineReasons: funtypes.ReadonlyArray(funtypes.String),
 		quarantine: funtypes.Boolean,

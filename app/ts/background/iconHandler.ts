@@ -1,15 +1,15 @@
 import { getPrettySignerName } from '../components/subcomponents/signers.js'
-import { ICON_ACCESS_DENIED, ICON_INTERCEPTOR_DISABLED, ICON_NOT_ACTIVE, ICON_SIGNING, ICON_SIGNING_NOT_SUPPORTED, ICON_SIMULATING, PRIMARY_COLOR, TIME_BETWEEN_BLOCKS, WARNING_COLOR } from '../utils/constants.js'
-import { areWeBlocking, hasAccess, hasAddressAccess } from './accessManagement.js'
-import { getActiveAddress, sendPopupMessageToOpenWindows, setExtensionBadgeBackgroundColor, setExtensionBadgeText, setExtensionIcon, setExtensionTitle } from './backgroundUtils.js'
-import { imageToUri } from '../utils/imageToUri.js'
-import { Future } from '../utils/future.js'
 import { RpcConnectionStatus, TabIcon, TabState, WebsiteTabConnections } from '../types/user-interface-types.js'
-import { getSettings } from './settings.js'
-import { getRpcConnectionStatus, getTabState, updateTabState } from './storageVariables.js'
-import { getLastKnownCurrentTabId } from './popupMessageHandlers.js'
+import { ICON_ACCESS_DENIED, ICON_INTERCEPTOR_DISABLED, ICON_NOT_ACTIVE, ICON_SIGNING, ICON_SIGNING_NOT_SUPPORTED, PRIMARY_COLOR, TIME_BETWEEN_BLOCKS, WARNING_COLOR } from '../utils/constants.js'
+import { Future } from '../utils/future.js'
+import { imageToUri } from '../utils/imageToUri.js'
 import { checkAndPrintRuntimeLastError, safeGetTab } from '../utils/requests.js'
 import { modifyObject } from '../utils/typescript.js'
+import { areWeBlocking, hasAccess, hasAddressAccess } from './accessManagement.js'
+import { getActiveAddress, sendPopupMessageToOpenWindows, setExtensionBadgeBackgroundColor, setExtensionBadgeText, setExtensionIcon, setExtensionTitle } from './backgroundUtils.js'
+import { getLastKnownCurrentTabId } from './popupMessageHandlers.js'
+import { getSettings } from './settings.js'
+import { getRpcConnectionStatus, getTabState, updateTabState } from './storageVariables.js'
 
 async function setInterceptorIcon(tabId: number, icon: TabIcon, iconReason: string) {
 	const tabIconDetails = { icon, iconReason }
@@ -41,7 +41,6 @@ export async function updateExtensionIcon(websiteTabConnections: WebsiteTabConne
 		}
 		return setIcon(ICON_ACCESS_DENIED, `The access to ${ activeAddress.name } for ${ websiteOrigin } has been DENIED!`)
 	}
-	if (settings.simulationMode) return setIcon(ICON_SIMULATING, 'PhisGuard simulates your sent transactions.')
 	if (settings.activeRpcNetwork.httpsRpc === undefined) return setIcon(ICON_SIGNING_NOT_SUPPORTED, `PhisGuard is disabled while it's on an unsupported network`)
 	const tabState = await getTabState(tabId)
 	return setIcon(ICON_SIGNING, `PhisGuard forwards your transactions to ${ getPrettySignerName(tabState.signerName) } once sent.`)

@@ -9,7 +9,6 @@ import { VisualizedPersonalSignRequest } from '../types/personal-message-definit
 import { RpcEntries, RpcEntry, RpcNetwork } from '../types/rpc.js'
 import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-interface-types.js'
 import { ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState } from '../types/visualizer-types.js'
-import { EthereumAddress } from '../types/wire-types.js'
 import { checksummedAddress } from '../utils/bigint.js'
 import { DEFAULT_TAB_CONNECTION, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
 import { truncateAddr } from '../utils/ethereum.js'
@@ -45,12 +44,10 @@ type Page = { page: 'Home' | 'ChangeActiveAddress' | 'AccessList' | 'Settings' |
 export function App() {
 	const appPage = useSignal<Page>({ page: 'Unknown' })
 	const [activeAddresses, setActiveAddresses] = useState<AddressBookEntries>(defaultActiveAddresses)
-	const [activeSimulationAddress, setActiveSimulationAddress] = useState<bigint | undefined>(undefined)
 	const [activeSigningAddress, setActiveSigningAddress] = useState<bigint | undefined>(undefined)
 	const [useSignersAddressAsActiveAddress, setUseSignersAddressAsActiveAddress] = useState(false)
 	const [simVisResults, setSimVisResults] = useState<SimulationAndVisualisationResults | undefined >(undefined)
 	const rpcNetwork = useSignal<RpcNetwork | undefined>(undefined)
-	const simulationMode = false
 	const [tabIconDetails, setTabConnection] = useState<TabIconDetails>(DEFAULT_TAB_CONNECTION)
 	const [isSettingsLoaded, setIsSettingsLoaded] = useState<boolean>(false)
 	const [currentBlockNumber, setCurrentBlockNumber] = useState<bigint | undefined>(undefined)
@@ -65,24 +62,18 @@ export function App() {
 	async function setActiveAddressAndInformAboutIt(address: bigint | 'signer') {
 		setUseSignersAddressAsActiveAddress(address === 'signer')
 		if (address === 'signer') {
-			sendPopupMessageToBackgroundPage({ method: 'popup_changeActiveAddress', data: { activeAddress: 'signer', simulationMode: simulationMode } })
-			if (simulationMode) {
-				return setActiveSimulationAddress(tabState && tabState.signerAccounts.length > 0 ? tabState.signerAccounts[0] : undefined)
-			}
+			sendPopupMessageToBackgroundPage({ method: 'popup_changeActiveAddress', data: { activeAddress: 'signer' } })
 			return setActiveSigningAddress(tabState && tabState.signerAccounts.length > 0 ? tabState.signerAccounts[0] : undefined)
 		}
-		sendPopupMessageToBackgroundPage({ method: 'popup_changeActiveAddress', data: { activeAddress: address, simulationMode: simulationMode } })
-		if (simulationMode) {
-			return setActiveSimulationAddress(address)
-		}
+		sendPopupMessageToBackgroundPage({ method: 'popup_changeActiveAddress', data: { activeAddress: address} })
+		
 		return setActiveSigningAddress(address)
 	}
 
 	function isSignerConnected() {
 		return tabState !== undefined && tabState.signerAccounts.length > 0
 			&& (
-				simulationMode && activeSimulationAddress !== undefined && tabState.signerAccounts[0] === activeSimulationAddress
-				|| !simulationMode && activeSigningAddress !== undefined && tabState.signerAccounts[0] === activeSigningAddress
+				activeSigningAddress !== undefined && tabState.signerAccounts[0] === activeSigningAddress
 			)
 	}
 
@@ -99,10 +90,8 @@ export function App() {
 			addressBookEntries: AddressBookEntries,
 			simulatedAndVisualizedTransactions: readonly SimulatedAndVisualizedTransaction[],
 			personalSignRequests: readonly VisualizedPersonalSignRequest[],
-			activeSimulationAddress: EthereumAddress | undefined,
 			namedTokenIds: readonly NamedTokenId[],
 		) => {
-			if (activeSimulationAddress === undefined) return setSimVisResults(undefined)
 			if (simState === undefined) return setSimVisResults(undefined)
 			setSimVisResults({
 				blockNumber: simState.blockNumber,
@@ -111,7 +100,7 @@ export function App() {
 				simulatedAndVisualizedTransactions,
 				visualizedPersonalSignRequests: personalSignRequests,
 				rpcNetwork: simState.rpcNetwork,
-				activeAddress: activeSimulationAddress,
+				activeAddress: activeSigningAddress!,
 				addressBookEntries: addressBookEntries,
 				namedTokenIds,
 			})
@@ -133,7 +122,6 @@ export function App() {
 						data.visualizedSimulatorState.addressBookEntries,
 						data.visualizedSimulatorState.simulatedAndVisualizedTransactions,
 						data.visualizedSimulatorState.visualizedPersonalSignRequests,
-						data.visualizedSimulatorState.activeAddress,
 						data.visualizedSimulatorState.namedTokenIds,
 					)
 					setSimulationUpdatingState(data.visualizedSimulatorState.simulationUpdatingState)
@@ -152,7 +140,6 @@ export function App() {
 				}
 			}
 			rpcNetwork.value = settings.activeRpcNetwork
-			setActiveSimulationAddress(settings.activeSimulationAddress)
 			setUseSignersAddressAsActiveAddress(settings.useSignersAddressAsActiveAddress)
 		}
 
@@ -319,10 +306,8 @@ export function App() {
 							simVisResults = { simVisResults }
 							useSignersAddressAsActiveAddress = { useSignersAddressAsActiveAddress }
 							activeSigningAddress = { activeSigningAddress }
-							activeSimulationAddress = { activeSimulationAddress }
 							changeActiveAddress = { changeActiveAddress }
 							activeAddresses = { activeAddresses }
-							simulationMode = { simulationMode }
 							tabIconDetails = { tabIconDetails }
 							currentBlockNumber = { currentBlockNumber }
 							tabState = { tabState }
@@ -350,7 +335,7 @@ export function App() {
 									setActiveAddressAndInformAboutIt = { setActiveAddressAndInformAboutIt }
 									modifyAddressWindowState = { appPage.value.state }
 									close = { goHome }
-									activeAddress = { simulationMode ? activeSimulationAddress : activeSigningAddress }
+									activeAddress = { activeSigningAddress }
 									rpcEntries = { rpcEntries }
 								/>
 							: <></> }

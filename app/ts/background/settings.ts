@@ -1,9 +1,7 @@
 import { AddressBookEntries } from '../types/addressBookTypes.js'
 import { Page } from '../types/exportedSettingsTypes.js'
 import { Settings } from '../types/interceptor-messages.js'
-import { RpcNetwork } from '../types/rpc.js'
 import { WebsiteAccessArray } from '../types/websiteAccessTypes.js'
-import { EthereumAddress } from '../types/wire-types.js'
 import { ETHEREUM_COIN_ICON } from '../utils/constants.js'
 import { Semaphore } from '../utils/semaphore.js'
 import { browserStorageLocalGet, browserStorageLocalSafeParseGet, browserStorageLocalSet } from '../utils/storageUtils.js'
@@ -78,8 +76,7 @@ export async function getSettings() : Promise<Settings> {
 		'activeSimulationAddress',
 		'openedPageV2',
 		'useSignersAddressAsActiveAddress',
-		'websiteAccess',
-		'simulationMode',
+		'websiteAccess'
 	])
 	const activeRpcNetwork = (await browserStorageLocalSafeParseGet('activeRpcNetwork'))?.activeRpcNetwork
 	const results = await resultsPromise
@@ -90,7 +87,6 @@ export async function getSettings() : Promise<Settings> {
 		useSignersAddressAsActiveAddress: results.useSignersAddressAsActiveAddress ?? false,
 		websiteAccess: results.websiteAccess ?? [],
 		activeRpcNetwork: activeRpcNetwork || defaultRpcs[0],
-		simulationMode: results.simulationMode ?? true,
 	}
 }
 
@@ -105,15 +101,6 @@ export async function setUseSignersAddressAsActiveAddress(useSignersAddressAsAct
 	return await browserStorageLocalSet({
 		useSignersAddressAsActiveAddress,
 		...useSignersAddressAsActiveAddress === true ? { activeSigningAddress: currentSignerAddress } : {}
-	})
-}
-
-export async function changeSimulationMode(changes: { simulationMode: boolean, rpcNetwork?: RpcNetwork, activeSimulationAddress?: EthereumAddress | undefined, activeSigningAddress?: EthereumAddress | undefined }) {
-	return await browserStorageLocalSet({
-		simulationMode: changes.simulationMode,
-		...changes.rpcNetwork ? { activeRpcNetwork: changes.rpcNetwork }: {},
-		...'activeSimulationAddress' in changes ? { activeSimulationAddress: changes.activeSimulationAddress }: {},
-		...'activeSigningAddress' in changes ? { activeSigningAddress: changes.activeSigningAddress }: {},
 	})
 }
 

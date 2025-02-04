@@ -166,7 +166,6 @@ export async function requestAccessFromUser(
 			associatedAddresses: requestAccessToAddress !== undefined ? await getAssociatedAddresses(settings, website.websiteOrigin, requestAccessToAddress) : [],
 			signerAccounts: [],
 			signerName: request !== undefined ? (await getTabState(request.uniqueRequestIdentifier.requestSocket.tabId)).signerName : 'NoSignerDetected',
-			simulationMode: settings.simulationMode,
 			activeAddress: activeAddress,
 		}
 
@@ -225,9 +224,7 @@ async function resolve(simulator: Simulator, websiteTabConnections: WebsiteTabCo
 		} else {
 			if (accessReply.requestAccessToAddress === undefined) throw new Error('Changed request to page level')
 			await changeAccess(simulator, websiteTabConnections, accessReply, website, false)
-			const settings = await getSettings()
 			await changeActiveAddressAndChainAndResetSimulation(simulator, websiteTabConnections, {
-				simulationMode: settings.simulationMode,
 				activeAddress: accessReply.requestAccessToAddress,
 			})
 		}

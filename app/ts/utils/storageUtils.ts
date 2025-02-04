@@ -40,7 +40,6 @@ const LocalStorageItems = funtypes.ReadonlyPartial({
 	useSignersAddressAsActiveAddress: funtypes.Boolean,
 	websiteAccess: WebsiteAccessArray,
 	activeRpcNetwork: RpcNetwork,
-	simulationMode: funtypes.Boolean,
 	pendingInterceptorAccessRequests: PendingAccessRequests,
 	ChainChangeConfirmationPromise: funtypes.Union(funtypes.Undefined, PendingChainChangeConfirmationPromise),
 	transactionStack: funtypes.Union(funtypes.Undefined, TransactionStack),
@@ -69,7 +68,6 @@ const LocalStorageKey = funtypes.Union(
 	funtypes.Literal('useSignersAddressAsActiveAddress'),
 	funtypes.Literal('websiteAccess'),
 	funtypes.Literal('activeRpcNetwork'),
-	funtypes.Literal('simulationMode'),
 	funtypes.Literal('pendingInterceptorAccessRequests'),
 	funtypes.Literal('ChainChangeConfirmationPromise'),
 	funtypes.Literal('transactionStack'),
@@ -87,8 +85,6 @@ const LocalStorageKey = funtypes.Union(
 	funtypes.Literal('idsOfOpenedTabs'),
 	funtypes.Literal('interceptorStartSleepingTimestamp'),
 	funtypes.Literal('latestUnexpectedError'),
-	funtypes.Literal('ensNameHashes'),
-	funtypes.Literal('ensLabelHashes'),
 )
 
 type LocalStorageItems2 = funtypes.Static<typeof LocalStorageItems2>

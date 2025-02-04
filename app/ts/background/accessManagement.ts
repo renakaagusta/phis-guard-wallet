@@ -162,7 +162,7 @@ function connectToPort(websiteTabConnections: WebsiteTabConnections, socket: Web
 
 	sendSubscriptionReplyOrCallBack(websiteTabConnections, socket, { type: 'result' as const, method: 'chainChanged', result: settings.activeRpcNetwork.chainId })
 
-	if (!settings.simulationMode || settings.useSignersAddressAsActiveAddress) {
+	if (settings.useSignersAddressAsActiveAddress) {
 		sendSubscriptionReplyOrCallBack(websiteTabConnections, socket, { type: 'result' as const, method: 'request_signer_to_eth_requestAccounts', result: [] })
 		sendSubscriptionReplyOrCallBack(websiteTabConnections, socket, { type: 'result' as const, method: 'request_signer_chainId', result: [] })
 	}
