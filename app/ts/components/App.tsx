@@ -1,5 +1,4 @@
 import { Signal, useSignal } from '@preact/signals'
-import { ethers } from 'ethers'
 import { useEffect, useState } from 'preact/hooks'
 import { sendPopupMessageToBackgroundPage } from '../background/backgroundUtils.js'
 import { defaultActiveAddresses } from '../background/settings.js'
@@ -11,13 +10,11 @@ import { RpcConnectionStatus, TabIconDetails, TabState } from '../types/user-int
 import { ModifyAddressWindowState, NamedTokenId, SimulatedAndVisualizedTransaction, SimulationAndVisualisationResults, SimulationResultState, SimulationState, SimulationUpdatingState } from '../types/visualizer-types.js'
 import { checksummedAddress } from '../utils/bigint.js'
 import { DEFAULT_TAB_CONNECTION, TIME_BETWEEN_BLOCKS } from '../utils/constants.js'
-import { truncateAddr } from '../utils/ethereum.js'
 import { AddNewAddress } from './pages/AddNewAddress.js'
 import { ChangeActiveAddress } from './pages/ChangeActiveAddress.js'
 import { Home } from './pages/Home.js'
 import { ErrorComponent, UnexpectedError } from './subcomponents/Error.js'
 import Hint from './subcomponents/Hint.js'
-import { PasteCatcher } from './subcomponents/PasteCatcher.js'
 import { SomeTimeAgo } from './subcomponents/SomeTimeAgo.js'
 
 type NetworkErrorParams = {
@@ -188,40 +185,6 @@ export function App() {
 		sendPopupMessageToBackgroundPage({ method: 'popup_changePage', data: newPage })
 	}
 
-	async function addressPaste(address: string) {
-		if (appPage.value !== undefined && appPage.value.page === 'AddNewAddress') return
-
-		const trimmed = address.trim()
-		if (!ethers.isAddress(trimmed)) return
-
-		const bigIntReprentation = BigInt(trimmed)
-		// see if we have that address, if so, let's switch to it
-		for (const activeAddress of activeAddresses) {
-			if (activeAddress.address === bigIntReprentation) return await setActiveAddressAndInformAboutIt(activeAddress.address)
-		}
-
-		// address not found, let's promt user to create it
-		const addressString = ethers.getAddress(trimmed)
-		const newPage = { page: 'AddNewAddress', state: {
-			windowStateId: 'appAddressPaste',
-			errorState: undefined,
-			incompleteAddressBookEntry: {
-				addingAddress: true,
-				symbol: undefined,
-				decimals: undefined,
-				logoUri: undefined,
-				type: 'contact',
-				name: `Pasted ${ truncateAddr(addressString) }`,
-				address: checksummedAddress(bigIntReprentation),
-				entrySource: 'FilledIn',
-				useAsActiveAddress: true,
-				chainId: rpcConnectionStatus.peek()?.rpcNetwork.chainId || 1n,
-			}
-		} } as const
-		appPage.value = { page: 'AddNewAddress', state: new Signal(newPage.state) }
-		sendPopupMessageToBackgroundPage({ method: 'popup_changePage', data: newPage })
-	}
-
 	function renameAddressCallBack(entry: AddressBookEntry) {
 		const newPage = { page: 'ModifyAddress', state: {
 			windowStateId: 'appRename',
@@ -273,7 +236,6 @@ export function App() {
 	return (
 		<main>
 			<Hint>
-				<PasteCatcher enabled = { appPage.value.page === 'Unknown' || appPage.value.page === 'Home' } onPaste = { addressPaste } />
 				<div style = { `background-color: var(--bg-color); width: 520px; height: 600px; ${ appPage.value.page !== 'Unknown' && appPage.value.page !== 'Home' ? 'overflow: hidden;' : 'overflow-y: auto; overflow-x: hidden' }` }>
 					{ !isSettingsLoaded ? <></> : <>
 						<nav class = 'navbar window-header' role = 'navigation' aria-label = 'main navigation'>

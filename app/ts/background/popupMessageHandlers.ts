@@ -1,5 +1,5 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { Simulator, parseEvents, parseInputData } from '../simulation/simulator.js'
+import { Simulator, parseEvents } from '../simulation/simulator.js'
 import { AddOrEditAddressBookEntry, AllowOrPreventAddressAccessForWebsite, BlockOrAllowExternalRequests, ChainChangeConfirmation, ChangeActiveAddress, ChangeActiveChain, ChangeAddOrModifyAddressWindowState, ChangeInterceptorAccess, ChangePage, ForceSetGasLimitForTransaction, GetAddressBookData, InterceptorAccess, InterceptorAccessChangeAddress, InterceptorAccessRefresh, OpenWebPage, RemoveAddressBookEntry, RemoveTransaction, RequestAccountsFromSigner, RetrieveWebsiteAccess, SetRpcList, Settings, TransactionConfirmation, UpdateConfirmTransactionDialog, UpdateConfirmTransactionDialogPendingTransactions, UpdateHomePage } from '../types/interceptor-messages.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { CompleteVisualizedSimulation, ModifyAddressWindowState, PreSimulationTransaction, TransactionStack } from '../types/visualizer-types.js'
@@ -191,7 +191,10 @@ export async function refreshPopupConfirmTransactionMetadata(ethereumClientServi
 			const simulationState = first.simulationResults.data.simulationState
 
 			const eventsForEachTransaction = await Promise.all(oldEventsForEachTransaction.map(async (transactionsEvents) => await parseEvents(transactionsEvents.map((event) => event), ethereumClientService, requestAbortController)))
-			const parsedInputData = await Promise.all(oldSimulatedAndVisualizedTransactions.map((transaction) => parseInputData({ to: transaction.transaction.to?.address, input: transaction.transaction.input, value: transaction.transaction.value }, ethereumClientService, requestAbortController)))
+			const parsedInputData = await Promise.all(oldSimulatedAndVisualizedTransactions.map((transaction) => ({ 
+				input: transaction.transaction.input,
+				type: 'NonParsed' as const
+			})))
 			const allEvents = eventsForEachTransaction.flat()
 			const addressBookEntriesPromise = getAddressBookEntriesForVisualiser(ethereumClientService, requestAbortController, allEvents, parsedInputData, simulationState)
 			const addressBookEntries = await addressBookEntriesPromise
