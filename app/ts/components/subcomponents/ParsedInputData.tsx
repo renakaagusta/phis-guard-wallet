@@ -9,16 +9,16 @@ import { SmallAddress } from './address.js'
 
 
 export function NoParsedAvailable({ to, renameAddressCallBack }: { to: AddressBookEntry | undefined, renameAddressCallBack: RenameAddressCallBack }) {
-	if (to?.abi === undefined) {
+	// if (to?.abi === undefined) {
 		if (to === undefined) return <p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>No ABI available</p>
 		return <p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>No ABI available for&nbsp;
 			<SmallAddress addressBookEntry = { to } renameAddressCallBack = { renameAddressCallBack } />
 		</p>
-	} // We don't have support for parsing struct atm: https://github.com/DarkFlorist/TheInterceptor/issues/737
-	if (to === undefined) return <p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>Unable to parse input data (it probably contains a struct)</p>
-	return <p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>Unable to parse input data (it probably contains a struct) for&nbsp;
-		<SmallAddress addressBookEntry = { to } renameAddressCallBack = { renameAddressCallBack } />
-	</p>
+	// } // We don't have support for parsing struct atm: https://github.com/DarkFlorist/TheInterceptor/issues/737
+	// if (to === undefined) return <p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>Unable to parse input data (it probably contains a struct)</p>
+	// return <p class = 'paragraph' style = 'color: var(--subtitle-text-color)'>Unable to parse input data (it probably contains a struct) for&nbsp;
+	// 	<SmallAddress addressBookEntry = { to } renameAddressCallBack = { renameAddressCallBack } />
+	// </p>
 }
 
 type TransactionInputParams = {

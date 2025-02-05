@@ -230,8 +230,6 @@ export function InterceptorAccess() {
 					decimals: undefined,
 					logoUri: undefined,
 					useAsActiveAddress: false,
-					abi: undefined,
-					declarativeNetRequestBlockMode: undefined,
 					chainId: entry.chainId || 1n,
 					...entry,
 					address: checksummedAddress(entry.address),
@@ -295,8 +293,6 @@ export function InterceptorAccess() {
 					useAsActiveAddress: true,
 					entrySource: 'FilledIn',
 					address: undefined,
-					abi: undefined,
-					declarativeNetRequestBlockMode: undefined,
 					chainId: 1n,
 				}
 			})

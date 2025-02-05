@@ -273,8 +273,6 @@ export function ConfirmTransaction() {
 					decimals: undefined,
 					logoUri: undefined,
 					useAsActiveAddress: false,
-					abi: undefined,
-					declarativeNetRequestBlockMode: undefined,
 					chainId: entry.chainId || 1n,
 					...entry,
 					address: checksummedAddress(entry.address),

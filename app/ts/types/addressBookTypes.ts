@@ -26,9 +26,7 @@ export const ContactEntry = funtypes.ReadonlyObject({
 	entrySource: funtypes.Union(EntrySource, funtypes.Literal(undefined).withParser(LiteralConverterParserFactory(undefined, 'User' as const))),
 }).And(funtypes.Partial({
 	logoUri: funtypes.String,
-	abi: funtypes.String,
 	useAsActiveAddress: funtypes.Boolean,
-	declarativeNetRequestBlockMode: DeclarativeNetRequestBlockMode,
 	chainId: ChainIdWithUniversal,
 }))
 
@@ -54,8 +52,6 @@ export const IncompleteAddressBookEntry = funtypes.ReadonlyObject({
 	decimals: funtypes.Union(EthereumQuantity, funtypes.Undefined),
 	logoUri: funtypes.Union(funtypes.String, funtypes.Undefined),
 	entrySource: EntrySource,
-	abi: funtypes.Union(funtypes.String, funtypes.Undefined),
 	useAsActiveAddress: funtypes.Union(funtypes.Undefined, funtypes.Boolean),
-	declarativeNetRequestBlockMode: funtypes.Union(funtypes.Undefined, DeclarativeNetRequestBlockMode),
 	chainId: ChainIdWithUniversal,
 })

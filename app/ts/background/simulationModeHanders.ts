@@ -1,12 +1,12 @@
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
-import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedCode, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
+import { getInputFieldFromDataOrInput, getSimulatedBalance, getSimulatedBlock, getSimulatedBlockByHash, getSimulatedBlockNumber, getSimulatedTransactionByHash, getSimulatedTransactionCount, getSimulatedTransactionReceipt, simulatedCall, simulateEstimateGas } from '../simulation/services/SimulationModeEthereumClientService.js'
 import { Simulator } from '../simulation/simulator.js'
 import { SignMessageParams } from '../types/jsonRpc-signing-types.js'
-import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, GetCode, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams } from '../types/JsonRpc-types.js'
+import { EstimateGasParams, EthBalanceParams, EthBlockByHashParams, EthBlockByNumberParams, EthCallParams, GetTransactionCount, InterceptorError, SendRawTransactionParams, SendTransactionParams, SwitchEthereumChainParams, TransactionByHashParams, TransactionReceiptParams } from '../types/JsonRpc-types.js'
 import { WebsiteTabConnections } from '../types/user-interface-types.js'
 import { SimulationState } from '../types/visualizer-types.js'
 import { Website } from '../types/websiteAccessTypes.js'
-import { DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GET_CODE_FAILED } from '../utils/constants.js'
+import { DEFAULT_CALL_ADDRESS } from '../utils/constants.js'
 import { handleUnexpectedError } from '../utils/errors.js'
 import { InterceptedRequest } from '../utils/requests.js'
 import { openChangeChainDialog } from './windows/changeChain.js'
@@ -120,12 +120,6 @@ export async function switchEthereumChain(simulator: Simulator, websiteTabConnec
 	}
 	const change = await openChangeChainDialog(simulator, websiteTabConnections, request, website, params)
 	return { type: 'result' as const, method: params.method, ...change }
-}
-
-export async function getCode(ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined, request: GetCode) {
-	const code = await getSimulatedCode(ethereumClientService, undefined, simulationState, request.params[0], request.params[1])
-	if (code.statusCode === 'failure') return { type: 'result' as const, method: request.method, ...ERROR_INTERCEPTOR_GET_CODE_FAILED }
-	return { type: 'result' as const, method: request.method, result: code.getCodeReturn }
 }
 
 export async function getTransactionCount(ethereumClientService: EthereumClientService, simulationState: SimulationState | undefined, request: GetTransactionCount) {

@@ -4,11 +4,10 @@ import { SignMessageParams } from '../../types/jsonRpc-signing-types.js'
 import { DappRequestTransaction, EthGetLogsRequest, EthGetLogsResponse, EthTransactionReceiptResponse } from '../../types/JsonRpc-types.js'
 import { EstimateGasError, SimulationState } from '../../types/visualizer-types.js'
 import { EthereumAddress, EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBlockTag, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSendableSignedTransaction, EthereumSignedTransactionWithBlockData, EthereumUnsignedTransaction } from '../../types/wire-types.js'
-import { addressString, bigintToUint8Array, bytes32String, dataStringWith0xStart, max, min, stringToUint8Array } from '../../utils/bigint.js'
+import { bigintToUint8Array, bytes32String, dataStringWith0xStart, max, min, stringToUint8Array } from '../../utils/bigint.js'
 import { CANNOT_SIMULATE_OFF_LEGACY_BLOCK, DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GAS_ESTIMATION_FAILED, ETHEREUM_EIP1559_BASEFEECHANGEDENOMINATOR, ETHEREUM_EIP1559_ELASTICITY_MULTIPLIER, GAS_PER_BLOB, MOCK_ADDRESS } from '../../utils/constants.js'
 import { JsonRpcResponseError } from '../../utils/errors.js'
 import { EthereumUnsignedTransactionToUnsignedTransaction, IUnsignedTransaction1559, rlpEncode, serializeSignedTransactionToBytes } from '../../utils/ethereum.js'
-import { getCodeByteCode } from '../../utils/ethereumByteCodes.js'
 import { stripLeadingZeros } from '../../utils/typed-arrays.js'
 import { assertNever } from '../../utils/typescript.js'
 import { EthereumClientService } from './EthereumClientService.js'
@@ -16,7 +15,6 @@ import { EthereumClientService } from './EthereumClientService.js'
 const MOCK_PUBLIC_PRIVATE_KEY = 0x1n // key used to sign mock transactions
 const MOCK_SIMULATION_PRIVATE_KEY = 0x2n // key used to sign simulated transatons
 const ADDRESS_FOR_PRIVATE_KEY_ONE = 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdfn
-const GET_CODE_CONTRACT = 0x1ce438391307f908756fefe0fe220c0f0d51508an
 
 const transactionQueueTotalGasLimit = (simulationState: SimulationState) => {
 	return simulationState.simulatedTransactions.reduce((a, b) => a + b.preSimulationTransaction.signedTransaction.gas, 0n)
@@ -191,46 +189,6 @@ export const getSimulatedBalance = async (ethereumClientService: EthereumClientS
 	if (balance !== undefined) return balance
 	return await ethereumClientService.getBalance(address, blockTag, requestAbortController)
 }
-
-export const getSimulatedCode = async (ethereumClientService: EthereumClientService, requestAbortController: AbortController | undefined, simulationState: SimulationState | undefined, address: bigint, blockTag: EthereumBlockTag = 'latest') => {
-	if (simulationState === undefined || await canQueryNodeDirectly(ethereumClientService, requestAbortController, simulationState, blockTag)) {
-		return {
-			statusCode: 'success',
-			getCodeReturn: await ethereumClientService.getCode(address, blockTag, requestAbortController)
-		} as const
-	}
-	const block = await ethereumClientService.getBlock(requestAbortController)
-	if (block === null) throw new Error('The latest block is null')
-
-	const atInterface = new ethers.Interface(['function at(address) returns (bytes)'])
-	const input = stringToUint8Array(atInterface.encodeFunctionData('at', [addressString(address)]))
-
-	const getCodeTransaction = {
-		type: '1559',
-		from: MOCK_ADDRESS,
-		chainId: ethereumClientService.getChainId(),
-		nonce: await ethereumClientService.getTransactionCount(MOCK_ADDRESS, 'latest', requestAbortController),
-		maxFeePerGas: 0n,
-		maxPriorityFeePerGas: 0n,
-		gas: block.gasLimit,
-		to: GET_CODE_CONTRACT,
-		value: 0n,
-		input: input,
-		accessList: []
-	} as const
-	const multiCall = await simulatedMulticall(ethereumClientService, requestAbortController, simulationState, [getCodeTransaction], block.number, { [addressString(GET_CODE_CONTRACT)]: { code: getCodeByteCode() } }, true)
-	const lastBlock = multiCall[multiCall.length - 1]
-	if (lastBlock === undefined) throw new Error('last block did not exist in multicall')
-	const lastResult = lastBlock.calls[lastBlock.calls.length - 1]
-	if (lastResult === undefined) throw new Error('last result did not exist in multicall')
-	if (lastResult.status === 'failure') return { statusCode: 'failure' } as const
-	const parsed = atInterface.decodeFunctionResult('at', lastResult.returnData)
-	return {
-		statusCode: lastResult.status,
-		getCodeReturn: EthereumData.parse(parsed.toString())
-	} as const
-}
-
 // ported from: https://github.com/ethereum/go-ethereum/blob/509a64ffb9405942396276ae111d06f9bded9221/consensus/misc/eip1559/eip1559.go#L55
 const getNextBaseFeePerGas = (parentGasUsed: bigint, parentGasLimit: bigint, parentBaseFeePerGas: bigint) => {
 	const parentGasTarget = parentGasLimit / ETHEREUM_EIP1559_ELASTICITY_MULTIPLIER

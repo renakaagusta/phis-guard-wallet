@@ -2,11 +2,10 @@ import * as funtypes from 'funtypes'
 import { InterceptedRequest } from '../utils/requests.js'
 import { AddressBookEntry } from './addressBookTypes.js'
 import { EnrichedEIP712 } from './eip721.js'
-import { EnrichedEthereumInputData } from './EnrichedEthereumData.js'
 import { RpcNetwork } from './rpc.js'
 import { SignerName } from './signerTypes.js'
 import { Website } from './websiteAccessTypes.js'
-import { EthereumAddress, EthereumInput, EthereumQuantity, EthereumTimestamp, NonHexBigInt } from './wire-types.js'
+import { EthereumAddress, EthereumQuantity, EthereumTimestamp, NonHexBigInt } from './wire-types.js'
 
 type EIP2612Message = funtypes.Static<typeof EIP2612Message>
 const EIP2612Message = funtypes.ReadonlyObject({
@@ -210,74 +209,13 @@ export const VisualizedPersonalSignRequestPermit2 = funtypes.Intersect(
 		verifyingContract: AddressBookEntry,
 	})
 )
-
-export type SafeTx = funtypes.Static<typeof SafeTx>
-export const SafeTx = funtypes.ReadonlyObject({
-	types: funtypes.ReadonlyObject({
-		SafeTx: funtypes.ReadonlyTuple(
-			funtypes.ReadonlyObject({ name: funtypes.Literal('to'), type: funtypes.Literal('address') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('value'), type: funtypes.Literal('uint256') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('data'), type: funtypes.Literal('bytes') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('operation'), type: funtypes.Literal('uint8') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('safeTxGas'), type: funtypes.Literal('uint256') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('baseGas'), type: funtypes.Literal('uint256') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('gasPrice'), type: funtypes.Literal('uint256') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('gasToken'), type: funtypes.Literal('address') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('refundReceiver'), type: funtypes.Literal('address') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('nonce'), type: funtypes.Literal('uint256') })
-		),
-		EIP712Domain: funtypes.ReadonlyTuple(
-			funtypes.Partial({ name: funtypes.Literal('chainId'), type: funtypes.Literal('uint256') }),
-			funtypes.ReadonlyObject({ name: funtypes.Literal('verifyingContract'), type: funtypes.Literal('address') })
-		),
-	}),
-	primaryType: funtypes.Literal('SafeTx'),
-	domain: funtypes.Intersect(
-		funtypes.Partial({
-			chainId: funtypes.Union(EthereumQuantity, NonHexBigInt)
-		}),
-		funtypes.ReadonlyObject({
-			verifyingContract: EthereumAddress,
-		})
-	),
-	message: funtypes.ReadonlyObject({
-		to: EthereumAddress,
-		value: NonHexBigInt,
-		data: EthereumInput,
-		operation: NonHexBigInt,
-		safeTxGas: NonHexBigInt,
-		baseGas: NonHexBigInt,
-		gasPrice: NonHexBigInt,
-		gasToken: EthereumAddress,
-		refundReceiver: EthereumAddress,
-		nonce: NonHexBigInt,
-	})
-})
-
-export type VisualizedPersonalSignRequestSafeTx = funtypes.Static<typeof VisualizedPersonalSignRequestSafeTx>
-export const VisualizedPersonalSignRequestSafeTx = funtypes.Intersect(
-	PersonalSignRequestBase,
-	funtypes.ReadonlyObject({
-		method: EthSignTyped,
-		type: funtypes.Literal('SafeTx'),
-		message: SafeTx,
-		parsedMessageDataAddressBookEntries: funtypes.ReadonlyArray(AddressBookEntry),
-		parsedMessageData: EnrichedEthereumInputData,
-		gasToken: AddressBookEntry,
-		to: AddressBookEntry,
-		refundReceiver: AddressBookEntry,
-		verifyingContract: AddressBookEntry,
-	})
-)
-
 export type VisualizedPersonalSignRequest = funtypes.Static<typeof VisualizedPersonalSignRequest>
 export const VisualizedPersonalSignRequest = funtypes.Union(
 	VisualizedPersonalSignRequestNotParsed,
 	VisualizedPersonalSignRequestEIP712,
 	VisualizedPersonalSignRequestPermit,
-	VisualizedPersonalSignRequestPermit2,
-	VisualizedPersonalSignRequestSafeTx,
+	VisualizedPersonalSignRequestPermit2
 )
 
 export type PersonalSignRequestIdentifiedEIP712Message = funtypes.Static<typeof PersonalSignRequestIdentifiedEIP712Message>
-export const PersonalSignRequestIdentifiedEIP712Message = funtypes.Union(EIP2612Message, Permit2, SafeTx)
+export const PersonalSignRequestIdentifiedEIP712Message = funtypes.Union(EIP2612Message, Permit2)
