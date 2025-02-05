@@ -230,7 +230,6 @@ export function InterceptorAccess() {
 					decimals: undefined,
 					logoUri: undefined,
 					useAsActiveAddress: false,
-					chainId: entry.chainId || 1n,
 					...entry,
 					address: checksummedAddress(entry.address),
 				}

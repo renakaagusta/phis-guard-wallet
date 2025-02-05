@@ -27,7 +27,7 @@ const catchAllErrorsAndCall = async (func: () => Promise<unknown>) => {
 	try {
 		await func()
 		checkAndThrowRuntimeLastError()
-	} catch(error: unknown) {
+	} catch (error: unknown) {
 		if (error instanceof Error && error.message.startsWith('No tab with id')) return
 		if (error instanceof Error && error.message?.includes('the message channel is closed')) {
 			// ignore bfcache error. It means that the page is hibernating and we cannot communicate with it anymore. We get a normal disconnect about it.
@@ -64,14 +64,13 @@ async function migrateAddressInfoAndContactsFromV1ToV2() {
 async function migrateAddressInfoAndContactsFromV2ToV3() {
 	const userAddressBookEntries = (await browserStorageLocalGet(['userAddressBookEntriesV2'])).userAddressBookEntriesV2
 	const convertOldActiveAddressToAddressBookEntry = (entry: AddressBookEntry): AddressBookEntry => {
-		if (entry.chainId !== undefined) return entry
-		if (entry.useAsActiveAddress === true && entry.type === 'contact') return { ...entry, chainId: 'AllChains' }
-		return { ...entry, chainId: 1n }
+		if (entry.useAsActiveAddress === true && entry.type === 'contact') return { ...entry }
+		return { ...entry }
 	}
 	if (userAddressBookEntries === undefined) return
 	const updated: AddressBookEntries = userAddressBookEntries.map(convertOldActiveAddressToAddressBookEntry)
 	if (updated.length > 0) {
-		await updateUserAddressBookEntries((previousEntries) => getUniqueItemsByProperties(updated.concat(previousEntries), ['address', 'chainId']))
+		await updateUserAddressBookEntries((previousEntries) => getUniqueItemsByProperties(updated.concat(previousEntries), ['address']))
 		await browserStorageLocalRemove(['userAddressBookEntriesV2'])
 	}
 }
@@ -156,7 +155,7 @@ async function onContentScriptConnected(simulator: Simulator, port: browser.runt
 		const website = await websitePromise
 		await updateTabState(socket.tabId, (previousState: TabState) => modifyObject(previousState, { website }))
 		checkAndThrowRuntimeLastError()
-	} catch(error: unknown) {
+	} catch (error: unknown) {
 		console.error(error)
 		if (error instanceof Error && error.message.startsWith('No tab with id')) return
 		await handleUnexpectedError(error)
@@ -164,7 +163,7 @@ async function onContentScriptConnected(simulator: Simulator, port: browser.runt
 }
 
 async function newBlockAttemptCallback(blockheader: EthereumBlockHeader, ethereumClientService: EthereumClientService, _: boolean, simulator: Simulator) {
-	if (ethereumClientService.getChainId() !== simulator.ethereum.getChainId()) throw new Error(`Chain Id Mismatch, node is on ${ ethereumClientService.getChainId() } while simulator is on ${ simulator.ethereum.getChainId() }`)
+	if (ethereumClientService.getChainId() !== simulator.ethereum.getChainId()) throw new Error(`Chain Id Mismatch, node is on ${ethereumClientService.getChainId()} while simulator is on ${simulator.ethereum.getChainId()}`)
 	if (blockheader === null) throw new Error('The latest block is null')
 	try {
 		const rpcConnectionStatus = {
@@ -180,7 +179,7 @@ async function newBlockAttemptCallback(blockheader: EthereumBlockHeader, ethereu
 		// if (isNewBlock) {
 		// 	return await sendSubscriptionMessagesForNewBlock(blockheader.number, ethereumClientService, undefined, websiteTabConnections)
 		// }
-	} catch(error) {
+	} catch (error) {
 		if (error instanceof Error && isNewBlockAbort(error)) return
 		await handleUnexpectedError(error)
 	}
@@ -199,7 +198,7 @@ async function onErrorBlockCallback(ethereumClientService: EthereumClientService
 		await updateExtensionBadge()
 		await sendPopupMessageToOpenWindows({ method: 'popup_failed_to_get_block', data: { rpcConnectionStatus } })
 		await handleUnexpectedError(error)
-	} catch(error) {
+	} catch (error) {
 		await handleUnexpectedError(error)
 	}
 }

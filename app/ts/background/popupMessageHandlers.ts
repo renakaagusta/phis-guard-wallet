@@ -22,6 +22,11 @@ import { getAddressMetadataForAccess, requestAddressChange, resolveInterceptorAc
 import { craftPersonalSignPopupMessage } from './windows/personalSign.js'
 
 export async function confirmDialog(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, confirmation: TransactionConfirmation) {
+	console.log('PopupMessageHandlers: confirmDialog', {
+		simulator,
+		websiteTabConnections,
+		confirmation,
+	})
 	await resolvePendingTransactionOrMessage(simulator, websiteTabConnections, confirmation)
 }
 
@@ -67,17 +72,15 @@ export async function changeActiveAddress(simulator: Simulator, websiteTabConnec
 
 export async function removeAddressBookEntry(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, removeAddressBookEntry: RemoveAddressBookEntry) {
 	await updateUserAddressBookEntries((previousContacts) => previousContacts.filter((contact) =>
-		!(contact.address === removeAddressBookEntry.data.address
-		&& (contact.chainId === removeAddressBookEntry.data.chainId || (contact.chainId === undefined && removeAddressBookEntry.data.chainId === 1n))))
-	)
+		!(contact.address === removeAddressBookEntry.data.address)))
 	if (removeAddressBookEntry.data.addressBookCategory === 'My Active Addresses') updateWebsiteApprovalAccesses(simulator, websiteTabConnections, await getSettings())
 	return await sendPopupMessageToOpenWindows({ method: 'popup_addressBookEntriesChanged' })
 }
 
 export async function addOrModifyAddressBookEntry(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, entry: AddOrEditAddressBookEntry) {
 	await updateUserAddressBookEntries((previousContacts) => {
-		if (previousContacts.find((previous) => previous.address === entry.data.address && (previous.chainId || 1n) === (entry.data.chainId || 1n)) ) {
-			return previousContacts.map((previous) => previous.address === entry.data.address && (previous.chainId || 1n) === (entry.data.chainId || 1n) ? entry.data : previous)
+		if (previousContacts.find((previous) => previous.address === entry.data.address)) {
+			return previousContacts.map((previous) => previous.address === entry.data.address ? entry.data : previous)
 		}
 		return previousContacts.concat([entry.data])
 	})
@@ -330,7 +333,7 @@ export async function changeAddOrModifyAddressWindowState(ethereum: EthereumClie
 		return await identifyAddress(ethereum, undefined, address.value)
 	}
 	const identifyPromise = identifyAddressCandidate(parsedRequest.data.newState.incompleteAddressBookEntry.address)
-	
+
 	return await sendPopupMessageToOpenWindows({
 		method: 'popup_addOrModifyAddressWindowStateInformation',
 		data: { windowStateId: parsedRequest.data.windowStateId, errorState: { message: '', blockEditing: false }, identifiedAddress: await identifyPromise }
@@ -384,11 +387,11 @@ export async function retrieveWebsiteAccess(parsedRequest: RetrieveWebsiteAccess
 	})
 }
 
-async function blockOrAllowWebsiteExternalRequests(websiteTabConnections: WebsiteTabConnections, website: Website, shouldBlock: boolean) {
+async function blockOrAllowWebsiteExternalRequests(websiteTabConnections: WebsiteTabConnections, website: Website) {
 	await updateWebsiteAccess((previousAccessList) => {
 		return previousAccessList.map((access) => {
 			if (access.website.websiteOrigin !== website.websiteOrigin) return access
-			return modifyObject(access, { declarativeNetRequestBlockMode: shouldBlock ? 'block-all' : 'disabled' })
+			return modifyObject(access, {})
 		})
 	})
 
@@ -396,7 +399,7 @@ async function blockOrAllowWebsiteExternalRequests(websiteTabConnections: Websit
 }
 
 export async function blockOrAllowExternalRequests(simulator: Simulator, websiteTabConnections: WebsiteTabConnections, parsedRequest: BlockOrAllowExternalRequests) {
-	await blockOrAllowWebsiteExternalRequests(websiteTabConnections, parsedRequest.data.website, parsedRequest.data.shouldBlock)
+	await blockOrAllowWebsiteExternalRequests(websiteTabConnections, parsedRequest.data.website)
 	updateWebsiteApprovalAccesses(simulator, websiteTabConnections, await getSettings())
 	return await sendPopupMessageToOpenWindows({ method: 'popup_websiteAccess_changed' })
 }

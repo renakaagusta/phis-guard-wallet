@@ -2,12 +2,11 @@ import { ethers } from 'ethers'
 import { EthereumClientService } from '../simulation/services/EthereumClientService.js'
 import { AddressBookEntries, AddressBookEntry } from '../types/addressBookTypes.js'
 import { EnrichedEthereumEvents, EnrichedEthereumInputData, SolidityVariable } from '../types/EnrichedEthereumData.js'
-import { RpcNetwork } from '../types/rpc.js'
 import { SimulationState } from '../types/visualizer-types.js'
 import { addressString, checksummedAddress } from '../utils/bigint.js'
 import { ETHEREUM_LOGS_LOGGER_ADDRESS, MOCK_ADDRESS } from '../utils/constants.js'
 import { defaultActiveAddresses } from './settings.js'
-import { addUserAddressBookEntryIfItDoesNotExist, getUserAddressBookEntries, getUserAddressBookEntriesForChainIdMorePreciseFirst } from './storageVariables.js'
+import { addUserAddressBookEntryIfItDoesNotExist, getUserAddressBookEntries } from './storageVariables.js'
 const LOGO_URI_PREFIX = '../vendor/@darkflorist/address-metadata'
 
 const pathJoin = (parts: string[], sep = '/') => parts.join(sep).replace(new RegExp(sep + '{1,}', 'g'), sep)
@@ -31,9 +30,9 @@ export async function getActiveAddresses() : Promise<AddressBookEntries> {
 	return activeAddresses === undefined || activeAddresses.length === 0 ? defaultActiveAddresses : activeAddresses
 }
 
-async function identifyAddressWithoutNode(address: bigint, rpcEntry: RpcNetwork | undefined, useLocalStorage = true) : Promise<AddressBookEntry | undefined> {
+async function identifyAddressWithoutNode(address: bigint, useLocalStorage = true) : Promise<AddressBookEntry | undefined> {
 	if (useLocalStorage) {
-		const userEntry = (await getUserAddressBookEntriesForChainIdMorePreciseFirst(rpcEntry?.chainId || 1n)).find((entry) => entry.address === address)
+		const userEntry = (await getUserAddressBookEntries()).find((entry) => entry.address === address)
 		if (userEntry !== undefined) return userEntry
 	}
 
@@ -42,21 +41,19 @@ async function identifyAddressWithoutNode(address: bigint, rpcEntry: RpcNetwork 
 		name: 'Ethereum Validator',
 		logoUri: '../../img/contracts/rhino.png',
 		type: 'contact',
-		entrySource: 'Interceptor',
-		chainId: rpcEntry?.chainId
+		entrySource: 'Interceptor'
 	}
 	if (address === 0n) return {
 		address: address,
 		name: '0x0 Address',
 		type: 'contact',
-		entrySource: 'Interceptor',
-		chainId: rpcEntry?.chainId
+		entrySource: 'Interceptor'
 	}
 	return undefined
 }
 
 export async function identifyAddress(ethereumClientService: EthereumClientService, _: AbortController | undefined, address: bigint, useLocalStorage = true) : Promise<AddressBookEntry> {
-	const identifiedAddress = await identifyAddressWithoutNode(address, ethereumClientService.getRpcEntry(), useLocalStorage)
+	const identifiedAddress = await identifyAddressWithoutNode(address, useLocalStorage)
 	if (identifiedAddress !== undefined) return identifiedAddress
 	const addrString = addressString(address)
 	const chainId = ethereumClientService.getChainId()

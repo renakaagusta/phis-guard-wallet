@@ -12,8 +12,7 @@ export const defaultActiveAddresses: AddressBookEntries = [
 		entrySource: 'User' as const,
 		name: 'anvil',
 		address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266n,
-		useAsActiveAddress: true,
-		chainId: 'AllChains',
+		useAsActiveAddress: true
 	},
 ]
 

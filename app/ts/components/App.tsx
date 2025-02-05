@@ -215,7 +215,6 @@ export function App() {
 				address: checksummedAddress(bigIntReprentation),
 				entrySource: 'FilledIn',
 				useAsActiveAddress: true,
-				declarativeNetRequestBlockMode: undefined,
 				chainId: rpcConnectionStatus.peek()?.rpcNetwork.chainId || 1n,
 			}
 		} } as const
@@ -233,8 +232,6 @@ export function App() {
 				decimals: undefined,
 				logoUri: undefined,
 				useAsActiveAddress: false,
-				declarativeNetRequestBlockMode: undefined,
-				chainId: entry.chainId || 1n,
 				...entry,
 				address: checksummedAddress(entry.address),
 			}
@@ -257,8 +254,6 @@ export function App() {
 				address: undefined,
 				entrySource: 'FilledIn',
 				useAsActiveAddress: true,
-				declarativeNetRequestBlockMode: undefined,
-				chainId: rpcConnectionStatus.peek()?.rpcNetwork.chainId || 1n,
 			}}
 		} as const
 		appPage.value = { page: 'AddNewAddress', state: new Signal(newPage.state) }

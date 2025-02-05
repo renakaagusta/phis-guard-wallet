@@ -3,7 +3,7 @@ import { UniqueRequestIdentifier, WebsiteSocket } from '../utils/requests.js'
 import { EnrichedEthereumEvent, EnrichedEthereumInputData } from './EnrichedEthereumData.js'
 import { EthGetFeeHistoryResponse, EthGetStorageAtParams, EthTransactionReceiptResponse, GetBlockReturn, SendRawTransactionParams, SendTransactionParams, WalletAddEthereumChain } from './JsonRpc-types.js'
 import { PendingAccessRequests, PendingTransactionOrSignableMessage } from './accessRequest.js'
-import { AddressBookEntries, AddressBookEntry, ChainIdWithUniversal } from './addressBookTypes.js'
+import { AddressBookEntries, AddressBookEntry } from './addressBookTypes.js'
 import { Page } from './exportedSettingsTypes.js'
 import { OldSignTypedDataParams, PersonalSignParams, SignTypedDataParams } from './jsonRpc-signing-types.js'
 import { VisualizedPersonalSignRequest } from './personal-message-definitions.js'
@@ -245,7 +245,6 @@ export const RemoveAddressBookEntry = funtypes.ReadonlyObject({
 	data: funtypes.ReadonlyObject({
 		address: EthereumAddress,
 		addressBookCategory: AddressBookCategory,
-		chainId: ChainIdWithUniversal,
 	})
 }).asReadonly()
 
@@ -370,7 +369,6 @@ export type GetAddressBookDataFilter = funtypes.Static<typeof GetAddressBookData
 export const GetAddressBookDataFilter = funtypes.Intersect(
 	funtypes.ReadonlyObject({
 		filter: AddressBookCategory,
-		chainId: ChainIdWithUniversal,
 	}).asReadonly(),
 	funtypes.Partial({
 		startIndex: funtypes.Number,

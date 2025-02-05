@@ -13,9 +13,6 @@ export const EntrySource = funtypes.Union(
 	funtypes.Literal('FilledIn'),
 )
 
-export type DeclarativeNetRequestBlockMode = funtypes.Static<typeof DeclarativeNetRequestBlockMode>
-export const DeclarativeNetRequestBlockMode = funtypes.Union(funtypes.Literal('block-all'), funtypes.Literal('disabled'))
-
 export type AddressBookEntryCategory = 'contact' | 'activeAddress' 
 
 export type ContactEntry = funtypes.Static<typeof ContactEntry>
@@ -27,7 +24,6 @@ export const ContactEntry = funtypes.ReadonlyObject({
 }).And(funtypes.Partial({
 	logoUri: funtypes.String,
 	useAsActiveAddress: funtypes.Boolean,
-	chainId: ChainIdWithUniversal,
 }))
 
 
@@ -53,5 +49,4 @@ export const IncompleteAddressBookEntry = funtypes.ReadonlyObject({
 	logoUri: funtypes.Union(funtypes.String, funtypes.Undefined),
 	entrySource: EntrySource,
 	useAsActiveAddress: funtypes.Union(funtypes.Undefined, funtypes.Boolean),
-	chainId: ChainIdWithUniversal,
 })
