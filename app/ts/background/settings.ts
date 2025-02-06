@@ -10,6 +10,13 @@ export const defaultActiveAddresses: AddressBookEntries = [
 	{
 		type: 'contact' as const,
 		entrySource: 'User' as const,
+		name: 'conduit',
+		address: 0xaf4F62EBe8732A090E402335706d44d642ce130Dn,
+		useAsActiveAddress: true
+	},
+	{
+		type: 'contact' as const,
+		entrySource: 'User' as const,
 		name: 'anvil',
 		address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266n,
 		useAsActiveAddress: true
@@ -17,6 +24,16 @@ export const defaultActiveAddresses: AddressBookEntries = [
 ]
 
 export const defaultRpcs = [
+	{
+		name: 'Conduit',
+		chainId: 911867n,
+		httpsRpc: 'https://odyssey.ithaca.xyz',
+		currencyName: 'Ether',
+		currencyTicker: 'ETH',
+		currencyLogoUri: ETHEREUM_COIN_ICON,
+		primary: true,
+		minimized: true,
+	},
 	{
 		name: 'Anvil',
 		chainId: 31337n,

@@ -169,6 +169,12 @@ export const SendRawTransactionParams = funtypes.ReadonlyObject({
 	params: funtypes.ReadonlyTuple(EthereumData),
 })
 
+export type DebugTraceCallParams = funtypes.Static<typeof DebugTraceCallParams>
+export const DebugTraceCallParams = funtypes.ReadonlyObject({
+	method: funtypes.Literal('debug_traceCall'),
+	params: funtypes.ReadonlyTuple(DappRequestTransaction),
+})
+
 export type EthereumAccountsReply = funtypes.Static<typeof EthereumAccountsReply>
 export const EthereumAccountsReply = funtypes.ReadonlyTuple(
 	funtypes.Union(
@@ -362,7 +368,7 @@ export const EthereumJsonRpcRequest = funtypes.Union(
 	EthGetStorageAtParams,
 	EthGetLogsParams,
 	EthSign,
-	// EthSimulateV1Params,
+	DebugTraceCallParams,
 	WalletAddEthereumChain,
 	Web3ClientVersion,
 	FeeHistory,

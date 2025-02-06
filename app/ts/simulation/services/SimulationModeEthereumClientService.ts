@@ -3,11 +3,11 @@ import { EthereumEvent, StateOverrides } from '../../types/ethSimulate-types.js'
 import { SignMessageParams } from '../../types/jsonRpc-signing-types.js'
 import { DappRequestTransaction, EthGetLogsRequest, EthGetLogsResponse, EthTransactionReceiptResponse } from '../../types/JsonRpc-types.js'
 import { EstimateGasError, SimulationState } from '../../types/visualizer-types.js'
-import { EthereumAddress, EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBlockTag, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSendableSignedTransaction, EthereumSignedTransactionWithBlockData, EthereumUnsignedTransaction } from '../../types/wire-types.js'
+import { EthereumAddress, EthereumBlockHeader, EthereumBlockHeaderWithTransactionHashes, EthereumBlockTag, EthereumBytes32, EthereumData, EthereumQuantity, EthereumSignedTransactionWithBlockData, EthereumUnsignedTransaction } from '../../types/wire-types.js'
 import { bigintToUint8Array, bytes32String, dataStringWith0xStart, max, min, stringToUint8Array } from '../../utils/bigint.js'
 import { CANNOT_SIMULATE_OFF_LEGACY_BLOCK, DEFAULT_CALL_ADDRESS, ERROR_INTERCEPTOR_GAS_ESTIMATION_FAILED, ETHEREUM_EIP1559_BASEFEECHANGEDENOMINATOR, ETHEREUM_EIP1559_ELASTICITY_MULTIPLIER, GAS_PER_BLOB, MOCK_ADDRESS } from '../../utils/constants.js'
 import { JsonRpcResponseError } from '../../utils/errors.js'
-import { EthereumUnsignedTransactionToUnsignedTransaction, IUnsignedTransaction1559, rlpEncode, serializeSignedTransactionToBytes } from '../../utils/ethereum.js'
+import { IUnsignedTransaction1559, rlpEncode } from '../../utils/ethereum.js'
 import { stripLeadingZeros } from '../../utils/typed-arrays.js'
 import { assertNever } from '../../utils/typescript.js'
 import { EthereumClientService } from './EthereumClientService.js'
@@ -82,21 +82,6 @@ export const simulateEstimateGas = async (ethereumClientService: EthereumClientS
 export const calculateRealizedEffectiveGasPrice = (transaction: EthereumUnsignedTransaction, blocksBaseFeePerGas: bigint) => {
 	if ('gasPrice' in transaction) return transaction.gasPrice
 	return min(blocksBaseFeePerGas + transaction.maxPriorityFeePerGas, transaction.maxFeePerGas)
-}
-
-export const mockSignTransaction = (transaction: EthereumUnsignedTransaction) : EthereumSendableSignedTransaction => {
-	const unsignedTransaction = EthereumUnsignedTransactionToUnsignedTransaction(transaction)
-	if (unsignedTransaction.type === 'legacy') {
-		const signatureParams = { r: 0n, s: 0n, v: 0n }
-		const hash = EthereumQuantity.parse(keccak256(serializeSignedTransactionToBytes({ ...unsignedTransaction, ...signatureParams })))
-		if (transaction.type !== 'legacy') throw new Error('types do not match')
-		return { ...transaction, ...signatureParams, hash }
-	}
-
-	const signatureParams = { r: 0n, s: 0n, yParity: 'even' as const }
-	const hash = EthereumQuantity.parse(keccak256(serializeSignedTransactionToBytes({ ...unsignedTransaction, ...signatureParams })))
-	if (transaction.type === 'legacy') throw new Error('types do not match')
-	return { ...transaction, ...signatureParams, hash }
 }
 
 const getTransactionQueue = (simulationState: SimulationState | undefined) => {
@@ -189,6 +174,7 @@ export const getSimulatedBalance = async (ethereumClientService: EthereumClientS
 	if (balance !== undefined) return balance
 	return await ethereumClientService.getBalance(address, blockTag, requestAbortController)
 }
+
 // ported from: https://github.com/ethereum/go-ethereum/blob/509a64ffb9405942396276ae111d06f9bded9221/consensus/misc/eip1559/eip1559.go#L55
 const getNextBaseFeePerGas = (parentGasUsed: bigint, parentGasLimit: bigint, parentBaseFeePerGas: bigint) => {
 	const parentGasTarget = parentGasLimit / ETHEREUM_EIP1559_ELASTICITY_MULTIPLIER

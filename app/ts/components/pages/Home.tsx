@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
+import { sendPopupMessageToBackgroundPage } from '../../background/backgroundUtils.js'
 import { AddressBookEntries, AddressBookEntry } from '../../types/addressBookTypes.js'
 import { FirstCardParams, HomeParams, TabIconDetails, TabState } from '../../types/user-interface-types.js'
 import { DEFAULT_TAB_CONNECTION } from '../../utils/constants.js'
@@ -6,7 +7,7 @@ import { ActiveAddressComponent, getActiveAddressEntry } from '../subcomponents/
 import { RpcSelector } from '../subcomponents/ChainSelector.js'
 import { DinoSays } from '../subcomponents/DinoSays.js'
 import { ErrorComponent } from '../subcomponents/Error.js'
-import { getPrettySignerName } from '../subcomponents/signers.js'
+import { getPrettySignerName, SignerLogoText } from '../subcomponents/signers.js'
 
 type SignerExplanationParams = {
 	activeAddress: AddressBookEntry | undefined
@@ -60,7 +61,17 @@ function FirstCard(param: FirstCardParams) {
 					changeActiveAddress={param.changeActiveAddress}
 					renameAddressCallBack={param.renameAddressCallBack}
 				/>
-
+				{(param.tabState?.signerAccounts.length === 0) ?
+					<div style='margin-top: 5px'>
+						<button className='button is-primary' onClick={() => sendPopupMessageToBackgroundPage({ method: 'popup_requestAccountsFromSigner', data: true })} >
+							<SignerLogoText
+								signerName={param.tabState.signerName}
+								text={`Connect to ${getPrettySignerName(param.tabState.signerName)}`}
+							/>
+						</button>
+					</div>
+					: <></>
+				}
 			</div>
 		</section>
 

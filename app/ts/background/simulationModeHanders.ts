@@ -38,6 +38,16 @@ export async function sendTransaction(
 	website: Website,
 	websiteTabConnections: WebsiteTabConnections
 ) {
+	let simulationResult: any = undefined
+
+	const txParams = transactionParams.params[0];
+	if (!(txParams instanceof Uint8Array)) {
+		simulationResult = await simulator.ethereum.debugTraceCall(txParams, undefined);
+	}
+
+	console.log('simulationResult', simulationResult)
+	console.log('txParams', txParams)
+
 	const action = await openConfirmTransactionDialogForTransaction(simulator, request, transactionParams, activeAddress, website, websiteTabConnections)
 	if (action.type === 'doNotReply') return action
 	return { method: transactionParams.method, ...action }

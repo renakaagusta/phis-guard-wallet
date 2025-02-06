@@ -89,6 +89,11 @@ export class EthereumClientService {
 		return EthereumQuantity.parse(response)
 	}
 
+	public readonly debugTraceCall = async (data: DappRequestTransaction, requestAbortController: AbortController | undefined) => {
+		const response = await this.requestHandler.jsonRpcRequest({ method: 'debug_traceCall', params: [data] }, requestAbortController)
+		return response
+	}
+
 	public readonly getStorageAt = async (contract: bigint, slot: bigint, blockTag: EthereumBlockTag, requestAbortController: AbortController | undefined) => {
 		const response = await this.requestHandler.jsonRpcRequest({ method: 'eth_getStorageAt', params: [contract, slot, blockTag] }, requestAbortController)
 		return EthGetStorageAtResponse.parse(response)

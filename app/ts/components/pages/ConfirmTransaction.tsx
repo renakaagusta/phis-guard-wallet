@@ -134,7 +134,6 @@ function Buttons({ currentPendingTransactionOrSignableMessage, reject, approve }
 }
 
 export function ConfirmTransaction() {
-	console.log('ConfirmTransaction')
 	const currentPendingTransactionOrSignableMessage = useSignal<PendingTransactionOrSignableMessage | undefined>(undefined)
 	const pendingTransactionsAndSignableMessages = useSignal<readonly PendingTransactionOrSignableMessage[]>([])
 	const completeVisualizedSimulation = useSignal<CompleteVisualizedSimulation | undefined>(undefined)
@@ -145,8 +144,6 @@ export function ConfirmTransaction() {
 	const pendingTransactionAddedNotification = useSignal<boolean>(false)
 	const unexpectedError = useSignal<undefined | UnexpectedErrorOccured>(undefined)
 	const rpcEntries = useSignal<RpcEntries>([])
-
-	console.log('ConfirmTransaction 2')
 
 	const updatePendingTransactionsAndSignableMessages = (message: UpdateConfirmTransactionDialog) => {
 		completeVisualizedSimulation.value = message.data.visualizedSimulatorState
@@ -196,8 +193,6 @@ export function ConfirmTransaction() {
 		browser.runtime.onMessage.addListener(popupMessageListener)
 		return () => browser.runtime.onMessage.removeListener(popupMessageListener)
 	})
-
-	console.log('ConfirmTransaction 3')
 
 	useEffect(() => {
 		sendPopupMessageToBackgroundPage({ method: 'popup_confirmTransactionReadyAndListening' })
@@ -249,9 +244,6 @@ export function ConfirmTransaction() {
 		})
 	}
 
-
-	console.log('ConfirmTransaction 4')
-
 	const refreshMetadata = async () => {
 		if (currentPendingTransactionOrSignableMessage === undefined) return
 		await sendPopupMessageToBackgroundPage({ method: 'popup_refreshConfirmTransactionMetadata' })
@@ -285,13 +277,6 @@ export function ConfirmTransaction() {
 		await sendPopupMessageToBackgroundPage({ method: 'popup_clearUnexpectedError' })
 	}
 
-	console.log('currentPendingTransactionOrSignableMessage', currentPendingTransactionOrSignableMessage)
-
-	console.log('Variables used in if condition:', {
-		'currentPendingTransactionOrSignableMessage.value': currentPendingTransactionOrSignableMessage.value,
-		'currentPendingTransactionOrSignableMessage.value?.transactionOrMessageCreationStatus': currentPendingTransactionOrSignableMessage.value?.transactionOrMessageCreationStatus
-	})
-
 	if (currentPendingTransactionOrSignableMessage.value === undefined) {
 		return <>
 			<main>
@@ -300,10 +285,8 @@ export function ConfirmTransaction() {
 		</>
 	}
 	
-	console.log('2 currentPendingTransactionOrSignableMessage.value.transactionOrMessageCreationStatus !== \'Simulated\' && currentPendingTransactionOrSignableMessage.value.transactionOrMessageCreationStatus !== \'FailedToSimulate\' is true')
 	const underTransactions = useComputed(() => pendingTransactionsAndSignableMessages.value.slice(1).reverse())
 
-	console.log('currentPendingTransactionOrSignableMessage 2', currentPendingTransactionOrSignableMessage)
 	return (
 		<main>
 			<Hint>

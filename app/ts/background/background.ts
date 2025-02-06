@@ -57,7 +57,7 @@ async function handleRPCRequest(
 			type: 'result' as const,
 			method: request.method,
 			error: {
-				message: `Failed to parse RPC request: ${ JSON.stringify(serialize(InterceptedRequest, request)) }`,
+				message: `Failed to parse RPC request: ${JSON.stringify(serialize(InterceptedRequest, request))}`,
 				data: maybeParsedRequest.fullError === undefined ? 'Failed to parse RPC request' : maybeParsedRequest.fullError.toString(),
 				code: METAMASK_ERROR_FAILED_TO_PARSE_REQUEST,
 			}
@@ -98,10 +98,12 @@ async function handleRPCRequest(
 			if (forwardToSigner) return getForwardingMessage(parsedRequest)
 			return { type: 'result' as const, method: parsedRequest.method, error: { code: 10000, message: 'eth_getStorageAt not implemented' } }
 		}
-		case 'eth_sign': return { type: 'result' as const,method: parsedRequest.method, error: { code: 10000, message: 'eth_sign is deprecated' } }
+		case 'eth_sign': return { type: 'result' as const, method: parsedRequest.method, error: { code: 10000, message: 'eth_sign is deprecated' } }
 		case 'eth_sendRawTransaction':
 		case 'eth_sendTransaction': {
+			console.log('eth_sendTransaction: 1', parsedRequest)
 			if (forwardToSigner && settings.activeRpcNetwork.httpsRpc === undefined) return getForwardingMessage(parsedRequest)
+			console.log('eth_sendTransaction: 2', parsedRequest)
 			return await sendTransaction(simulator, activeAddress, parsedRequest, request, website, websiteTabConnections)
 		}
 		case 'web3_clientVersion': return await web3ClientVersion(simulator.ethereum)
@@ -296,7 +298,7 @@ export async function popupMessageHandler(
 			case 'popup_forceSetGasLimitForTransaction': return await forceSetGasLimitForTransaction(simulator, parsedRequest)
 			default: return { type: 'result' as const, method: parsedRequest.method }
 		}
-	} catch(error: unknown) {
+	} catch (error: unknown) {
 		if (error instanceof Error && (isNewBlockAbort(error) || isFailedToFetchError(error))) return
 		throw error
 	}
